@@ -145,3 +145,4 @@ D:\LTWeb\BTL_QlBi_a\BTL_QlBi_a\obj\Debug\net8.0\refint\BTL_QlBi_a.dll
 D:\LTWeb\BTL_QlBi_a\BTL_QlBi_a\obj\Debug\net8.0\BTL_QlBi_a.pdb
 D:\LTWeb\BTL_QlBi_a\BTL_QlBi_a\obj\Debug\net8.0\BTL_QlBi_a.genruntimeconfig.cache
 D:\LTWeb\BTL_QlBi_a\BTL_QlBi_a\obj\Debug\net8.0\ref\BTL_QlBi_a.dll
+D:\LTWeb\BTL_QlBi_a\BTL_QlBi_a\obj\Debug\net8.0\BTL_QlBi_a.sourcelink.json
