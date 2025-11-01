@@ -3,15 +3,19 @@
     ViewData["Title"] = "Quản lý bàn";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/table.css" />
+}
+
 <section class="page-section active" id="page-tables">
     <div class="section-header">
         <h2 class="section-title">Quản lý bàn</h2>
         <div class="action-buttons">
-            <button class="btn btn-warning" onclick="openReservationModal()">Đặt bàn trước</button>
+            <button class="btn btn-warning" onclick="openReservationModal()">📅 Đặt bàn trước</button>
         </div>
     </div>
 
-    @* <div class="filter-bar">
+    <div class="filter-bar">
         <div class="filter-row">
             <div class="filter-group">
                 <span class="filter-label">Khu vực:</span>
@@ -35,8 +39,8 @@
         </div>
 
         <div class="filter-row">
-            <input type="text" class="search-input" placeholder="Tìm kiếm bàn..." id="searchTables" onkeyup="searchTables()">
-        </div> *@
+            <input type="text" class="search-input" placeholder="🔍 Tìm kiếm bàn..." id="searchTables" onkeyup="searchTables()">
+        </div>
     </div>
 
     @if (Model != null && Model.Any())
@@ -44,72 +48,62 @@
         <div class="tables-grid" id="myTablesGrid">
             @foreach (var ban in Model.Where(b => b.TrangThai != "Bảo trì"))
             {
-                // Xác định các class CSS dựa trên trạng thái
-                string statusClass = ban.TrangThai switch
+                string statusBadgeClass = ban.TrangThai switch
                 {
-                    "Trong" => "available",
-                    "DangChoi" => "occupied",
-                    "DaDat" => "reserved",
-                    _ => ""
-                };
-
-                // Xác định các class CSS cho status text
-                string statusTextClass = ban.TrangThai switch
-                {
-                    "Trong" => "status-available",
-                    "DangChoi" => "status-occupied",
-                    "DaDat" => "status-reserved",
-                    _ => ""
+                    "Trống" => "status-badge available",
+                    "Đang chơi" => "status-badge occupied",
+                    "Đã đặt" => "status-badge reserved",
+                    _ => "status-badge"
                 };
 
                 string statusText = ban.TrangThai switch
                 {
-                    "Trong" => "Trống",
-                    "DangChoi" => "Đang chơi",
-                    "DaDat" => "Đã đặt",
+                    "Trống" => "Trống",
+                    "Đang chơi" => "Đang chơi",
+                    "Đã đặt" => "Đã đặt",
                     _ => ban.TrangThai
                 };
-                <div class="table-card @statusClass"
+
+                <div class="table-card"
                      data-area="@ban.KhuVuc"
                      data-status="@ban.TrangThai"
                      onclick="showTableDetail(@ban.MaBan)">
-                    @* Badge VIP *@
-                    @if (ban.KhuVuc == "VIP")
-                    {
-                        <span class="vip-badge">⭐ VIP</span>
-                    }
 
                     <div class="table-image">
                         @{
                             var imagePath = !string.IsNullOrEmpty(ban.HinhAnh)
-                            ? Url.Content($"~/asset/img/{ban.HinhAnh}") 
+                            ? Url.Content($"~/asset/img/{ban.HinhAnh}")
                             : Url.Content("~/asset/img/ban_mik_libre_Phan.jpg");
                         }
 
                         <img src="@imagePath"
                              alt="@ban.TenBan"
                              class="table-img"
-                             onerror="this.onerror=null; this.src='/images/no-image.png';" />
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
 
-                        @* Placeholder chỉ hiển thị khi thật sự không có ảnh *@
-                        @if (string.IsNullOrEmpty(ban.HinhAnh))
+                        <div class="placeholder-icon" style="display: none;">🎱</div>
+
+                        <!-- Hiển thị trạng thái trên ảnh (bên trái) -->
+                        <span class="@statusBadgeClass">@statusText</span>
+
+                        <!-- VIP badge vẫn ở bên phải -->
+                        @if (ban.KhuVuc == "VIP")
                         {
-                            <div class="placeholder-icon">🎱</div>
+                            <span class="vip-badge">⭐ VIP</span>
                         }
                     </div>
 
-
                     <div class="table-content">
-                        <div class="table-name">@ban.TenBan</div>
-                        <div class="table-status @statusTextClass">@statusText</div>
+                        <div class="table-header">
+                            <div class="table-name">@ban.TenBan</div>
+                        </div>
 
-                        @* Thông tin chi tiết tùy theo trạng thái *@
                         @if (ban.TrangThai == "DangChoi")
                         {
                             if (ban.GioBatDau.HasValue)
                             {
                                 var duration = DateTime.Now - ban.GioBatDau.Value;
-                                <div class="table-info">👤 Khách: <strong>@(ban.KhachHang?.TenKH ?? "Khách lẻ")</strong></div>
+                                <div class="table-info">👤 <strong>@(ban.KhachHang?.TenKH ?? "Khách lẻ")</strong></div>
                                 <div class="table-timer">⏱️ @((int)duration.TotalHours)h @(duration.Minutes)m</div>
                             }
                         }
@@ -121,16 +115,15 @@
                             }
                             if (ban.KhachHang != null)
                             {
-                                <div class="table-info">👤 Khách: <strong>@ban.KhachHang.TenKH</strong></div>
+                                <div class="table-info">👤 <strong>@ban.KhachHang.TenKH</strong></div>
                             }
                         }
-                        else // Trong
+                        else
                         {
-                            <div class="table-info">Loại: @(ban.LoaiBan?.TenLoai ?? "Không rõ")</div>
+                            <div class="table-info">@(ban.LoaiBan?.TenLoai ?? "Không rõ")</div>
                             <div class="table-price">@(ban.LoaiBan?.GiaGio.ToString("N0") ?? "0") đ/giờ</div>
                         }
 
-                        @* Action Buttons *@
                         <div class="action-buttons">
                             @if (ban.TrangThai == "Trong")
                             {
@@ -141,7 +134,7 @@
                             else if (ban.TrangThai == "DangChoi")
                             {
                                 <button class="btn btn-primary" onclick="event.stopPropagation(); addService(@ban.MaBan)">
-                                    ➕ DV
+                                    ➕ Dịch vụ
                                 </button>
                                 <button class="btn btn-danger" onclick="event.stopPropagation(); endTable(@ban.MaBan)">
                                     ⏹️ Kết thúc
@@ -163,174 +156,99 @@
     {
         <div class="empty-state">
             <div class="empty-icon">🎱</div>
-            <h3 class="empty-text">Không có bàn nào</h3>
+            <h3>Không có bàn nào</h3>
             <p class="empty-text">Chưa có bàn bi-a trong hệ thống</p>
         </div>
     }
 </section>
 
-<style>
-    .table-image {
-        width: 100%;
-        height: 180px;
-        overflow: hidden;
-        border-radius: 8px 8px 0 0;
-        background: #f5f5f5;
-        position: relative;
-    }
+@section Scripts {
+    <script>
+        console.log('=== QUẢN LÝ BÀN LOADED ===');
+        console.log('Cards on page:', document.querySelectorAll('.table-card').length);
 
-        .table-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+        function filterTables(area) {
+            const cards = document.querySelectorAll('.table-card');
+            const buttons = document.querySelectorAll('.filter-btn[data-filter]');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector('.filter-btn[data-filter="' + area + '"]');
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const currentStatus = document.querySelector('.filter-btn[data-status].active')?.dataset.status || 'all';
+            const searchValue = document.getElementById('searchTables').value.toLowerCase();
+
+            cards.forEach(card => {
+                const cardArea = card.dataset.area;
+                const cardStatus = card.dataset.status;
+                const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
+
+                const areaMatch = (area === 'all' || cardArea === area);
+                const statusMatch = (currentStatus === 'all' || cardStatus === currentStatus);
+                const searchMatch = (searchValue === '' || tableName.includes(searchValue));
+
+                card.style.display = (areaMatch && statusMatch && searchMatch) ? 'block' : 'none';
+            });
         }
 
-    .table-card:hover .table-image img {
-        transform: scale(1.05);
-    }
+        function filterStatus(status) {
+            const cards = document.querySelectorAll('.table-card');
+            const buttons = document.querySelectorAll('.filter-btn[data-status]');
 
-    .table-image .placeholder-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        font-size: 64px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
+            buttons.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector('.filter-btn[data-status="' + status + '"]');
+            if (activeBtn) activeBtn.classList.add('active');
 
-    .vip-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-        z-index: 10;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
+            const currentArea = document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all';
+            const searchValue = document.getElementById('searchTables').value.toLowerCase();
 
-    .table-content {
-        padding: 15px;
-    }
+            cards.forEach(card => {
+                const cardArea = card.dataset.area;
+                const cardStatus = card.dataset.status;
+                const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
 
-    .table-card {
-        position: relative;
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
+                const areaMatch = (currentArea === 'all' || cardArea === currentArea);
+                const statusMatch = (status === 'all' || cardStatus === status);
+                const searchMatch = (searchValue === '' || tableName.includes(searchValue));
 
-        .table-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+                card.style.display = (areaMatch && statusMatch && searchMatch) ? 'block' : 'none';
+            });
         }
 
-        .table-card.available {
-            border: 2px solid #10b981;
+        function searchTables() {
+            filterTables(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
         }
 
-        .table-card.occupied {
-            border: 2px solid #ef4444;
+        function showTableDetail(maBan) {
+            window.location.href = '/Home/ChiTietBan?maBan=' + maBan;
         }
 
-        .table-card.reserved {
-            border: 2px solid #f59e0b;
+        function startTable(maBan) {
+            alert('Bắt đầu chơi bàn: ' + maBan);
         }
-</style>
 
-<script>
-    console.log('=== QUẢN LÝ BÀN LOADED ===');
-    console.log('Cards on page:', document.querySelectorAll('.table-card').length);
+        function addService(maBan) {
+            alert('Thêm dịch vụ cho bàn: ' + maBan);
+        }
 
-    function filterTables(area) {
-        const cards = document.querySelectorAll('.table-card');
-        const buttons = document.querySelectorAll('.filter-btn[data-filter]');
+        function endTable(maBan) {
+            if (confirm('Kết thúc và thanh toán?')) {
+                alert('Thanh toán bàn: ' + maBan);
+            }
+        }
 
-        buttons.forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector('.filter-btn[data-filter="' + area + '"]');
-        if (activeBtn) activeBtn.classList.add('active');
+        function confirmReservation(maBan) {
+            if (confirm('Xác nhận khách đã đến?')) {
+                alert('Xác nhận bàn: ' + maBan);
+            }
+        }
 
-        const currentStatus = document.querySelector('.filter-btn[data-status].active')?.dataset.status || 'all';
-        const searchValue = document.getElementById('searchTables').value.toLowerCase();
+        function openReservationModal() {
+            alert('Mở form đặt bàn trước');
+        }
 
-        cards.forEach(card => {
-            const cardArea = card.dataset.area;
-            const cardStatus = card.dataset.status;
-            const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
-
-            const areaMatch = (area === 'all' || cardArea === area);
-            const statusMatch = (currentStatus === 'all' || cardStatus === currentStatus);
-            const searchMatch = (searchValue === '' || tableName.includes(searchValue));
-
-            card.style.display = (areaMatch && statusMatch && searchMatch) ? 'block' : 'none';
+        document.addEventListener('DOMContentLoaded', function() {
+            filterTables('all');
         });
-    }
-
-    function filterStatus(status) {
-        const cards = document.querySelectorAll('.table-card');
-        const buttons = document.querySelectorAll('.filter-btn[data-status]');
-
-        buttons.forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector('.filter-btn[data-status="' + status + '"]');
-        if (activeBtn) activeBtn.classList.add('active');
-
-        const currentArea = document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all';
-        const searchValue = document.getElementById('searchTables').value.toLowerCase();
-
-        cards.forEach(card => {
-            const cardArea = card.dataset.area;
-            const cardStatus = card.dataset.status;
-            const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
-
-            const areaMatch = (currentArea === 'all' || cardArea === currentArea);
-            const statusMatch = (status === 'all' || cardStatus === status);
-            const searchMatch = (searchValue === '' || tableName.includes(searchValue));
-
-            card.style.display = (areaMatch && statusMatch && searchMatch) ? 'block' : 'none';
-        });
-    }
-
-    function searchTables() {
-        filterTables(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
-    }
-
-    function showTableDetail(maBan) {
-        window.location.href = '/Home/ChiTietBan?maBan=' + maBan;
-    }
-
-    function startTable(maBan) {
-        alert('Bắt đầu chơi bàn: ' + maBan);
-    }
-
-    function addService(maBan) {
-        alert('Thêm dịch vụ cho bàn: ' + maBan);
-    }
-
-    function endTable(maBan) {
-        if (confirm('Kết thúc và thanh toán?')) {
-            alert('Thanh toán bàn: ' + maBan);
-        }
-    }
-
-    function confirmReservation(maBan) {
-        if (confirm('Xác nhận khách đã đến?')) {
-            alert('Xác nhận bàn: ' + maBan);
-        }
-    }
-
-    function openReservationModal() {
-        alert('Mở form đặt bàn trước');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        filterTables('all');
-    });
-</script>
+    </script>
+}
