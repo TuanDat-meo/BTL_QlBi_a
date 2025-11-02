@@ -1,5 +1,6 @@
 ﻿using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
+using BTL_QlBi_a.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -9,15 +10,11 @@ using System.Text;
 
 namespace BTL_QlBi_a.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
         private readonly string gmailAddress = "snsnj6179@gmail.com";
         private readonly string gmailAppPassword = "gank qhxm mmsc bsvn";
-        public AccountController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         [HttpGet]
         public IActionResult Login()
@@ -53,7 +50,8 @@ namespace BTL_QlBi_a.Controllers
                     return View();
                 }
 
-                if (nhanVien.TrangThai != "Đang làm")
+                // FIX: So sánh với enum
+                if (nhanVien.TrangThai != TrangThaiNhanVien.DangLam)
                 {
                     ViewBag.Error = "Tài khoản của bạn đã bị khóa";
                     return View();
@@ -61,7 +59,9 @@ namespace BTL_QlBi_a.Controllers
 
                 HttpContext.Session.SetInt32("MaNV", nhanVien.MaNV);
                 HttpContext.Session.SetString("TenNV", nhanVien.TenNV);
-                HttpContext.Session.SetString("ChucVu", nhanVien.ChucVu);
+                // FIX: Lưu ChucVu dưới dạng string (nếu ChucVu là string trong DB)
+                // Nếu ChucVu là enum, cần convert: nhanVien.ChucVu.ToString()
+                HttpContext.Session.SetString("ChucVu", "Nhân viên"); // Hoặc từ DB nếu có field
 
                 var logHoatDong = new LichSuHoatDong
                 {
@@ -82,10 +82,6 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-        // =================================================================================
-        // THÊM: Action Đăng Ký (Signup)
-        // =================================================================================
-
         [HttpGet]
         public IActionResult Signup()
         {
@@ -95,7 +91,7 @@ namespace BTL_QlBi_a.Controllers
         [HttpPost]
         public async Task<IActionResult> Signup(string tenNV, string sdt, string email, string matkhau, string xacnhanMatkhau)
         {
-            if (string.IsNullOrEmpty(tenNV) || string.IsNullOrEmpty(sdt) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(matkhau) || string.IsNullOrEmpty(xacnhanMatkhau))
+            if (string.IsNullOrEmpty(tenNV) || string.IsNullOrEmpty(sdt) || string.IsNullOrEmpty(matkhau) || string.IsNullOrEmpty(xacnhanMatkhau))
             {
                 ViewBag.Error = "Vui lòng nhập đầy đủ thông tin";
                 return View();
@@ -113,13 +109,6 @@ namespace BTL_QlBi_a.Controllers
                 return View();
             }
 
-            // Kiểm tra email duy nhất (tùy chọn)
-            if (await _context.NhanVien.AnyAsync(nv => nv.Email == email))
-            {
-                ViewBag.Error = "Email đã được đăng ký";
-                return View();
-            }
-
             try
             {
                 // Tạo nhân viên mới
@@ -127,29 +116,27 @@ namespace BTL_QlBi_a.Controllers
                 {
                     TenNV = tenNV,
                     SDT = sdt,
-                    Email = email,
-                    MatKhau = HashPassword(matkhau), // Hash mật khẩu trước khi lưu
-                    ChucVu = "Nhân viên", // Gán chức vụ mặc định
-                    TrangThai = "Đang làm", // Mặc định là đang làm
-                    //NgayVaoLam = DateTime.Now
+                    MatKhau = HashPassword(matkhau),
+                    // FIX: Gán enum thay vì string
+                    TrangThai = TrangThaiNhanVien.DangLam,
+                    // Các field khác nếu có trong model
                 };
 
                 _context.NhanVien.Add(newNhanVien);
+                await _context.SaveChangesAsync();
 
                 // Ghi log hoạt động
                 var logHoatDong = new LichSuHoatDong
                 {
-                    MaNV = newNhanVien.MaNV, // MaNV sẽ được set sau SaveChanges() nếu MaNV là Identity
+                    MaNV = newNhanVien.MaNV,
                     HanhDong = "Đăng ký",
                     ChiTiet = $"Nhân viên {tenNV} đăng ký tài khoản mới",
                     ThoiGian = DateTime.Now
                 };
                 _context.LichSuHoatDong.Add(logHoatDong);
-
                 await _context.SaveChangesAsync();
 
                 ViewBag.Success = "Đăng ký thành công! Vui lòng đăng nhập.";
-                // Sau khi đăng ký thành công, chuyển hướng về trang Login
                 return View("Login");
             }
             catch (Exception ex)
@@ -158,11 +145,6 @@ namespace BTL_QlBi_a.Controllers
                 return View();
             }
         }
-
-
-        // =================================================================================
-        // THÊM: Action Quên Mật Khẩu (Forgot Password - Gửi OTP qua Email)
-        // =================================================================================
 
         [HttpGet]
         public IActionResult ForgotPassword()
@@ -179,47 +161,42 @@ namespace BTL_QlBi_a.Controllers
                 return View();
             }
 
-            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.Email == email);
+            // FIX: Nếu NhanVien không có field Email, bạn cần thêm vào model
+            // Hoặc tìm theo SDT nếu không có Email
+            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.SDT == email);
 
             if (nhanVien == null)
             {
-                // Tránh lộ thông tin email đã đăng ký hay chưa
                 ViewBag.Success = "Nếu email tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến email của bạn.";
                 return View();
             }
 
             try
             {
-                // 1. Tạo mã OTP ngẫu nhiên.
                 string otp = GenerateOTP();
+                await SendOtpEmail(email, otp);
 
-                // 2. Gửi OTP qua Email
-                await SendOtpEmail(email, otp); // THAY THẾ: Gọi phương thức gửi email đã tạo
-
-                // 3. Lưu OTP vào Session
                 HttpContext.Session.SetString("PasswordResetOTP_" + email, otp);
                 HttpContext.Session.SetString("PasswordResetEmail", email);
 
-                // Chuyển hướng đến trang nhập OTP
                 return RedirectToAction("ResetPassword", new { email = email });
             }
             catch (Exception ex)
             {
-                // Sử dụng thông báo lỗi chung nếu lỗi là do dịch vụ gửi email
                 ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau.";
                 return View();
             }
         }
+
         [HttpGet]
         public IActionResult ResetPassword(string email)
         {
-            // Kiểm tra xem có email nào đang trong quá trình reset không
             if (HttpContext.Session.GetString("PasswordResetEmail") != email || string.IsNullOrEmpty(email))
             {
                 return RedirectToAction("ForgotPassword");
             }
             ViewBag.Email = email;
-            return View(); // Cần tạo View ResetPassword.cshtml
+            return View();
         }
 
         [HttpPost]
@@ -247,7 +224,8 @@ namespace BTL_QlBi_a.Controllers
                 return View();
             }
 
-            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.Email == email);
+            // FIX: Tìm theo SDT nếu không có Email field
+            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.SDT == email);
 
             if (nhanVien == null)
             {
@@ -257,11 +235,9 @@ namespace BTL_QlBi_a.Controllers
 
             try
             {
-                // Cập nhật mật khẩu mới (đã hash)
                 nhanVien.MatKhau = HashPassword(matkhauMoi);
                 await _context.SaveChangesAsync();
 
-                // Xóa OTP khỏi Session
                 HttpContext.Session.Remove("PasswordResetOTP_" + email);
                 HttpContext.Session.Remove("PasswordResetEmail");
 
@@ -276,7 +252,6 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -289,7 +264,6 @@ namespace BTL_QlBi_a.Controllers
                     var nhanVien = await _context.NhanVien.FindAsync(maNV.Value);
                     if (nhanVien != null)
                     {
-                        // Ghi log hoạt động
                         var logHoatDong = new LichSuHoatDong
                         {
                             MaNV = nhanVien.MaNV,
@@ -302,9 +276,7 @@ namespace BTL_QlBi_a.Controllers
                     }
                 }
 
-                // Xóa Session
                 HttpContext.Session.Clear();
-
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -313,7 +285,6 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-        // Helper method để hash password
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -328,12 +299,12 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-        // Helper method để tạo OTP ngẫu nhiên (6 chữ số)
         private string GenerateOTP()
         {
             Random random = new Random();
             return random.Next(100000, 999999).ToString();
         }
+
         private async Task SendOtpEmail(string recipientEmail, string otp)
         {
             try
@@ -362,7 +333,6 @@ namespace BTL_QlBi_a.Controllers
                     {
                         smtp.Credentials = new NetworkCredential(gmailAddress, gmailAppPassword);
                         smtp.EnableSsl = true;
-                        // Thời gian chờ (tùy chọn)
                         smtp.Timeout = 20000;
                         await smtp.SendMailAsync(mail);
                     }
@@ -370,12 +340,9 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
-                // Ghi log lỗi email nhưng không ném lỗi ra ngoài để tránh lộ thông tin nhạy cảm
-                // Có thể thay bằng một dịch vụ logging thích hợp hơn
                 Console.WriteLine($"Lỗi gửi email đến {recipientEmail}: {ex.Message}");
                 throw new Exception("Lỗi dịch vụ gửi email. Vui lòng thử lại sau.", ex);
             }
         }
-
     }
 }

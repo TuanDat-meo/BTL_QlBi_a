@@ -6,6 +6,7 @@ namespace BTL_QlBi_a.Models.Entities
     public class HoaDon
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaHD { get; set; }
 
         public int? MaBan { get; set; }
@@ -18,6 +19,7 @@ namespace BTL_QlBi_a.Models.Entities
 
         public DateTime? ThoiGianKetThuc { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public int? ThoiLuongPhut { get; set; }
 
         [Column(TypeName = "decimal(12,0)")]
@@ -29,27 +31,35 @@ namespace BTL_QlBi_a.Models.Entities
         [Column(TypeName = "decimal(12,0)")]
         public decimal GiamGia { get; set; } = 0;
 
+        [MaxLength(255)]
+        public string? GhiChuGiamGia { get; set; }
+
         [Column(TypeName = "decimal(12,0)")]
         public decimal TongTien { get; set; } = 0;
 
-        [MaxLength(20)]
-        public string PhuongThucThanhToan { get; set; } = "Tiền Mặt"; 
+        public PhuongThucThanhToan PhuongThucThanhToan { get; set; } = PhuongThucThanhToan.TienMat;
 
-        [MaxLength(20)]
-        public string TrangThai { get; set; } = "Đang Chơi"; 
+        public TrangThaiHoaDon TrangThai { get; set; } = TrangThaiHoaDon.DangChoi;
 
-        public string GhiChu { get; set; }
+        [MaxLength(100)]
+        public string? MaGiaoDichQR { get; set; }
 
-        // Navigation Properties
+        [MaxLength(500)]
+        public string? QRCodeUrl { get; set; }
+
+        public string? GhiChu { get; set; }
+
+        // Navigation properties
         [ForeignKey("MaBan")]
-        public BanBi_a BanBia { get; set; }
+        public virtual BanBia? BanBia { get; set; }
 
         [ForeignKey("MaKH")]
-        public KhachHang KhachHang { get; set; }
+        public virtual KhachHang? KhachHang { get; set; }
 
         [ForeignKey("MaNV")]
-        public NhanVien NhanVien { get; set; }
+        public virtual NhanVien? NhanVien { get; set; }
 
-        public ICollection<ChiTietHoaDon> ChiTietHoaDons { get; set; }
+        public virtual ICollection<ChiTietHoaDon> ChiTietHoaDons { get; set; }
+        public virtual ICollection<SoQuy> SoQuys { get; set; }
     }
 }

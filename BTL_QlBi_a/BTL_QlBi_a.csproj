@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="resources\" />
     <Folder Include="wwwroot\asset\js\" />
+	  <Folder Include="wwwroot\asset\css\" />
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 

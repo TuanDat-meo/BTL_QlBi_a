@@ -17,18 +17,17 @@ namespace BTL_QlBi_a.Models.Entities
         BachKim
     }
 
-    public enum KhuVucBan
+    // Enum cho Trạng thái loại bàn
+    public enum TrangThaiLoaiBan
     {
-        [Display(Name = "Tầng 1")]
-        Tang1,
+        [Display(Name = "Đang áp dụng")]
+        DangApDung,
 
-        [Display(Name = "Tầng 2")]
-        Tang2,
-
-        [Display(Name = "VIP")]
-        VIP
+        [Display(Name = "Ngừng áp dụng")]
+        NgungApDung
     }
 
+    // Enum cho Trạng thái bàn
     public enum TrangThaiBan
     {
         [Display(Name = "Trống")]
@@ -44,15 +43,7 @@ namespace BTL_QlBi_a.Models.Entities
         BaoTri
     }
 
-    public enum TrangThaiLoaiBan
-    {
-        [Display(Name = "Đang áp dụng")]
-        DangApDung,
-
-        [Display(Name = "Ngừng áp dụng")]
-        NgungApDung
-    }
-
+    // Enum cho Trạng thái đặt bàn
     public enum TrangThaiDatBan
     {
         [Display(Name = "Đang chờ")]
@@ -68,8 +59,12 @@ namespace BTL_QlBi_a.Models.Entities
         DaHuy
     }
 
+    // Enum cho Loại mặt hàng - ĐÃ SỬA: Đặt "Khác" lên đầu
     public enum LoaiMatHang
     {
+        [Display(Name = "Khác")]
+        Khac = 0,
+
         [Display(Name = "Đồ uống")]
         DoUong,
 
@@ -77,11 +72,10 @@ namespace BTL_QlBi_a.Models.Entities
         DoAn,
 
         [Display(Name = "Dụng cụ bi-a")]
-        DungCuBia,
-
-        [Display(Name = "Khác")]
-        Khac
+        DungCuBia
     }
+
+    // Enum cho Trạng thái mặt hàng
     public enum TrangThaiMatHang
     {
         [Display(Name = "Còn hàng")]
@@ -94,18 +88,20 @@ namespace BTL_QlBi_a.Models.Entities
         NgungKinhDoanh
     }
 
+    // Enum cho Loại dịch vụ - ĐÃ SỬA: Đặt "Khác" lên đầu
     public enum LoaiDichVu
     {
+        [Display(Name = "Khác")]
+        Khac = 0,
+
         [Display(Name = "Đồ uống")]
         DoUong,
 
         [Display(Name = "Đồ ăn")]
-        DoAn,
-
-        [Display(Name = "Khác")]
-        Khac
+        DoAn
     }
 
+    // Enum cho Trạng thái dịch vụ
     public enum TrangThaiDichVu
     {
         [Display(Name = "Còn hàng")]
@@ -118,18 +114,7 @@ namespace BTL_QlBi_a.Models.Entities
         NgungBan
     }
 
-    public enum ChucVu
-    {
-        [Display(Name = "Quản lý")]
-        QuanLy,
-
-        [Display(Name = "Thu ngân")]
-        ThuNgan,
-
-        [Display(Name = "Phục vụ")]
-        PhucVu
-    }
-
+    // Enum cho Ca làm việc
     public enum CaLamViec
     {
         [Display(Name = "Sáng")]
@@ -141,7 +126,7 @@ namespace BTL_QlBi_a.Models.Entities
         [Display(Name = "Tối")]
         Toi
     }
-
+    // Enum cho Trạng thái nhân viên
     public enum TrangThaiNhanVien
     {
         [Display(Name = "Đang làm")]
@@ -151,6 +136,7 @@ namespace BTL_QlBi_a.Models.Entities
         Nghi
     }
 
+    // Enum cho Phương thức xác thực
     public enum PhuongThucXacThuc
     {
         [Display(Name = "Thủ công")]
@@ -163,6 +149,7 @@ namespace BTL_QlBi_a.Models.Entities
         FaceID
     }
 
+    // Enum cho Trạng thái chấm công
     public enum TrangThaiChamCong
     {
         [Display(Name = "Đúng giờ")]
@@ -181,6 +168,7 @@ namespace BTL_QlBi_a.Models.Entities
         CaThem
     }
 
+    // Enum cho Phương thức thanh toán
     public enum PhuongThucThanhToan
     {
         [Display(Name = "Tiền mặt")]
@@ -193,9 +181,13 @@ namespace BTL_QlBi_a.Models.Entities
         The,
 
         [Display(Name = "Ví điện tử")]
-        ViDienTu
+        ViDienTu,
+
+        [Display(Name = "QR Tự động")]
+        QRTuDong
     }
 
+    // Enum cho Trạng thái hóa đơn
     public enum TrangThaiHoaDon
     {
         [Display(Name = "Đang chơi")]
@@ -208,6 +200,17 @@ namespace BTL_QlBi_a.Models.Entities
         DaHuy
     }
 
+    // Enum cho Loại phiếu sổ quỹ
+    public enum LoaiPhieu
+    {
+        [Display(Name = "Thu")]
+        Thu,
+
+        [Display(Name = "Chi")]
+        Chi
+    }
+
+    // Enum cho Trạng thái giá giờ chơi
     public enum TrangThaiGiaGio
     {
         [Display(Name = "Đang áp dụng")]

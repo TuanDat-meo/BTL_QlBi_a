@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BTL_QlBi_a")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0f4c059352e5b6e95ed7a3587a0392165df62769")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+734202d620d7723677c624f1a6c14d6251670349")]
 [assembly: System.Reflection.AssemblyProductAttribute("BTL_QlBi_a")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BTL_QlBi_a")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
