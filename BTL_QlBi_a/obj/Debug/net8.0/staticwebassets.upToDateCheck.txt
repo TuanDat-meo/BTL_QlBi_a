@@ -1,4 +1,5 @@
 wwwroot\asset\css\index.css
+wwwroot\asset\css\table.css
 wwwroot\asset\img\ban_maxim.jpg
 wwwroot\asset\img\ban_mik_libre_Phan.jpg
 wwwroot\asset\img\bill.svg
@@ -70,4 +71,3 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\asset\css\table.css
