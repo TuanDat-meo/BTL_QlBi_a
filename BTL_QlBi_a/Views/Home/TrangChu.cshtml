@@ -1,9 +1,6 @@
-﻿@using BTL_QlBi_a.Extensions
-@using BTL_QlBi_a.Models.Entities
-@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
 @{
     ViewData["Title"] = "Trang chủ";
-    var khuVucList = Model?.Select(b => b.KhuVuc).Distinct().Where(k => k != null).ToList() ?? new List<KhuVuc>();
 }
 
 <section class="page-section active" id="page-tables">
@@ -20,10 +17,9 @@
                 <span class="filter-label">Khu vực:</span>
                 <div class="filter-buttons">
                     <button class="filter-btn active" data-filter="all" onclick="filterTables('all')">Tất cả</button>
-                    @foreach (var kv in khuVucList)
-                    {
-                        <button class="filter-btn" data-filter="@kv.TenKhuVuc" onclick="filterTables('@kv.TenKhuVuc')">@kv.TenKhuVuc</button>
-                    }
+                    <button class="filter-btn" data-filter="Tầng 1" onclick="filterTables('Tầng 1')">Tầng 1</button>
+                    <button class="filter-btn" data-filter="Tầng 2" onclick="filterTables('Tầng 2')">Tầng 2</button>
+                    <button class="filter-btn" data-filter="VIP" onclick="filterTables('VIP')">VIP</button>
                 </div>
             </div>
 
@@ -47,7 +43,7 @@
         <strong>🔍 DEBUG INFO:</strong><br>
         <div style="margin-top: 10px;">
             ✅ Tổng số bàn từ Model: <strong>@(Model?.Count() ?? 0)</strong><br>
-            ✅ Bàn không bảo trì: <strong>@(Model?.Count(b => b.TrangThai != TrangThaiBan.BaoTri) ?? 0)</strong>
+            ✅ Bàn không bảo trì: <strong>@(Model?.Count(b => b.TrangThai != BTL_QlBi_a.Models.Entities.TrangThaiBan.BaoTri) ?? 0)</strong>
         </div>
         <div style="margin-top: 10px; font-size: 12px; color: #666;">
             @if (Model != null && Model.Any())
@@ -55,7 +51,7 @@
                 <div>Danh sách bàn (5 bàn đầu):</div>
                 @foreach (var b in Model.Take(5))
                 {
-                    <div>- @b.TenBan (@b.TrangThai.GetDisplayName()) - @(b.KhuVuc?.TenKhuVuc ?? "Không rõ")</div>
+                    <div>- @b.TenBan (@b.TrangThai) - @b.KhuVuc?.TenKhuVuc</div>
                 }
             }
             else
@@ -68,38 +64,54 @@
     @if (Model != null && Model.Any())
     {
         <div class="tables-grid" id="myTablesGrid">
-            @foreach (var ban in Model.Where(b => b.TrangThai != TrangThaiBan.BaoTri))
+            @foreach (var ban in Model)
             {
+                @if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.BaoTri)
+                {
+                    continue;
+                }
+
                 // Xác định các class CSS dựa trên trạng thái (từ index.css)
                 string statusClass = ban.TrangThai switch
                 {
-                    TrangThaiBan.Trong => "available",
-                    TrangThaiBan.DangChoi => "occupied",
-                    TrangThaiBan.DaDat => "reserved",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "available",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "occupied",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "reserved",
                     _ => ""
                 };
 
                 // Xác định các class CSS cho status text (từ index.css)
                 string statusTextClass = ban.TrangThai switch
                 {
-                    TrangThaiBan.Trong => "status-available",
-                    TrangThaiBan.DangChoi => "status-occupied",
-                    TrangThaiBan.DaDat => "status-reserved",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "status-available",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "status-occupied",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "status-reserved",
                     _ => ""
                 };
 
-                string statusText = ban.TrangThai.GetDisplayName();
-                string statusEnum = ban.TrangThai.ToString();
-                string khuVucName = ban.KhuVuc?.TenKhuVuc ?? "Không rõ";
-                bool isVIP = khuVucName.ToUpper().Contains("VIP");
+                string statusText = ban.TrangThai switch
+                {
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trống",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "Đang chơi",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "Đã đặt",
+                    _ => ban.TrangThai.ToString()
+                };
+
+                string statusDataAttr = ban.TrangThai switch
+                {
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trong",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "DangChoi",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "DaDat",
+                    _ => ban.TrangThai.ToString()
+                };
 
                 <div class="table-card @statusClass"
-                     data-area="@khuVucName"
-                     data-status="@statusEnum"
+                     data-area="@ban.KhuVuc?.TenKhuVuc"
+                     data-status="@statusDataAttr"
                      onclick="showTableDetail(@ban.MaBan)">
 
                     @* Badge VIP *@
-                    @if (isVIP)
+                    @if (ban.KhuVuc?.TenKhuVuc == "VIP")
                     {
                         <span class="vip-badge">⭐ VIP</span>
                     }
@@ -108,7 +120,7 @@
                     <div class="table-status @statusTextClass">@statusText</div>
 
                     @* Thông tin chi tiết tùy theo trạng thái *@
-                    @if (ban.TrangThai == TrangThaiBan.DangChoi)
+                    @if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi)
                     {
                         if (ban.GioBatDau.HasValue)
                         {
@@ -117,7 +129,7 @@
                             <div class="table-timer">⏱️ @((int)duration.TotalHours)h @(duration.Minutes)m</div>
                         }
                     }
-                    else if (ban.TrangThai == TrangThaiBan.DaDat)
+                    else if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat)
                     {
                         if (!string.IsNullOrEmpty(ban.GhiChu))
                         {
@@ -128,7 +140,7 @@
                             <div class="table-info">👤 Khách: <strong>@ban.KhachHang.TenKH</strong></div>
                         }
                     }
-                    else // Trong
+                    else
                     {
                         <div class="table-info">Loại: @(ban.LoaiBan?.TenLoai ?? "Không rõ")</div>
                         <div class="table-price">@(ban.LoaiBan?.GiaGio.ToString("N0") ?? "0") đ/giờ</div>
@@ -136,13 +148,13 @@
 
                     @* Action Buttons - Sử dụng class btn đã định nghĩa *@
                     <div class="action-buttons">
-                        @if (ban.TrangThai == TrangThaiBan.Trong)
+                        @if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong)
                         {
                             <button class="btn btn-success" onclick="event.stopPropagation(); startTable(@ban.MaBan)">
                                 ▶️ Bắt đầu
                             </button>
                         }
-                        else if (ban.TrangThai == TrangThaiBan.DangChoi)
+                        else if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi)
                         {
                             <button class="btn btn-primary" onclick="event.stopPropagation(); addService(@ban.MaBan)">
                                 ➕ DV
@@ -151,7 +163,7 @@
                                 ⏹️ Kết thúc
                             </button>
                         }
-                        else if (ban.TrangThai == TrangThaiBan.DaDat)
+                        else if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat)
                         {
                             <button class="btn btn-success" onclick="event.stopPropagation(); confirmReservation(@ban.MaBan)">
                                 ✅ Xác nhận
@@ -225,9 +237,11 @@
             const cardStatus = card.dataset.status;
             const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
 
+
             const areaMatch = (currentArea === 'all' || cardArea === currentArea);
             const statusMatch = (status === 'all' || cardStatus === status);
             const searchMatch = (searchValue === '' || tableName.includes(searchValue));
+
 
             card.style.display = (areaMatch && statusMatch && searchMatch)
             ? 'block' : 'none';

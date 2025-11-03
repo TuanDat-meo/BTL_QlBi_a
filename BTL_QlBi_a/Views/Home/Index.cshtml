@@ -1,9 +1,6 @@
-﻿@using BTL_QlBi_a.Extensions
-@using BTL_QlBi_a.Models.Entities
-@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
 @{
     ViewData["Title"] = "Quản lý bàn";
-    var khuVucList = Model?.Select(b => b.KhuVuc).Distinct().Where(k => k != null).ToList() ?? new List<KhuVuc>();
 }
 
 @section Styles {
@@ -24,10 +21,9 @@
                 <span class="filter-label">Khu vực:</span>
                 <div class="filter-buttons">
                     <button class="filter-btn active" data-filter="all" onclick="filterTables('all')">Tất cả</button>
-                    @foreach (var kv in khuVucList)
-                    {
-                        <button class="filter-btn" data-filter="@kv.TenKhuVuc" onclick="filterTables('@kv.TenKhuVuc')">@kv.TenKhuVuc</button>
-                    }
+                    <button class="filter-btn" data-filter="Tầng 1" onclick="filterTables('Tầng 1')">Tầng 1</button>
+                    <button class="filter-btn" data-filter="Tầng 2" onclick="filterTables('Tầng 2')">Tầng 2</button>
+                    <button class="filter-btn" data-filter="VIP" onclick="filterTables('VIP')">VIP</button>
                 </div>
             </div>
 
@@ -50,24 +46,27 @@
     @if (Model != null && Model.Any())
     {
         <div class="tables-grid" id="myTablesGrid">
-            @foreach (var ban in Model.Where(b => b.TrangThai != TrangThaiBan.BaoTri))
+            @foreach (var ban in Model.Where(b => b.TrangThai != BTL_QlBi_a.Models.Entities.TrangThaiBan.BaoTri))
             {
                 string statusBadgeClass = ban.TrangThai switch
                 {
-                    TrangThaiBan.Trong => "status-badge available",
-                    TrangThaiBan.DangChoi => "status-badge occupied",
-                    TrangThaiBan.DaDat => "status-badge reserved",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "status-badge available",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "status-badge occupied",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "status-badge reserved",
                     _ => "status-badge"
                 };
 
-                string statusText = ban.TrangThai.GetDisplayName();
-                string statusEnum = ban.TrangThai.ToString();
-                string khuVucName = ban.KhuVuc?.TenKhuVuc ?? "Không rõ";
-                bool isVIP = khuVucName.ToUpper().Contains("VIP");
+                string statusText = ban.TrangThai switch
+                {
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trống",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "Đang chơi",
+                    BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "Đã đặt",
+                    _ => ban.TrangThai.ToString()
+                };
 
                 <div class="table-card"
-                     data-area="@khuVucName"
-                     data-status="@statusEnum"
+                     data-area="@ban.KhuVuc?.TenKhuVuc"
+                     data-status="@ban.TrangThai"
                      onclick="showTableDetail(@ban.MaBan)">
 
                     <div class="table-image">
@@ -88,7 +87,7 @@
                         <span class="@statusBadgeClass">@statusText</span>
 
                         <!-- VIP badge vẫn ở bên phải -->
-                        @if (isVIP)
+                        @if (ban.KhuVuc?.TenKhuVuc == "VIP")
                         {
                             <span class="vip-badge">⭐ VIP</span>
                         }
@@ -99,7 +98,7 @@
                             <div class="table-name">@ban.TenBan</div>
                         </div>
 
-                        @if (ban.TrangThai == TrangThaiBan.DangChoi)
+                        @if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi)
                         {
                             if (ban.GioBatDau.HasValue)
                             {
@@ -108,7 +107,7 @@
                                 <div class="table-timer">⏱️ @((int)duration.TotalHours)h @(duration.Minutes)m</div>
                             }
                         }
-                        else if (ban.TrangThai == TrangThaiBan.DaDat)
+                        else if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat)
                         {
                             if (!string.IsNullOrEmpty(ban.GhiChu))
                             {
@@ -126,13 +125,13 @@
                         }
 
                         <div class="action-buttons">
-                            @if (ban.TrangThai == TrangThaiBan.Trong)
+                            @if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong)
                             {
                                 <button class="btn btn-success" onclick="event.stopPropagation(); startTable(@ban.MaBan)">
                                     ▶️ Bắt đầu
                                 </button>
                             }
-                            else if (ban.TrangThai == TrangThaiBan.DangChoi)
+                            else if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi)
                             {
                                 <button class="btn btn-primary" onclick="event.stopPropagation(); addService(@ban.MaBan)">
                                     ➕ Dịch vụ
@@ -141,7 +140,7 @@
                                     ⏹️ Kết thúc
                                 </button>
                             }
-                            else if (ban.TrangThai == TrangThaiBan.DaDat)
+                            else if (ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat)
                             {
                                 <button class="btn btn-success" onclick="event.stopPropagation(); confirmReservation(@ban.MaBan)">
                                     ✅ Xác nhận

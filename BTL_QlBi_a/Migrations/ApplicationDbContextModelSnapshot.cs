@@ -74,7 +74,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Trong")
+                        .HasDefaultValue("Trống")
                         .HasColumnName("trang_thai");
 
                     b.Property<int>("ViTriX")
@@ -224,7 +224,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DungGio")
+                        .HasDefaultValue("Đúng giờ")
                         .HasColumnName("trang_thai");
 
                     b.Property<string>("XacThucBang")
@@ -232,7 +232,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ThuCong")
+                        .HasDefaultValue("Thủ công")
                         .HasColumnName("xac_thuc_bang");
 
                     b.HasKey("ID");
@@ -393,7 +393,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangCho")
+                        .HasDefaultValue("Đang chờ")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaDat");
@@ -435,7 +435,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Khac")
+                        .HasDefaultValue("Khác")
                         .HasColumnName("loai");
 
                     b.Property<int?>("MaHang")
@@ -464,7 +464,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ConHang")
+                        .HasDefaultValue("Còn hàng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaDV");
@@ -514,7 +514,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangApDung")
+                        .HasDefaultValue("Đang áp dụng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("ID");
@@ -570,7 +570,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("TienMat")
+                        .HasDefaultValue("Tiền mặt")
                         .HasColumnName("phuong_thuc_thanh_toan");
 
                     b.Property<string>("QRCodeUrl")
@@ -615,7 +615,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangChoi")
+                        .HasDefaultValue("Đang chơi")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaHD");
@@ -653,7 +653,7 @@ namespace BTL_QlBi_a.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("Dong")
+                        .HasDefaultValue("Đồng")
                         .HasColumnName("hang_tv");
 
                     b.Property<DateTime?>("LanDenCuoi")
@@ -793,7 +793,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangApDung")
+                        .HasDefaultValue("Đang áp dụng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaLoai");
@@ -834,7 +834,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Khac")
+                        .HasDefaultValue("Khác")
                         .HasColumnName("loai");
 
                     b.Property<int?>("MaNCCDefault")
@@ -879,7 +879,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ConHang")
+                        .HasDefaultValue("Còn hàng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaHang");
@@ -938,7 +938,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
-                        .HasDefaultValue("Sang")
+                        .HasDefaultValue("Sáng")
                         .HasColumnName("ca_mac_dinh");
 
                     b.Property<string>("FaceIDAnh")
@@ -994,7 +994,7 @@ namespace BTL_QlBi_a.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangLam")
+                        .HasDefaultValue("Đang làm")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaNV");

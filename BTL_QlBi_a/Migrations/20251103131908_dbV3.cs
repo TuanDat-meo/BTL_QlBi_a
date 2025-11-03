@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BTL_QlBi_a.Migrations
 {
     /// <inheritdoc />
-    public partial class db_v3 : Migration
+    public partial class dbV3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,7 +35,7 @@ namespace BTL_QlBi_a.Migrations
                     mat_khau = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ngay_sinh = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    hang_tv = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "Dong"),
+                    hang_tv = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "Đồng"),
                     diem_tich_luy = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     tong_chi_tieu = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
                     ngay_dang_ky = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
@@ -69,7 +69,7 @@ namespace BTL_QlBi_a.Migrations
                     ten_loai = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     mo_ta = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     gia_gio = table.Column<decimal>(type: "decimal(10,0)", nullable: false),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "DangApDung")
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Đang áp dụng")
                 },
                 constraints: table =>
                 {
@@ -114,7 +114,7 @@ namespace BTL_QlBi_a.Migrations
                     ten_ban = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     ma_loai = table.Column<int>(type: "int", nullable: false),
                     ma_khu_vuc = table.Column<int>(type: "int", nullable: false),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Trong"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Trống"),
                     gio_bat_dau = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ma_kh = table.Column<int>(type: "int", nullable: true),
                     vi_tri_x = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
@@ -158,7 +158,7 @@ namespace BTL_QlBi_a.Migrations
                     ma_loai = table.Column<int>(type: "int", nullable: true),
                     gia = table.Column<decimal>(type: "decimal(10,0)", nullable: false),
                     ap_dung_tu_ngay = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "DangApDung")
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Đang áp dụng")
                 },
                 constraints: table =>
                 {
@@ -178,14 +178,14 @@ namespace BTL_QlBi_a.Migrations
                     ma_hang = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ten_hang = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    loai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Khac"),
+                    loai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Khác"),
                     don_vi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValue: "cái"),
                     gia = table.Column<decimal>(type: "decimal(10,0)", nullable: false),
                     so_luong_ton = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     nguong_canh_bao = table.Column<int>(type: "int", nullable: false, defaultValue: 10),
                     ma_ncc_default = table.Column<int>(type: "int", nullable: true),
                     ngay_nhap_gan_nhat = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "ConHang"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Còn hàng"),
                     mo_ta = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     hinh_anh = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     ngay_tao = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
@@ -215,8 +215,8 @@ namespace BTL_QlBi_a.Migrations
                     sdt = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
                     luong_co_ban = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
                     phu_cap = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
-                    ca_mac_dinh = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false, defaultValue: "Sang"),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "DangLam"),
+                    ca_mac_dinh = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false, defaultValue: "Sáng"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Đang làm"),
                     mat_khau = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
@@ -267,7 +267,7 @@ namespace BTL_QlBi_a.Migrations
                     thoi_gian_dat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     so_nguoi = table.Column<int>(type: "int", nullable: true),
                     ghi_chu = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "DangCho"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Đang chờ"),
                     ngay_tao = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
@@ -294,11 +294,11 @@ namespace BTL_QlBi_a.Migrations
                     ma_dv = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ten_dv = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    loai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Khac"),
+                    loai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Khác"),
                     gia = table.Column<decimal>(type: "decimal(10,0)", nullable: false),
                     don_vi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true, defaultValue: "phần"),
                     ma_hang = table.Column<int>(type: "int", nullable: true),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "ConHang"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Còn hàng"),
                     mo_ta = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     hinh_anh = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     ngay_tao = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
@@ -354,9 +354,9 @@ namespace BTL_QlBi_a.Migrations
                     gio_ra = table.Column<DateTime>(type: "datetime2", nullable: true),
                     hinh_anh_vao = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     hinh_anh_ra = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    xac_thuc_bang = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "ThuCong"),
+                    xac_thuc_bang = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Thủ công"),
                     so_gio_lam = table.Column<decimal>(type: "decimal(5,2)", nullable: true, computedColumnSql: "(CASE WHEN [gio_ra] IS NOT NULL THEN CAST(DATEDIFF(MINUTE, [gio_vao], [gio_ra]) AS DECIMAL(5,2)) / 60.0 ELSE 0 END)", stored: true),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "DungGio"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Đúng giờ"),
                     ghi_chu = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
@@ -387,8 +387,8 @@ namespace BTL_QlBi_a.Migrations
                     giam_gia = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
                     ghi_chu_giam_gia = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     tong_tien = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
-                    phuong_thuc_thanh_toan = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "TienMat"),
-                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "DangChoi"),
+                    phuong_thuc_thanh_toan = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Tiền mặt"),
+                    trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Đang chơi"),
                     ma_giao_dich_qr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     qr_code_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     ghi_chu = table.Column<string>(type: "nvarchar(max)", nullable: true)

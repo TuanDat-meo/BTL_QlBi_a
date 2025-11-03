@@ -1,4 +1,5 @@
-﻿using BTL_QlBi_a.Models.Entities;
+﻿using BTL_QlBi_a.Extensions;
+using BTL_QlBi_a.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BTL_QlBi_a.Models.EF
@@ -51,7 +52,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.NgaySinh).HasColumnName("ngay_sinh");
                 entity.Property(e => e.HangTV)
                     .HasColumnName("hang_tv")
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<HangThanhVien>())
                     .HasDefaultValue(HangThanhVien.Dong);
                 entity.Property(e => e.DiemTichLuy).HasColumnName("diem_tich_luy").HasDefaultValue(0);
                 entity.Property(e => e.TongChiTieu).HasColumnName("tong_chi_tieu").HasColumnType("decimal(12,0)").HasDefaultValue(0);
@@ -74,7 +75,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiLoaiBan>())
                     .HasDefaultValue(TrangThaiLoaiBan.DangApDung);
 
                 entity.HasIndex(e => e.TenLoai).IsUnique();
@@ -104,10 +105,10 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.MaLoai).HasColumnName("ma_loai").IsRequired();
                 entity.Property(e => e.MaKhuVuc).HasColumnName("ma_khu_vuc").IsRequired();
                 entity.Property(e => e.TrangThai)
-                    .HasColumnName("trang_thai")
-                    .HasMaxLength(20)
-                    .HasConversion<string>()
-                    .HasDefaultValue(TrangThaiBan.Trong);
+                     .HasColumnName("trang_thai")
+                     .HasMaxLength(20)
+                     .HasConversion(new UnicodeEnumConverter<TrangThaiBan>())
+                     .HasDefaultValue(TrangThaiBan.Trong);
                 entity.Property(e => e.GioBatDau).HasColumnName("gio_bat_dau");
                 entity.Property(e => e.MaKH).HasColumnName("ma_kh");
                 entity.Property(e => e.ViTriX).HasColumnName("vi_tri_x").HasDefaultValue(0);
@@ -151,7 +152,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiDatBan>())
                     .HasDefaultValue(TrangThaiDatBan.DangCho);
                 entity.Property(e => e.NgayTao).HasColumnName("ngay_tao").HasDefaultValueSql("GETDATE()");
 
@@ -190,7 +191,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.Loai)
                     .HasColumnName("loai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<LoaiMatHang>())
                     .HasDefaultValue(LoaiMatHang.Khac);
                 entity.Property(e => e.DonVi).HasColumnName("don_vi").HasMaxLength(50).HasDefaultValue("cái");
                 entity.Property(e => e.Gia).HasColumnName("gia").HasColumnType("decimal(10,0)").IsRequired();
@@ -201,7 +202,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiMatHang>())
                     .HasDefaultValue(TrangThaiMatHang.ConHang);
                 entity.Property(e => e.MoTa).HasColumnName("mo_ta").HasMaxLength(255);
                 entity.Property(e => e.HinhAnh).HasColumnName("hinh_anh").HasMaxLength(255);
@@ -243,12 +244,12 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.CaMacDinh)
                     .HasColumnName("ca_mac_dinh")
                     .HasMaxLength(10)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<CaLamViec>())
                     .HasDefaultValue(CaLamViec.Sang);
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiNhanVien>())
                     .HasDefaultValue(TrangThaiNhanVien.DangLam);
                 entity.Property(e => e.MatKhau).HasColumnName("mat_khau").HasMaxLength(255).IsRequired();
 
@@ -322,7 +323,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.Loai)
                     .HasColumnName("loai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<LoaiDichVu>())
                     .HasDefaultValue(LoaiDichVu.Khac);
                 entity.Property(e => e.Gia).HasColumnName("gia").HasColumnType("decimal(10,0)").IsRequired();
                 entity.Property(e => e.DonVi).HasColumnName("don_vi").HasMaxLength(50).HasDefaultValue("phần");
@@ -330,7 +331,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiDichVu>())
                     .HasDefaultValue(TrangThaiDichVu.ConHang);
                 entity.Property(e => e.MoTa).HasColumnName("mo_ta").HasMaxLength(255);
                 entity.Property(e => e.HinhAnh).HasColumnName("hinh_anh").HasMaxLength(255);
@@ -389,7 +390,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.XacThucBang)
                     .HasColumnName("xac_thuc_bang")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<PhuongThucXacThuc>())
                     .HasDefaultValue(PhuongThucXacThuc.ThuCong);
                 entity.Property(e => e.SoGioLam).HasColumnName("so_gio_lam")
                     .HasColumnType("decimal(5,2)")
@@ -397,7 +398,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiChamCong>())
                     .HasDefaultValue(TrangThaiChamCong.DungGio);
                 entity.Property(e => e.GhiChu).HasColumnName("ghi_chu").HasMaxLength(255);
 
@@ -453,12 +454,12 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.PhuongThucThanhToan)
                     .HasColumnName("phuong_thuc_thanh_toan")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<PhuongThucThanhToan>())
                     .HasDefaultValue(PhuongThucThanhToan.TienMat);
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiHoaDon>())
                     .HasDefaultValue(TrangThaiHoaDon.DangChoi);
                 entity.Property(e => e.MaGiaoDichQR).HasColumnName("ma_giao_dich_qr").HasMaxLength(100);
                 entity.Property(e => e.QRCodeUrl).HasColumnName("qr_code_url").HasMaxLength(500);
@@ -515,7 +516,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.LoaiPhieu)
                     .HasColumnName("loai_phieu")
                     .HasMaxLength(10)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<LoaiPhieu>())
                     .IsRequired();
                 entity.Property(e => e.SoTien).HasColumnName("so_tien").HasColumnType("decimal(12,0)").IsRequired();
                 entity.Property(e => e.LyDo).HasColumnName("ly_do").HasMaxLength(500).IsRequired();
@@ -548,7 +549,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")
                     .HasMaxLength(20)
-                    .HasConversion<string>()
+                    .HasConversion(new UnicodeEnumConverter<TrangThaiGiaGio>())
                     .HasDefaultValue(TrangThaiGiaGio.DangApDung);
 
                 entity.HasOne(e => e.LoaiBan)

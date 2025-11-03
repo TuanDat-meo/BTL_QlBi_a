@@ -1,15 +1,20 @@
-﻿using BTL_QlBi_a.Models.EF;
+﻿#nullable enable
+using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
 using BTL_QlBi_a.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace BTL_QlBi_a.Controllers
 {
-    public class HomeController(ApplicationDbContext context) : Controller
+    public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         public async Task<IActionResult> Index()
         {
@@ -17,7 +22,7 @@ namespace BTL_QlBi_a.Controllers
             int? maNV = HttpContext.Session.GetInt32("MaNV");
 
             // Lấy thông tin nhân viên từ database
-            NhanVien nv = null;
+            NhanVien? nv = null;
             if (maNV.HasValue)
             {
                 nv = await _context.NhanVien.FindAsync(maNV.Value);
@@ -27,13 +32,13 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.TenNV = HttpContext.Session.GetString("TenNV") ?? "Khách";
             ViewBag.ChucVu = HttpContext.Session.GetString("ChucVu") ?? "Không xác định";
 
-            // Thống kê bàn - FIX: So sánh với enum
+            // Thống kê bàn - So sánh với enum
             var danhSachBan = await _context.BanBia.ToListAsync();
             ViewBag.BanTrong = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.Trong);
             ViewBag.BanDangChoi = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.DangChoi);
             ViewBag.BanDaDat = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.DaDat);
 
-            // Doanh thu hôm nay - FIX: So sánh với enum
+            // Doanh thu hôm nay - So sánh với enum
             var today = DateTime.Today;
             var doanhThuHomNay = await _context.HoaDon
                 .Where(h => h.ThoiGianKetThuc.HasValue &&
@@ -45,7 +50,7 @@ namespace BTL_QlBi_a.Controllers
             // Tổng khách hàng
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
 
-            // Lấy danh sách bàn với thông tin liên quan - FIX: BanBi_a → BanBia
+            // Lấy danh sách bàn với thông tin liên quan
             var danhSachBanFull = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhachHang)
@@ -58,7 +63,6 @@ namespace BTL_QlBi_a.Controllers
 
         public async Task<IActionResult> ChiTietBan(int maBan)
         {
-            // FIX: BanBi_a → BanBia
             var ban = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhachHang)
@@ -70,7 +74,7 @@ namespace BTL_QlBi_a.Controllers
                 return NotFound();
             }
 
-            // Lấy hóa đơn đang mở của bàn (nếu có) - FIX: So sánh với enum
+            // Lấy hóa đơn đang mở của bàn (nếu có)
             var hoaDon = await _context.HoaDon
                 .Include(h => h.KhachHang)
                 .Include(h => h.NhanVien)
@@ -97,14 +101,12 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                // FIX: BanBi_a → BanBia
                 var ban = await _context.BanBia.FindAsync(maBan);
                 if (ban == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
                 }
 
-                // FIX: So sánh với enum
                 if (ban.TrangThai != TrangThaiBan.Trong)
                 {
                     return Json(new { success = false, message = "Bàn đang được sử dụng" });
@@ -118,12 +120,12 @@ namespace BTL_QlBi_a.Controllers
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
                 }
 
-                // Cập nhật trạng thái bàn - FIX: Gán enum
+                // Cập nhật trạng thái bàn
                 ban.TrangThai = TrangThaiBan.DangChoi;
                 ban.GioBatDau = DateTime.Now;
                 ban.MaKH = maKH;
 
-                // Tạo hóa đơn mới - FIX: Gán enum
+                // Tạo hóa đơn mới
                 var hoaDon = new HoaDon
                 {
                     MaBan = maBan,
@@ -149,14 +151,13 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                // FIX: BanBi_a → BanBia
                 var ban = await _context.BanBia.FindAsync(maBan);
                 if (ban == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
                 }
 
-                // Tìm hóa đơn đang mở - FIX: So sánh với enum
+                // Tìm hóa đơn đang mở
                 var hoaDon = await _context.HoaDon
                     .Include(h => h.BanBia)
                     .ThenInclude(b => b.LoaiBan)
@@ -195,7 +196,7 @@ namespace BTL_QlBi_a.Controllers
                 hoaDon.TienDichVu = chiTiet.Sum(ct => ct.ThanhTien ?? 0);
                 hoaDon.TongTien = hoaDon.TienBan + hoaDon.TienDichVu - hoaDon.GiamGia;
 
-                // Cập nhật trạng thái bàn - FIX: Gán enum
+                // Cập nhật trạng thái bàn
                 ban.TrangThai = TrangThaiBan.Trong;
                 ban.GioBatDau = null;
                 ban.MaKH = null;
@@ -217,7 +218,7 @@ namespace BTL_QlBi_a.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ThanhToan(int maHD, string phuongThuc)
+        public async Task<IActionResult> ThanhToan(int maHD, string? phuongThuc)
         {
             try
             {
@@ -227,17 +228,17 @@ namespace BTL_QlBi_a.Controllers
                     return Json(new { success = false, message = "Không tìm thấy hóa đơn" });
                 }
 
-                // FIX: Gán enum
                 hoaDon.TrangThai = TrangThaiHoaDon.DaThanhToan;
 
-                // FIX: Convert string to enum
-                if (Enum.TryParse<PhuongThucThanhToan>(phuongThuc, out var pttt))
+                // Convert string to enum
+                if (!string.IsNullOrEmpty(phuongThuc) &&
+                    Enum.TryParse<PhuongThucThanhToan>(phuongThuc, out var pttt))
                 {
                     hoaDon.PhuongThucThanhToan = pttt;
                 }
                 else
                 {
-                    hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.TienMat; // Mặc định
+                    hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.TienMat;
                 }
 
                 // Cập nhật thông tin khách hàng (nếu có)
@@ -250,15 +251,14 @@ namespace BTL_QlBi_a.Controllers
                         khachHang.DiemTichLuy += (int)(hoaDon.TongTien / 1000m);
                         khachHang.LanDenCuoi = DateTime.Now;
 
-                        // Cập nhật hạng thành viên - FIX: Gán enum
-                        if (khachHang.TongChiTieu >= 10000000)
-                            khachHang.HangTV = HangThanhVien.BachKim;
-                        else if (khachHang.TongChiTieu >= 5000000)
-                            khachHang.HangTV = HangThanhVien.Vang;
-                        else if (khachHang.TongChiTieu >= 2000000)
-                            khachHang.HangTV = HangThanhVien.Bac;
-                        else
-                            khachHang.HangTV = HangThanhVien.Dong;
+                        // Cập nhật hạng thành viên
+                        khachHang.HangTV = khachHang.TongChiTieu switch
+                        {
+                            >= 10000000 => HangThanhVien.BachKim,
+                            >= 5000000 => HangThanhVien.Vang,
+                            >= 2000000 => HangThanhVien.Bac,
+                            _ => HangThanhVien.Dong
+                        };
                     }
                 }
 
