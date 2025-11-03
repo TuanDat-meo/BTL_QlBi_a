@@ -7,6 +7,7 @@ namespace BTL_QlBi_a.Models.Entities
     public class DatBan
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaDat { get; set; }
 
         public int? MaBan { get; set; }
@@ -17,29 +18,26 @@ namespace BTL_QlBi_a.Models.Entities
         [MaxLength(100)]
         public string TenKhach { get; set; }
 
-        [Required] 
+        [Required]
         [MaxLength(15)]
         public string SDT { get; set; }
 
-        [MaxLength(100)]
-        public string Email { get; set; } 
-
+        [Required]
         public DateTime ThoiGianDat { get; set; }
 
         public int? SoNguoi { get; set; }
 
-        public string GhiChu { get; set; }
+        public string? GhiChu { get; set; }
 
-        [MaxLength(20)]
-        public string TrangThai { get; set; } = "Đang Chờ"; 
+        public TrangThaiDatBan TrangThai { get; set; } = TrangThaiDatBan.DangCho;
 
         public DateTime NgayTao { get; set; } = DateTime.Now;
 
-        // Navigation Properties
+        // Navigation properties
         [ForeignKey("MaBan")]
-        public BanBi_a BanBia { get; set; }
+        public virtual BanBia? BanBia { get; set; }
 
         [ForeignKey("MaKH")]
-        public KhachHang KhachHang { get; set; }
+        public virtual KhachHang? KhachHang { get; set; }
     }
 }
