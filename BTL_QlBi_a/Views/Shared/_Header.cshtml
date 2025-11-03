@@ -1,0 +1,56 @@
+﻿<header class="header">
+    <div class="header-top">
+        <div class="header-title">
+            <h1>🎱 Quản Lý Quán Bi-a Pro</h1>
+        </div>
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-name">@(ViewBag.TenNV ?? "Nhân viên")</div>
+                <div class="user-role">@(ViewBag.ChucVu ?? "Nhân viên")</div>
+            </div>
+            <div class="user-avatar">@(ViewBag.ChucVu?.Substring(0, 1) ?? "NV")</div>
+            <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+        </div>
+    </div>
+
+    <div class="stats-dashboard">
+        <div class="stat-card">
+            <div class="stat-value" id="availableTables">@(ViewBag.BanTrong ?? 0)</div>
+            <div class="stat-label">Bàn Trống</div>
+            <div class="stat-trend">↑ 2 bàn so với 1h trước</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="occupiedTables">@(ViewBag.BanDangChoi ?? 0)</div>
+            <div class="stat-label">Đang Chơi</div>
+            <div class="stat-trend down">↓ 1 bàn</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="reservedTables">@(ViewBag.BanDaDat ?? 0)</div>
+            <div class="stat-label">Đặt Trước</div>
+            <div class="stat-trend">→ Không đổi</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="todayRevenue">@(ViewBag.DoanhThuHomNay ?? "0đ")</div>
+            <div class="stat-label">Doanh Thu Hôm Nay</div>
+            <div class="stat-trend">↑ +15% so với hôm qua</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalCustomers">@(ViewBag.TongKhachHang ?? 0)</div>
+            <div class="stat-label">Khách Hàng</div>
+            <div class="stat-trend">↑ 3 khách mới</div>
+        </div>
+    </div>
+</header>
+
+<script>
+    function logout() {
+        if (confirm('Bạn có chắc muốn đăng xuất?')) {
+            fetch('/Account/Logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(() => window.location.href = '/Account/Login')
+            .catch(() => window.location.href = '/Account/Login');
+        }
+    }
+</script>

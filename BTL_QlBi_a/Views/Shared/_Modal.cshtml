@@ -1,0 +1,35 @@
+﻿<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Modal</h3>
+            <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<script>
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function openModal(title, content) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalContent').innerHTML = content;
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('modalOverlay')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>

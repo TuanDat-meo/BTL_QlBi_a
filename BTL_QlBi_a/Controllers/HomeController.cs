@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
-using BTL_QlBi_a.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,29 +15,13 @@ namespace BTL_QlBi_a.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        private async Task LoadHeaderStats()
         {
-            // Lấy MaNV từ Session
-            int? maNV = HttpContext.Session.GetInt32("MaNV");
-
-            // Lấy thông tin nhân viên từ database
-            NhanVien? nv = null;
-            if (maNV.HasValue)
-            {
-                nv = await _context.NhanVien.FindAsync(maNV.Value);
-            }
-
-            // Lấy TenNV và ChucVu từ Session (đã lưu khi đăng nhập)
-            ViewBag.TenNV = HttpContext.Session.GetString("TenNV") ?? "Khách";
-            ViewBag.ChucVu = HttpContext.Session.GetString("ChucVu") ?? "Không xác định";
-
-            // Thống kê bàn - So sánh với enum
             var danhSachBan = await _context.BanBia.ToListAsync();
             ViewBag.BanTrong = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.Trong);
             ViewBag.BanDangChoi = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.DangChoi);
             ViewBag.BanDaDat = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.DaDat);
 
-            // Doanh thu hôm nay - So sánh với enum
             var today = DateTime.Today;
             var doanhThuHomNay = await _context.HoaDon
                 .Where(h => h.ThoiGianKetThuc.HasValue &&
@@ -47,22 +30,28 @@ namespace BTL_QlBi_a.Controllers
                 .SumAsync(h => h.TongTien);
             ViewBag.DoanhThuHomNay = doanhThuHomNay.ToString("N0") + "đ";
 
-            // Tổng khách hàng
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
+        }
 
-            // Lấy danh sách bàn với thông tin liên quan
-            var danhSachBanFull = await _context.BanBia
+        public async Task<IActionResult> Index()
+        {
+            await LoadHeaderStats();
+
+            var danhSachBan = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhachHang)
                 .Include(b => b.KhuVuc)
                 .OrderBy(b => b.MaBan)
                 .ToListAsync();
 
-            return View(danhSachBanFull);
+            return View("Index", danhSachBan);
         }
 
+        // FIX: Thêm log và đảm bảo return PartialView đúng
         public async Task<IActionResult> ChiTietBan(int maBan)
         {
+            Console.WriteLine($"=== ChiTietBan called for MaBan: {maBan} ===");
+
             var ban = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhachHang)
@@ -71,10 +60,12 @@ namespace BTL_QlBi_a.Controllers
 
             if (ban == null)
             {
-                return NotFound();
+                Console.WriteLine($"Bàn {maBan} không tìm thấy!");
+                return NotFound(new { message = "Không tìm thấy bàn" });
             }
 
-            // Lấy hóa đơn đang mở của bàn (nếu có)
+            Console.WriteLine($"Bàn tìm thấy: {ban.TenBan}, Trạng thái: {ban.TrangThai}");
+
             var hoaDon = await _context.HoaDon
                 .Include(h => h.KhachHang)
                 .Include(h => h.NhanVien)
@@ -82,8 +73,8 @@ namespace BTL_QlBi_a.Controllers
                                          h.TrangThai == TrangThaiHoaDon.DangChoi);
 
             ViewBag.HoaDon = hoaDon;
+            Console.WriteLine($"Hóa đơn: {(hoaDon != null ? $"Có - MaHD: {hoaDon.MaHD}" : "Không có")}");
 
-            // Lấy chi tiết dịch vụ đã order (nếu có hóa đơn)
             if (hoaDon != null)
             {
                 var chiTiet = await _context.ChiTietHoaDon
@@ -91,45 +82,39 @@ namespace BTL_QlBi_a.Controllers
                     .Where(ct => ct.MaHD == hoaDon.MaHD)
                     .ToListAsync();
                 ViewBag.ChiTietDichVu = chiTiet;
+                Console.WriteLine($"Chi tiết dịch vụ: {chiTiet.Count} items");
             }
 
-            return View(ban);
+            // QUAN TRỌNG: Return PartialView
+            return PartialView("ChiTietBan", ban);
         }
 
         [HttpPost]
-        public async Task<IActionResult> BatDauChoi(int maBan, int? maKH)
+        public async Task<IActionResult> BatDauChoi([FromBody] BatDauChoiRequest request)
         {
             try
             {
-                var ban = await _context.BanBia.FindAsync(maBan);
+                Console.WriteLine($"BatDauChoi - MaBan: {request.MaBan}, MaKH: {request.MaKH}");
+
+                var ban = await _context.BanBia.FindAsync(request.MaBan);
                 if (ban == null)
-                {
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
-                }
 
                 if (ban.TrangThai != TrangThaiBan.Trong)
-                {
                     return Json(new { success = false, message = "Bàn đang được sử dụng" });
-                }
 
-                // Lấy MaNV từ Session
                 int? maNV = HttpContext.Session.GetInt32("MaNV");
-
                 if (!maNV.HasValue)
-                {
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
-                }
 
-                // Cập nhật trạng thái bàn
                 ban.TrangThai = TrangThaiBan.DangChoi;
                 ban.GioBatDau = DateTime.Now;
-                ban.MaKH = maKH;
+                ban.MaKH = request.MaKH;
 
-                // Tạo hóa đơn mới
                 var hoaDon = new HoaDon
                 {
-                    MaBan = maBan,
-                    MaKH = maKH,
+                    MaBan = request.MaBan,
+                    MaKH = request.MaKH,
                     MaNV = maNV.Value,
                     ThoiGianBatDau = DateTime.Now,
                     TrangThai = TrangThaiHoaDon.DangChoi
@@ -142,52 +127,41 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+                Console.WriteLine($"Lỗi BatDauChoi: {ex.Message}");
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> KetThucChoi(int maBan)
+        public async Task<IActionResult> KetThucChoi([FromBody] KetThucChoiRequest request)
         {
             try
             {
-                var ban = await _context.BanBia.FindAsync(maBan);
+                var ban = await _context.BanBia.FindAsync(request.MaBan);
                 if (ban == null)
-                {
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
-                }
 
-                // Tìm hóa đơn đang mở
                 var hoaDon = await _context.HoaDon
                     .Include(h => h.BanBia)
                     .ThenInclude(b => b.LoaiBan)
-                    .FirstOrDefaultAsync(h => h.MaBan == maBan &&
+                    .FirstOrDefaultAsync(h => h.MaBan == request.MaBan &&
                                              h.TrangThai == TrangThaiHoaDon.DangChoi);
 
                 if (hoaDon == null)
-                {
                     return Json(new { success = false, message = "Không tìm thấy hóa đơn" });
-                }
 
-                // Tính toán thời gian và tiền
                 hoaDon.ThoiGianKetThuc = DateTime.Now;
                 var duration = (hoaDon.ThoiGianKetThuc.Value - hoaDon.ThoiGianBatDau.Value).TotalMinutes;
                 hoaDon.ThoiLuongPhut = (int)Math.Ceiling(duration);
 
-                // Tính tiền bàn (làm tròn lên 15 phút)
                 var soPhutLamTron = Math.Ceiling(duration / 15) * 15;
                 var soGio = soPhutLamTron / 60;
 
                 if (hoaDon.BanBia?.LoaiBan != null)
-                {
                     hoaDon.TienBan = hoaDon.BanBia.LoaiBan.GiaGio * (decimal)soGio;
-                }
                 else
-                {
                     hoaDon.TienBan = 0;
-                }
 
-                // Tính tiền dịch vụ
                 var chiTiet = await _context.ChiTietHoaDon
                     .Include(ct => ct.DichVu)
                     .Where(ct => ct.MaHD == hoaDon.MaHD)
@@ -196,7 +170,6 @@ namespace BTL_QlBi_a.Controllers
                 hoaDon.TienDichVu = chiTiet.Sum(ct => ct.ThanhTien ?? 0);
                 hoaDon.TongTien = hoaDon.TienBan + hoaDon.TienDichVu - hoaDon.GiamGia;
 
-                // Cập nhật trạng thái bàn
                 ban.TrangThai = TrangThaiBan.Trong;
                 ban.GioBatDau = null;
                 ban.MaKH = null;
@@ -213,63 +186,90 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ThanhToan(int maHD, string? phuongThuc)
+        public async Task<IActionResult> DichVu()
         {
-            try
-            {
-                var hoaDon = await _context.HoaDon.FindAsync(maHD);
-                if (hoaDon == null)
-                {
-                    return Json(new { success = false, message = "Không tìm thấy hóa đơn" });
-                }
-
-                hoaDon.TrangThai = TrangThaiHoaDon.DaThanhToan;
-
-                // Convert string to enum
-                if (!string.IsNullOrEmpty(phuongThuc) &&
-                    Enum.TryParse<PhuongThucThanhToan>(phuongThuc, out var pttt))
-                {
-                    hoaDon.PhuongThucThanhToan = pttt;
-                }
-                else
-                {
-                    hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.TienMat;
-                }
-
-                // Cập nhật thông tin khách hàng (nếu có)
-                if (hoaDon.MaKH.HasValue)
-                {
-                    var khachHang = await _context.KhachHang.FindAsync(hoaDon.MaKH.Value);
-                    if (khachHang != null)
-                    {
-                        khachHang.TongChiTieu += hoaDon.TongTien;
-                        khachHang.DiemTichLuy += (int)(hoaDon.TongTien / 1000m);
-                        khachHang.LanDenCuoi = DateTime.Now;
-
-                        // Cập nhật hạng thành viên
-                        khachHang.HangTV = khachHang.TongChiTieu switch
-                        {
-                            >= 10000000 => HangThanhVien.BachKim,
-                            >= 5000000 => HangThanhVien.Vang,
-                            >= 2000000 => HangThanhVien.Bac,
-                            _ => HangThanhVien.Dong
-                        };
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                return Json(new { success = true, message = "Thanh toán thành công" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
-            }
+            await LoadHeaderStats();
+            var danhSachDV = await _context.DichVu.ToListAsync();
+            return View(danhSachDV);
         }
+
+        public async Task<IActionResult> HoaDon()
+        {
+            await LoadHeaderStats();
+            var danhSachHD = await _context.HoaDon
+                .Include(h => h.BanBia)
+                .Include(h => h.KhachHang)
+                .Include(h => h.NhanVien)
+                .OrderByDescending(h => h.ThoiGianBatDau)
+                .ToListAsync();
+
+            return View(danhSachHD);
+        }
+
+        public async Task<IActionResult> KhachHang()
+        {
+            await LoadHeaderStats();
+            var danhSachKH = await _context.KhachHang
+                .OrderByDescending(k => k.TongChiTieu)
+                .ToListAsync();
+
+            return View(danhSachKH);
+        }
+
+        public async Task<IActionResult> ThongKe()
+        {
+            await LoadHeaderStats();
+
+            var today = DateTime.Today;
+            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+
+            ViewBag.DoanhThuThang = await _context.HoaDon
+                .Where(h => h.ThoiGianKetThuc.HasValue &&
+                           h.ThoiGianKetThuc.Value >= firstDayOfMonth &&
+                           h.TrangThai == TrangThaiHoaDon.DaThanhToan)
+                .SumAsync(h => h.TongTien);
+
+            return View();
+        }
+
+        public async Task<IActionResult> BangGia()
+        {
+            await LoadHeaderStats();
+            var loaiBan = await _context.LoaiBan.ToListAsync();
+            ViewBag.LoaiBan = loaiBan;
+            return View();
+        }
+
+        public async Task<IActionResult> NhanVien()
+        {
+            await LoadHeaderStats();
+            var danhSachNV = await _context.NhanVien
+                .Include(nv => nv.NhomQuyen)
+                .ToListAsync();
+
+            return View(danhSachNV);
+        }
+
+        public async Task<IActionResult> CaiDat()
+        {
+            await LoadHeaderStats();
+            return View();
+        }
+    }
+
+    // Request models
+    public class BatDauChoiRequest
+    {
+        public int MaBan { get; set; }
+        public int? MaKH { get; set; }
+    }
+
+    public class KetThucChoiRequest
+    {
+        public int MaBan { get; set; }
     }
 }
