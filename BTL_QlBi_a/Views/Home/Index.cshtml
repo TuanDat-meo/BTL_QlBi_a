@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="~/asset/css/table.css" />
 }
 
+<<<<<<< HEAD
+@* Render partial view cho Quản lý bàn *@
+@await Html.PartialAsync("Partials/_QuanLyBan", Model)
+=======
 <section class="page-section active" id="page-tables">
     <div class="section-header">
         <h2 class="section-title">Quản lý bàn</h2>
@@ -161,94 +165,14 @@
         </div>
     }
 </section>
+>>>>>>> e7f15b64503b8426516cf40bbd21e1680e35d641
 
 @section Scripts {
+    <script src="~/asset/js/quanlyban.js"></script>
     <script>
-        console.log('=== QUẢN LÝ BÀN LOADED ===');
-        console.log('Cards on page:', document.querySelectorAll('.table-card').length);
-
-        function filterTables(area) {
-            const cards = document.querySelectorAll('.table-card');
-            const buttons = document.querySelectorAll('.filter-btn[data-filter]');
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector('.filter-btn[data-filter="' + area + '"]');
-            if (activeBtn) activeBtn.classList.add('active');
-
-            const currentStatus = document.querySelector('.filter-btn[data-status].active')?.dataset.status || 'all';
-            const searchValue = document.getElementById('searchTables').value.toLowerCase();
-
-            cards.forEach(card => {
-                const cardArea = card.dataset.area;
-                const cardStatus = card.dataset.status;
-                const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
-
-                const areaMatch = (area === 'all' || cardArea === area);
-                const statusMatch = (currentStatus === 'all' || cardStatus === currentStatus);
-                const searchMatch = (searchValue === '' || tableName.includes(searchValue));
-
-                card.style.display = (areaMatch && statusMatch && searchMatch) ? 'block' : 'none';
-            });
-        }
-
-        function filterStatus(status) {
-            const cards = document.querySelectorAll('.table-card');
-            const buttons = document.querySelectorAll('.filter-btn[data-status]');
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector('.filter-btn[data-status="' + status + '"]');
-            if (activeBtn) activeBtn.classList.add('active');
-
-            const currentArea = document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all';
-            const searchValue = document.getElementById('searchTables').value.toLowerCase();
-
-            cards.forEach(card => {
-                const cardArea = card.dataset.area;
-                const cardStatus = card.dataset.status;
-                const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
-
-                const areaMatch = (currentArea === 'all' || cardArea === currentArea);
-                const statusMatch = (status === 'all' || cardStatus === status);
-                const searchMatch = (searchValue === '' || tableName.includes(searchValue));
-
-                card.style.display = (areaMatch && statusMatch && searchMatch) ? 'block' : 'none';
-            });
-        }
-
-        function searchTables() {
-            filterTables(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
-        }
-
-        function showTableDetail(maBan) {
-            window.location.href = '/Home/ChiTietBan?maBan=' + maBan;
-        }
-
-        function startTable(maBan) {
-            alert('Bắt đầu chơi bàn: ' + maBan);
-        }
-
-        function addService(maBan) {
-            alert('Thêm dịch vụ cho bàn: ' + maBan);
-        }
-
-        function endTable(maBan) {
-            if (confirm('Kết thúc và thanh toán?')) {
-                alert('Thanh toán bàn: ' + maBan);
-            }
-        }
-
-        function confirmReservation(maBan) {
-            if (confirm('Xác nhận khách đã đến?')) {
-                alert('Xác nhận bàn: ' + maBan);
-            }
-        }
-
-        function openReservationModal() {
-            alert('Mở form đặt bàn trước');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            filterTables('all');
-        });
+        // Test debug
+        console.log('Page loaded');
+        console.log('Detail Panel:', document.getElementById('detailPanel'));
+        console.log('Table Cards:', document.querySelectorAll('.table-card').length);
     </script>
 }

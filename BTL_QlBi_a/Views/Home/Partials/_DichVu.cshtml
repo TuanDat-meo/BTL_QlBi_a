@@ -1,0 +1,141 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.DichVu>
+
+<div class="section-header">
+    <h2 class="section-title">Dịch vụ & Menu</h2>
+    <div class="action-buttons">
+        <button class="btn btn-primary" onclick="openAddServiceModal()">➕ Thêm dịch vụ mới</button>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-row">
+        <div class="filter-group">
+            <span class="filter-label">Loại dịch vụ:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all" onclick="filterServices('all')">Tất cả</button>
+                <button class="filter-btn" data-filter="DoUong" onclick="filterServices('DoUong')">Đồ uống</button>
+                <button class="filter-btn" data-filter="DoAn" onclick="filterServices('DoAn')">Đồ ăn</button>
+                <button class="filter-btn" data-filter="Khac" onclick="filterServices('Khac')">Khác</button>
+            </div>
+        </div>
+    </div>
+    <div class="filter-row">
+        <input type="text" class="search-input" placeholder="🔍 Tìm kiếm dịch vụ..." id="searchServices" onkeyup="searchServices()">
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="tables-grid" id="servicesGrid">
+        @foreach (var dichVu in Model)
+        {
+            // SỬA: Dùng dichVu.Loai thay cho dichVu.LoaiDV
+            string loaiDV = dichVu.Loai.ToString() ?? "Khac";
+            string iconDV = loaiDV switch
+            {
+                "DoUong" => "🍹",
+                "DoAn" => "🍔",
+                _ => "📦"
+            };
+            <div class="table-card available" data-category="@loaiDV">
+                <div class="service-icon">@iconDV</div>
+                <div class="table-name">@dichVu.TenDV</div>
+                <div class="table-info">Mã: @dichVu.MaDV</div>
+
+                @* SỬA: Dùng dichVu.Gia thay cho dichVu.DonGia *@
+                <div class="table-price">@dichVu.Gia.ToString("N0") đ</div>
+
+                @* LOẠI BỎ: Phần tồn kho vì thuộc tính SoLuongTon không có trong entity DichVu *@
+                @* @if (dichVu.SoLuongTon.HasValue)
+                {
+                    <div class="table-info">
+                        Tồn kho: <strong>@dichVu.SoLuongTon</strong>
+                    </div>
+                } *@
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="editService(@dichVu.MaDV)">
+                        ✏️ Sửa
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteService(@dichVu.MaDV, '@dichVu.TenDV')">
+                        🗑️ Xóa
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>Chưa có dịch vụ</h3>
+        <p class="empty-text">Thêm dịch vụ đầu tiên vào menu</p>
+    </div>
+}
+
+<script>
+    function filterServices(category) {
+        const cards = document.querySelectorAll('#servicesGrid .table-card');
+        const buttons = document.querySelectorAll('.filter-btn[data-filter]');
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.filter-btn[data-filter="' + category + '"]')?.classList.add('active');
+
+        const searchValue = document.getElementById('searchServices').value.toLowerCase();
+        cards.forEach(card => {
+            const cardCategory = card.dataset.category;
+            const serviceName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
+
+            const categoryMatch = (category === 'all' || cardCategory === category);
+            const searchMatch = (searchValue === '' || serviceName.includes(searchValue));
+
+            card.style.display = (categoryMatch && searchMatch) ? 'block' : 'none';
+        });
+    }
+
+    function searchServices() {
+        filterServices(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
+    }
+
+    function openAddServiceModal() {
+        alert('Mở form thêm dịch vụ mới');
+        // TODO: Implement modal
+    }
+
+    function editService(maDV) {
+        alert('Sửa dịch vụ: ' + maDV);
+        // TODO: Implement edit
+    }
+
+    function deleteService(maDV, tenDV) {
+        if(confirm('Xóa dịch vụ "' + tenDV + '"?')) {
+            fetch('/Home/XoaDichVu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maDV: maDV })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        filterServices('all');
+    });
+</script>
+
+<style>
+    .service-icon {
+        font-size: 48px;
+        text-align: center;
+        margin: 20px 0;
+    }
+</style>

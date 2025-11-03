@@ -1,0 +1,116 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
+
+<section class="page-section active" id="page-tables">
+    <div class="section-header">
+        <h2 class="section-title">Quản lý bàn</h2>
+        <div class="action-buttons">
+            <button class="btn btn-warning" onclick="openReservationModal()">📅 Đặt bàn trước</button>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">Khu vực:</span>
+                <div class="filter-buttons" id="areaFilters">
+                    <button class="filter-btn active" data-filter="all">Tất cả</button>
+                    <button class="filter-btn" data-filter="Tầng 1">Tầng 1</button>
+                    <button class="filter-btn" data-filter="Tầng 2">Tầng 2</button>
+                    <button class="filter-btn" data-filter="VIP">VIP</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">Trạng thái:</span>
+                <div class="filter-buttons" id="statusFilters">
+                    <button class="filter-btn active" data-status="all">Tất cả</button>
+                    <button class="filter-btn" data-status="Trong">Trống</button>
+                    <button class="filter-btn" data-status="DangChoi">Đang chơi</button>
+                    <button class="filter-btn" data-status="DaDat">Đã đặt</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <input type="text" class="search-input" placeholder="🔍 Tìm kiếm bàn..." id="searchTables">
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="tables-grid" id="tablesGrid">
+            @foreach (var ban in Model.Where(b => b.TrangThai != BTL_QlBi_a.Models.Entities.TrangThaiBan.BaoTri))
+            {
+                @await Html.PartialAsync("Partials/_TableCard", ban)
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🎱</div>
+            <h3>Không có bàn nào</h3>
+            <p class="empty-text">Chưa có bàn bi-a trong hệ thống</p>
+        </div>
+    }
+</section>
+
+@* QUAN TRỌNG: Script phải ở cuối và sử dụng event delegation *@
+<script>
+    // Đảm bảo TableManager được khởi tạo trước
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Initializing filters...');
+
+        // Setup area filter buttons
+        const areaButtons = document.querySelectorAll('#areaFilters .filter-btn');
+        areaButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const area = this.getAttribute('data-filter');
+                console.log('Area clicked:', area);
+
+                if (window.TableManager) {
+                    window.TableManager.filterByArea(area, { target: this });
+                }
+            });
+        });
+
+        // Setup status filter buttons
+        const statusButtons = document.querySelectorAll('#statusFilters .filter-btn');
+        statusButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const status = this.getAttribute('data-status');
+                console.log('Status clicked:', status);
+
+                if (window.TableManager) {
+                    window.TableManager.filterByStatus(status, { target: this });
+                }
+            });
+        });
+
+        // Setup search input
+        const searchInput = document.getElementById('searchTables');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                if (window.TableManager) {
+                    window.TableManager.search();
+                }
+            });
+        }
+
+        // Setup table card clicks using event delegation
+        const tablesGrid = document.getElementById('tablesGrid');
+        if (tablesGrid) {
+            tablesGrid.addEventListener('click', function(e) {
+                const card = e.target.closest('.table-card');
+                if (card && !e.target.closest('.btn')) {
+                    const tableId = card.getAttribute('data-table-id');
+                    if (tableId && window.TableManager) {
+                        window.TableManager.showDetail(parseInt(tableId));
+                    }
+                }
+            });
+        }
+
+        console.log('✅ Filters initialized');
+    });
+</script>
