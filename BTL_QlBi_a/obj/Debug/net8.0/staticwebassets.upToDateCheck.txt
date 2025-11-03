@@ -72,4 +72,7 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+<<<<<<< HEAD
 wwwroot\asset\js\quanlyban.js
+=======
+>>>>>>> e7f15b64503b8426516cf40bbd21e1680e35d641

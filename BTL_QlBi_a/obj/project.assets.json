@@ -4013,11 +4013,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\LTWeb\\BTL_QlBi_a\\BTL_QlBi_a\\BTL_QlBi_a.csproj",
+      "projectUniqueName": "C:\\Users\\LENOVO\\source\\repos\\BTL_QlBi_a\\BTL_QlBi_a\\BTL_QlBi_a.csproj",
       "projectName": "BTL_QlBi_a",
-      "projectPath": "D:\\LTWeb\\BTL_QlBi_a\\BTL_QlBi_a\\BTL_QlBi_a.csproj",
+      "projectPath": "C:\\Users\\LENOVO\\source\\repos\\BTL_QlBi_a\\BTL_QlBi_a\\BTL_QlBi_a.csproj",
       "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
-      "outputPath": "D:\\LTWeb\\BTL_QlBi_a\\BTL_QlBi_a\\obj\\",
+      "outputPath": "C:\\Users\\LENOVO\\source\\repos\\BTL_QlBi_a\\BTL_QlBi_a\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
