@@ -6,6 +6,7 @@ namespace BTL_QlBi_a.Models.Entities
     public class ChiTietHoaDon
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public int? MaHD { get; set; }
@@ -17,10 +18,11 @@ namespace BTL_QlBi_a.Models.Entities
         [Column(TypeName = "decimal(12,0)")]
         public decimal? ThanhTien { get; set; }
 
+        // Navigation properties
         [ForeignKey("MaHD")]
-        public HoaDon HoaDon { get; set; }
+        public virtual HoaDon? HoaDon { get; set; }
 
         [ForeignKey("MaDV")]
-        public DichVu DichVu { get; set; }
+        public virtual DichVu? DichVu { get; set; }
     }
 }

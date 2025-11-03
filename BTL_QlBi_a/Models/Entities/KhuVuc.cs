@@ -3,27 +3,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BTL_QlBi_a.Models.Entities
 {
-    public class LoaiBan
+    public class KhuVuc
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int MaLoai { get; set; }
+        public int MaKhuVuc { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string TenLoai { get; set; }
+        public string TenKhuVuc { get; set; }
 
         [MaxLength(255)]
         public string? MoTa { get; set; }
 
-        [Required]
-        [Column(TypeName = "decimal(10,0)")]
-        public decimal GiaGio { get; set; }
-
-        public TrangThaiLoaiBan TrangThai { get; set; } = TrangThaiLoaiBan.DangApDung;
-
         // Navigation properties
         public virtual ICollection<BanBia> BanBias { get; set; }
-        public virtual ICollection<GiaGioChoi> GiaGioChois { get; set; }
     }
 }
