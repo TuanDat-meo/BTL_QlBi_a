@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fDGnnD5pkJk=",
+  "dgSpecHash": "QL6ESwqHsg8=",
   "success": true,
-  "projectFilePath": "D:\\LTWeb\\BTL_QlBi_a\\BTL_QlBi_a\\BTL_QlBi_a.csproj",
+  "projectFilePath": "D:\\Subject_in_class\\03. Programing Web\\Project\\BTL_QlBi_a\\BTL_QlBi_a\\BTL_QlBi_a.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\LENOVO\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\LENOVO\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
