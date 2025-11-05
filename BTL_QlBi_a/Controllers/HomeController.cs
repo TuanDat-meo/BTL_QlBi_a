@@ -247,26 +247,53 @@ namespace BTL_QlBi_a.Controllers
 
             return View(danhSachHD);
         }
-        public async Task<IActionResult> GetChiTietHoaDonPanel(int maHD)
+
+        public async Task<IActionResult> ChiTietHoaDon(int maHD)
         {
-            // Truy vấn hóa đơn, bao gồm các thông tin liên quan
+            Console.WriteLine($"=== TaiChiTietHoaDon called for MaHD: {maHD} ===");
+
             var hoaDon = await _context.HoaDon
-                .Include(hd => hd.BanBia)        
-                .Include(hd => hd.KhachHang)     
-                .Include(hd => hd.NhanVien)      
-                .Include(hd => hd.ChiTietHoaDons) 
-                    .ThenInclude(ct => ct.DichVu) 
-                .FirstOrDefaultAsync(hd => hd.MaHD == maHD);
+                .Include(h => h.KhachHang)
+                .Include(h => h.NhanVien)
+                .Include(h => h.BanBia) // Include bàn
+                .FirstOrDefaultAsync(h => h.MaHD == maHD);
 
             if (hoaDon == null)
             {
-                // Trả về thông báo lỗi nếu không tìm thấy
-                return Content("<div class='empty-state'><div class='empty-icon'>🚫</div><div class='empty-text'>Không tìm thấy hóa đơn.</div></div>");
+                Console.WriteLine($"Hóa đơn {maHD} không tìm thấy!");
+                return NotFound(new { message = "Không tìm thấy hóa đơn" });
             }
 
-            // Trả về một PartialView mới, truyền đối tượng hoaDon vào làm Model
-            // Chúng ta sẽ tạo file "_ChiTietHoaDonPanel.cshtml" ở bước 2
-            return PartialView("_ChiTietHoaDonPanel", hoaDon);
+            var chiTiet = await _context.ChiTietHoaDon
+                .Include(ct => ct.DichVu)
+                .Where(ct => ct.MaHD == hoaDon.MaHD)
+                .ToListAsync();
+
+            ViewBag.ChiTietDichVu = chiTiet;
+            Console.WriteLine($"Chi tiết dịch vụ: {chiTiet.Count} items");
+
+            return PartialView("ChiTietHoaDon", hoaDon);
+        }
+        public async Task<IActionResult> InHoaDon(int maHD)
+        {
+            Console.WriteLine($"=== InHoaDon called for MaHD: {maHD} ===");
+
+            // 1. Tìm hóa đơn và Include TẤT CẢ thông tin liên quan
+            var hoaDon = await _context.HoaDon
+                .Include(h => h.KhachHang)
+                .Include(h => h.NhanVien)
+                .Include(h => h.BanBia)
+                    .ThenInclude(b => b.LoaiBan)
+                .Include(h => h.ChiTietHoaDons)  
+                    .ThenInclude(ct => ct.DichVu) 
+                .FirstOrDefaultAsync(h => h.MaHD == maHD);
+
+            if (hoaDon == null)
+            {
+                return NotFound("Không tìm thấy hóa đơn.");
+            }
+
+            return View("InHoaDon", hoaDon);
         }
 
 
