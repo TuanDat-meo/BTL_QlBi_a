@@ -3,6 +3,7 @@ using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BTL_QlBi_a.Controllers
 {
@@ -197,18 +198,77 @@ namespace BTL_QlBi_a.Controllers
             return View(danhSachDV);
         }
 
-        public async Task<IActionResult> HoaDon()
+        public async Task<IActionResult> HoaDon(
+            DateTime? fromDate,
+            DateTime? toDate,
+            string status = "All")
         {
             await LoadHeaderStats();
-            var danhSachHD = await _context.HoaDon
+
+            var query = _context.HoaDon
                 .Include(h => h.BanBia)
                 .Include(h => h.KhachHang)
                 .Include(h => h.NhanVien)
+                .AsQueryable();
+
+
+            TrangThaiHoaDon? statusEnum = null;
+            if (status != "All" && !string.IsNullOrEmpty(status))
+            {
+                if (status == "Đang chơi")
+                    statusEnum = TrangThaiHoaDon.DangChoi;
+                else if (status == "Đã thanh toán")
+                    statusEnum = TrangThaiHoaDon.DaThanhToan;
+                else if (status == "Đã hủy")
+                    statusEnum = TrangThaiHoaDon.DaHuy;
+            }
+
+            if (statusEnum.HasValue)
+            {
+                query = query.Where(h => h.TrangThai == statusEnum.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(h => h.ThoiGianBatDau >= fromDate.Value);
+            }
+            if (toDate.HasValue)
+            {
+                query = query.Where(h => h.ThoiGianBatDau < toDate.Value.AddDays(1));
+            }
+
+            var danhSachHD = await query
                 .OrderByDescending(h => h.ThoiGianBatDau)
                 .ToListAsync();
 
+            ViewBag.FromDate = fromDate;
+            ViewBag.ToDate = toDate;
+            ViewBag.Status = status;
+
             return View(danhSachHD);
         }
+        public async Task<IActionResult> GetChiTietHoaDonPanel(int maHD)
+        {
+            // Truy vấn hóa đơn, bao gồm các thông tin liên quan
+            var hoaDon = await _context.HoaDon
+                .Include(hd => hd.BanBia)        
+                .Include(hd => hd.KhachHang)     
+                .Include(hd => hd.NhanVien)      
+                .Include(hd => hd.ChiTietHoaDons) 
+                    .ThenInclude(ct => ct.DichVu) 
+                .FirstOrDefaultAsync(hd => hd.MaHD == maHD);
+
+            if (hoaDon == null)
+            {
+                // Trả về thông báo lỗi nếu không tìm thấy
+                return Content("<div class='empty-state'><div class='empty-icon'>🚫</div><div class='empty-text'>Không tìm thấy hóa đơn.</div></div>");
+            }
+
+            // Trả về một PartialView mới, truyền đối tượng hoaDon vào làm Model
+            // Chúng ta sẽ tạo file "_ChiTietHoaDonPanel.cshtml" ở bước 2
+            return PartialView("_ChiTietHoaDonPanel", hoaDon);
+        }
+
 
         public async Task<IActionResult> KhachHang()
         {
