@@ -1,6 +1,9 @@
 ﻿const TableManager = {
     currentArea: 'all',
     currentStatus: 'all',
+    currentTableType: 'all',
+    currentTableId: null,
+    isShowingMenu: false,
 
     // Hiển thị chi tiết bàn vào panel bên phải
     showDetail: async function (maBan) {
@@ -8,21 +11,30 @@
             console.log('Loading detail for table:', maBan);
 
             const detailPanel = document.getElementById('detailPanel');
+            const container = document.querySelector('.container');
+
             if (!detailPanel) {
                 console.error('Detail panel not found!');
                 return;
             }
 
-            // Hiển thị loading
+            // Đóng modal nếu đang mở
+            this.closeModal();
+
+            this.currentTableId = maBan;
+
+            if (container) {
+                container.classList.add('with-detail');
+            }
+
             detailPanel.innerHTML = `
-                <div class="loading-state">
-                    <div class="spinner"></div>
+                <div class="loading-state" style="text-align: center; padding: 40px;">
+                    <div class="spinner" style="margin: 0 auto 20px;"></div>
                     <p>Đang tải thông tin...</p>
                 </div>
             `;
 
-            // FIX: Gọi API đúng endpoint
-            const response = await fetch(`/Home/ChiTietBan?maBan=${maBan}`, {
+            const response = await fetch(`/QLBan/ChiTietBan?maBan=${maBan}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'text/html'
@@ -34,12 +46,8 @@
             }
 
             const html = await response.text();
-            console.log('Received HTML length:', html.length);
-
-            // Cập nhật nội dung panel
             detailPanel.innerHTML = html;
 
-            // Highlight card đã chọn
             document.querySelectorAll('.table-card').forEach(card => {
                 card.classList.remove('selected');
             });
@@ -49,13 +57,11 @@
                 selectedCard.classList.add('selected');
             }
 
-            // Đảm bảo right-panel hiển thị
             const rightPanel = document.querySelector('.right-panel');
             if (rightPanel) {
                 rightPanel.style.display = 'flex';
                 rightPanel.style.visibility = 'visible';
 
-                // Scroll panel vào view trên mobile
                 if (window.innerWidth <= 1024) {
                     setTimeout(() => {
                         rightPanel.scrollIntoView({
@@ -73,10 +79,10 @@
             const detailPanel = document.getElementById('detailPanel');
             if (detailPanel) {
                 detailPanel.innerHTML = `
-                    <div class="error-state">
-                        <div class="error-icon">⚠️</div>
+                    <div class="error-state" style="text-align: center; padding: 40px;">
+                        <div class="error-icon" style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
                         <p>Không thể tải chi tiết bàn</p>
-                        <p style="font-size: 12px; color: #999;">${error.message}</p>
+                        <p style="font-size: 12px; color: #999; margin: 10px 0;">${error.message}</p>
                         <button class="btn btn-primary" onclick="location.reload()">Tải lại</button>
                     </div>
                 `;
@@ -88,13 +94,149 @@
         }
     },
 
+    // Hiển thị menu dịch vụ trong modal
+    addService: async function (maBan) {
+        try {
+            console.log('Opening service menu for table:', maBan);
+            this.currentTableId = maBan;
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (!modalOverlay) {
+                console.error('Modal overlay not found!');
+                return;
+            }
+
+            // Show loading
+            modalOverlay.innerHTML = `
+                <div class="modal-content service-modal">
+                    <div class="loading-state" style="text-align: center; padding: 40px;">
+                        <div class="spinner" style="margin: 0 auto 20px;"></div>
+                        <p>Đang tải menu...</p>
+                    </div>
+                </div>
+            `;
+            modalOverlay.classList.add('active');
+
+            const response = await fetch('/QLBan/LayDanhSachDichVu', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const html = await response.text();
+
+            // Wrap content in modal structure
+            modalOverlay.innerHTML = `
+                <div class="modal-content service-modal">
+                    ${html}
+                </div>
+            `;
+
+            console.log('✅ Menu loaded successfully');
+        } catch (error) {
+            console.error('❌ Error loading menu:', error);
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) {
+                modalOverlay.innerHTML = `
+                    <div class="modal-content service-modal">
+                        <div class="error-state" style="text-align: center; padding: 40px;">
+                            <div class="error-icon" style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                            <p style="color: #dc3545; font-weight: 600;">Không thể tải menu dịch vụ</p>
+                            <p style="font-size: 12px; color: #999; margin: 10px 0;">${error.message}</p>
+                            <button class="btn btn-primary" onclick="TableManager.closeModal()">Đóng</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (window.Toast) {
+                Toast.error('Không thể tải menu. Vui lòng thử lại.');
+            }
+        }
+    },
+
+    // Đóng menu dịch vụ
+    closeServiceMenu: function () {
+        this.closeModal();
+    },
+
+    // Tăng số lượng
+    increaseQuantity: function (maDV) {
+        const input = document.getElementById(`qty-${maDV}`);
+        if (input) {
+            const currentValue = parseInt(input.value) || 1;
+            if (currentValue < 99) {
+                input.value = currentValue + 1;
+            }
+        }
+    },
+
+    // Giảm số lượng
+    decreaseQuantity: function (maDV) {
+        const input = document.getElementById(`qty-${maDV}`);
+        if (input) {
+            const currentValue = parseInt(input.value) || 1;
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+        }
+    },
+
+    // Xác nhận thêm dịch vụ
+    confirmAddService: async function (maDV) {
+        if (!this.currentTableId) {
+            if (window.Toast) Toast.error('Không xác định được bàn');
+            return;
+        }
+
+        const input = document.getElementById(`qty-${maDV}`);
+        const soLuong = parseInt(input?.value) || 1;
+
+        try {
+            const response = await fetch('/QLBan/ThemDichVu', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    maBan: this.currentTableId,
+                    maDV: maDV,
+                    soLuong: soLuong
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (window.Toast) Toast.success(result.message);
+                this.closeModal();
+                setTimeout(() => {
+                    this.showDetail(this.currentTableId);
+                }, 300);
+            } else {
+                if (window.Toast) Toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi thêm dịch vụ');
+        }
+    },
+
     // Bắt đầu chơi
     start: async function (maBan) {
         const customerId = prompt('Nhập mã khách hàng (để trống nếu là khách lẻ):');
         const maKH = customerId && customerId.trim() !== '' ? parseInt(customerId) : null;
 
         try {
-            const response = await fetch('/Home/BatDauChoi', {
+            const response = await fetch('/QLBan/BatDauChoi', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,7 +265,7 @@
         }
 
         try {
-            const response = await fetch('/Home/KetThucChoi', {
+            const response = await fetch('/QLBan/KetThucChoi', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -135,11 +277,10 @@
 
             if (result.success) {
                 if (window.Toast) Toast.success(result.message);
-                // Redirect sang trang thanh toán nếu có
                 if (result.hoaDonId) {
                     setTimeout(() => {
-                        window.location.href = `/Home/ThanhToan?maHD=${result.hoaDonId}`;
-                    }, 1000);
+                        this.showPaymentPanel(result.hoaDonId);
+                    }, 500);
                 } else {
                     setTimeout(() => location.reload(), 1000);
                 }
@@ -152,9 +293,104 @@
         }
     },
 
-    // Thêm dịch vụ
-    addService: function (maBan) {
-        openAddServiceModal(maBan);
+    // Hiển thị panel thanh toán trong modal
+    showPaymentPanel: async function (hoaDonId) {
+        try {
+            console.log('Loading payment panel for invoice:', hoaDonId);
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (!modalOverlay) {
+                console.error('Modal overlay not found');
+                return;
+            }
+
+            // Show loading state
+            modalOverlay.innerHTML = `
+                <div class="modal-content payment-modal">
+                    <div class="loading-state" style="text-align: center; padding: 40px;">
+                        <div class="spinner" style="margin: 0 auto 20px;"></div>
+                        <p>Đang tải thông tin thanh toán...</p>
+                    </div>
+                </div>
+            `;
+            modalOverlay.classList.add('active');
+
+            const response = await fetch(`/QLBan/PanelThanhToan?maHD=${hoaDonId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server error:', response.status, errorText);
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const html = await response.text();
+
+            // Wrap content in modal structure
+            modalOverlay.innerHTML = `
+                <div class="modal-content payment-modal">
+                    ${html}
+                </div>
+            `;
+
+            console.log('✅ Payment panel loaded successfully');
+        } catch (error) {
+            console.error('❌ Error loading payment panel:', error);
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) {
+                modalOverlay.innerHTML = `
+                    <div class="modal-content payment-modal">
+                        <div class="error-state" style="text-align: center; padding: 40px;">
+                            <div class="error-icon" style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                            <h4 style="color: #dc3545; margin-bottom: 10px;">Không thể tải panel thanh toán</h4>
+                            <p style="font-size: 14px; color: #6c757d; margin: 10px 0;">${error.message}</p>
+                            <button class="btn btn-primary" onclick="TableManager.closeModal()">Đóng</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (window.Toast) {
+                Toast.error('Không thể tải panel thanh toán. Vui lòng thử lại.');
+            }
+        }
+    },
+
+    // Xác nhận thanh toán
+    confirmPayment: async function (hoaDonId, phuongThuc) {
+        try {
+            const tienKhachDua = document.getElementById('tienKhachDua')?.value || 0;
+
+            const response = await fetch('/QLBan/XacNhanThanhToan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    maHD: hoaDonId,
+                    phuongThucThanhToan: phuongThuc,
+                    tienKhachDua: parseFloat(tienKhachDua)
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (window.Toast) Toast.success(result.message);
+                this.closeModal();
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (window.Toast) Toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi thanh toán');
+        }
     },
 
     // Xác nhận đặt bàn
@@ -164,7 +400,7 @@
         }
 
         try {
-            const response = await fetch('/Home/XacNhanDatBan', {
+            const response = await fetch('/QLBan/XacNhanDatBan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,13 +422,158 @@
         }
     },
 
-    // Lọc theo khu vực - FIXED
+    // Chỉnh sửa bàn - hiển thị trong modal
+    editTable: async function (maBan) {
+        try {
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (!modalOverlay) {
+                console.error('Modal overlay not found');
+                return;
+            }
+
+            // Show loading
+            modalOverlay.innerHTML = `
+                <div class="modal-content edit-modal">
+                    <div class="loading-state" style="text-align: center; padding: 40px;">
+                        <div class="spinner" style="margin: 0 auto 20px;"></div>
+                        <p>Đang tải thông tin...</p>
+                    </div>
+                </div>
+            `;
+            modalOverlay.classList.add('active');
+
+            const response = await fetch(`/QLBan/PanelChinhSuaBan?maBan=${maBan}`);
+            if (!response.ok) throw new Error('Không thể tải panel chỉnh sửa');
+
+            const html = await response.text();
+
+            // Wrap content in modal structure
+            modalOverlay.innerHTML = `
+                <div class="modal-content edit-modal">
+                    ${html}
+                </div>
+            `;
+
+        } catch (error) {
+            console.error('Error:', error);
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) {
+                modalOverlay.innerHTML = `
+                    <div class="modal-content edit-modal">
+                        <div class="error-state" style="text-align: center; padding: 40px;">
+                            <div class="error-icon" style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                            <p style="color: #dc3545; font-weight: 600;">Không thể tải panel chỉnh sửa</p>
+                            <button class="btn btn-primary" onclick="TableManager.closeModal()">Đóng</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (window.Toast) Toast.error('Không thể tải panel chỉnh sửa');
+        }
+    },
+
+    // Lưu chỉnh sửa bàn
+    saveEditTable: async function (maBan) {
+        try {
+            const gioBatDau = document.getElementById('gioBatDau')?.value;
+
+            const response = await fetch('/QLBan/LuuChinhSuaBan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    maBan: maBan,
+                    gioBatDau: gioBatDau
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (window.Toast) Toast.success(result.message);
+                this.closeModal();
+                setTimeout(() => {
+                    this.showDetail(maBan);
+                }, 300);
+            } else {
+                if (window.Toast) Toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi lưu');
+        }
+    },
+
+    // Xóa dịch vụ
+    removeService: async function (chiTietId, maBan) {
+        if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/QLBan/XoaDichVu', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: chiTietId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (window.Toast) Toast.success(result.message);
+                // Reload the edit panel in modal
+                setTimeout(() => {
+                    this.editTable(maBan);
+                }, 300);
+            } else {
+                if (window.Toast) Toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi xóa');
+        }
+    },
+
+    // Xóa bàn (hủy đặt bàn)
+    deleteTable: async function (maBan) {
+        if (!confirm('Bạn có chắc muốn hủy đặt bàn này?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/QLBan/HuyDatBan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ maBan })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (window.Toast) Toast.success(result.message);
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (window.Toast) Toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra');
+        }
+    },
+
+    // Lọc theo khu vực
     filterByArea: function (area, event) {
         console.log('🔍 Filter by area:', area);
         this.currentArea = area;
         this.applyFilters();
 
-        // Cập nhật UI
         const areaFilters = document.getElementById('areaFilters');
         if (areaFilters) {
             areaFilters.querySelectorAll('.filter-btn').forEach(btn => {
@@ -205,13 +586,12 @@
         }
     },
 
-    // Lọc theo trạng thái - FIXED
+    // Lọc theo trạng thái
     filterByStatus: function (status, event) {
         console.log('🔍 Filter by status:', status);
         this.currentStatus = status;
         this.applyFilters();
 
-        // Cập nhật UI
         const statusFilters = document.getElementById('statusFilters');
         if (statusFilters) {
             statusFilters.querySelectorAll('.filter-btn').forEach(btn => {
@@ -224,37 +604,50 @@
         }
     },
 
-    // Áp dụng bộ lọc - IMPROVED
+    // Lọc theo loại bàn
+    filterByTableType: function (tableType, event) {
+        console.log('🔍 Filter by table type:', tableType);
+        this.currentTableType = tableType;
+        this.applyFilters();
+
+        const typeFilters = document.getElementById('tableTypeFilters');
+        if (typeFilters) {
+            typeFilters.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+    },
+
+    // Áp dụng bộ lọc
     applyFilters: function () {
-        console.log('🎯 Applying filters - Area:', this.currentArea, 'Status:', this.currentStatus);
+        console.log('🎯 Applying filters - Area:', this.currentArea, 'Status:', this.currentStatus, 'Type:', this.currentTableType);
 
         const cards = document.querySelectorAll('.table-card');
         let visibleCount = 0;
-        let hiddenCount = 0;
 
         cards.forEach(card => {
             const cardArea = card.getAttribute('data-area');
             const cardStatus = card.getAttribute('data-status');
-            const tableName = card.querySelector('.table-name')?.textContent;
-
-            // Debug mỗi card
-            // console.log(`Card: ${tableName}, Area: "${cardArea}", Status: "${cardStatus}"`);
+            const cardType = card.getAttribute('data-table-type');
 
             const areaMatch = this.currentArea === 'all' || cardArea === this.currentArea;
             const statusMatch = this.currentStatus === 'all' || cardStatus === this.currentStatus;
+            const typeMatch = this.currentTableType === 'all' || cardType === this.currentTableType;
 
-            if (areaMatch && statusMatch) {
+            if (areaMatch && statusMatch && typeMatch) {
                 card.style.display = 'block';
                 visibleCount++;
             } else {
                 card.style.display = 'none';
-                hiddenCount++;
             }
         });
 
-        console.log(`✅ Visible: ${visibleCount}, Hidden: ${hiddenCount}, Total: ${cards.length}`);
+        console.log(`✅ Visible: ${visibleCount}, Total: ${cards.length}`);
 
-        // Hiển thị thông báo nếu không có kết quả
         const tablesGrid = document.getElementById('tablesGrid');
         if (tablesGrid) {
             let emptyMessage = tablesGrid.querySelector('.filter-empty-message');
@@ -282,7 +675,7 @@
         }
     },
 
-    // Tìm kiếm - IMPROVED
+    // Tìm kiếm
     search: function () {
         const searchInput = document.getElementById('searchTables');
         if (!searchInput) {
@@ -297,7 +690,6 @@
         let foundCount = 0;
 
         if (searchValue === '') {
-            // Nếu search rỗng, apply lại filters
             this.applyFilters();
             return;
         }
@@ -306,16 +698,14 @@
             const tableName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
             const cardArea = card.getAttribute('data-area');
             const cardStatus = card.getAttribute('data-status');
+            const cardType = card.getAttribute('data-table-type');
 
-            // Kiểm tra search match
             const searchMatch = tableName.includes(searchValue);
-
-            // Kiểm tra filter match
             const areaMatch = this.currentArea === 'all' || cardArea === this.currentArea;
             const statusMatch = this.currentStatus === 'all' || cardStatus === this.currentStatus;
+            const typeMatch = this.currentTableType === 'all' || cardType === this.currentTableType;
 
-            // Hiển thị nếu match cả 3 điều kiện
-            if (searchMatch && areaMatch && statusMatch) {
+            if (searchMatch && areaMatch && statusMatch && typeMatch) {
                 card.style.display = 'block';
                 foundCount++;
             } else {
@@ -324,85 +714,284 @@
         });
 
         console.log(`✅ Found ${foundCount} cards matching "${searchValue}"`);
+    },
+
+    // Mở modal đặt bàn
+    openReservationModal: async function () {
+        try {
+            const response = await fetch('/QLBan/PanelDatBan');
+            if (!response.ok) throw new Error('Không thể tải form đặt bàn');
+
+            const html = await response.text();
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) {
+                modalOverlay.innerHTML = html;
+                modalOverlay.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Không thể tải form đặt bàn');
+        }
+    },
+
+    confirmReservationBooking: async function () {
+        try {
+            const maBan = document.getElementById('reservationTable')?.value;
+            const date = document.getElementById('reservationDate')?.value;
+            const startTime = document.getElementById('startTime')?.value;
+            const endTime = document.getElementById('endTime')?.value;
+            const tenKhach = document.getElementById('customerName')?.value;
+            const sdt = document.getElementById('customerPhone')?.value;
+            const email = document.getElementById('customerEmail')?.value;
+            const soNguoi = document.getElementById('numberOfPeople')?.value;
+            const ghiChu = document.getElementById('reservationNote')?.value;
+
+            // Validation
+            if (!maBan || !date || !startTime || !endTime || !tenKhach || !sdt) {
+                if (window.Toast) Toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+                return;
+            }
+
+            // Tạo datetime string
+            const gioBatDau = `${date}T${startTime}`;
+            const gioKetThuc = `${date}T${endTime}`;
+
+            // Kiểm tra giờ kết thúc phải sau giờ bắt đầu
+            const start = new Date(gioBatDau);
+            const end = new Date(gioKetThuc);
+
+            // Handle case where end time is past midnight
+            if (end <= start) {
+                end.setDate(end.getDate() + 1);
+            }
+
+            if (end <= start) {
+                if (window.Toast) Toast.error('Giờ kết thúc phải sau giờ bắt đầu');
+                return;
+            }
+
+            const response = await fetch('/QLBan/TaoDatBan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    maBan: parseInt(maBan),
+                    thoiGianDat: gioBatDau,
+                    gioKetThuc: end.toISOString().slice(0, 19),
+                    tenKhach: tenKhach,
+                    sdt: sdt,
+                    email: email,
+                    soNguoi: parseInt(soNguoi) || 1,
+                    ghiChu: ghiChu
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (window.Toast) Toast.success(result.message);
+                this.closeModal();
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (window.Toast) Toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi đặt bàn');
+        }
+    },
+
+    // Đóng modal
+    closeModal: function () {
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay) {
+            modalOverlay.classList.remove('active');
+            setTimeout(() => {
+                modalOverlay.innerHTML = '';
+            }, 300);
+        }
     }
 };
 
-// Hàm mở modal thêm dịch vụ
-function openAddServiceModal(maBan) {
-    if (window.Toast) {
-        Toast.info('Chức năng thêm dịch vụ chưa được triển khai đầy đủ.');
-    } else {
-        alert('Chức năng thêm dịch vụ chưa được triển khai đầy đủ.');
-    }
-}
-
-// Hàm mở modal đặt bàn
-function openReservationModal() {
-    if (window.Toast) {
-        Toast.info('Chức năng đặt bàn chưa được triển khai đầy đủ.');
-    } else {
-        alert('Chức năng đặt bàn chưa được triển khai đầy đủ.');
-    }
-}
-
-// --- BẮT ĐẦU PHẦN SỬA LỖI ---
+// Enhanced styles
 (function () {
-    // Kiểm tra nếu thẻ style cho TableManager đã tồn tại để tránh lỗi "already been declared"
     if (document.getElementById('table-manager-styles')) {
         return;
     }
 
     const style = document.createElement('style');
-    style.id = 'table-manager-styles'; // Thêm ID để kiểm tra ở lần load sau
+    style.id = 'table-manager-styles';
     style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+
+        .table-card.selected {
+            border: 3px solid #3b82f6 !important;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
+            transform: translateY(-5px);
         }
-    }
 
-    /* ... Giữ nguyên toàn bộ nội dung CSS còn lại ... */
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
 
-    /* Thêm CSS cho trạng thái SELECTED trong _TableCard.cshtml (Nếu chưa có trong index.css) */
-    .table-card.selected {
-        border: 3px solid #3b82f6 !important;
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
-        transform: translateY(-5px);
-    }
-    .table-card.selected::after {
-        /* ... Giữ nguyên CSS cho animation pulse ... */
-    }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 20px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-    /* Loading State */
-    .loading-state { /* ... */ }
-    .spinner { /* ... */ }
-    @keyframes spin { /* ... */ }
-    .loading-state p { /* ... */ }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
-    /* Error State */
-    .error-state { /* ... */ }
-    .error-icon { /* ... */ }
-    .error-state p { /* ... */ }
+        .error-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #dc3545;
+        }
 
-    /* Đảm bảo right-panel luôn hiển thị */
-    .right-panel {
-        display: flex !important;
-        visibility: visible !important;
-    }
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
 
-    .panel-body {
-        display: block !important;
-    }
+        .right-panel {
+            display: flex !important;
+            visibility: visible !important;
+        }
+
+        .panel-body {
+            display: block !important;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Modal Content Variants */
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Service Modal - Wider */
+        .service-modal {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        /* Payment Modal - Medium */
+        .payment-modal {
+            width: 100%;
+            max-width: 600px;
+            padding: 0;
+        }
+
+        /* Edit Modal - Medium */
+        .edit-modal {
+            width: 100%;
+            max-width: 600px;
+            padding: 0;
+        }
+
+        /* Close button for modals */
+        .btn-close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .btn-close-modal:hover {
+            background: #e9ecef;
+            transform: rotate(90deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .modal-content {
+                max-width: 100%;
+                max-height: 95vh;
+                margin: 10px;
+            }
+
+            .service-modal,
+            .payment-modal,
+            .edit-modal {
+                max-width: 100%;
+            }
+        }
     `;
     document.head.appendChild(style);
 })();
-// --- KẾT THÚC PHẦN SỬA LỖI ---
-document.head.appendChild(style);
 
 // Khởi tạo khi trang load
 document.addEventListener('DOMContentLoaded', function () {
@@ -411,19 +1000,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Right panel:', document.querySelector('.right-panel'));
     console.log('Table cards:', document.querySelectorAll('.table-card').length);
 
-    // Debug: Log tất cả data attributes
-    document.querySelectorAll('.table-card').forEach((card, index) => {
-        if (index < 3) { // Chỉ log 3 card đầu
-            console.log(`Card ${index + 1}:`, {
-                name: card.querySelector('.table-name')?.textContent,
-                area: card.getAttribute('data-area'),
-                status: card.getAttribute('data-status'),
-                id: card.getAttribute('data-table-id')
-            });
-        }
-    });
-
-    // Tự động load chi tiết bàn đầu tiên (nếu có)
+    // Tự động load chi tiết bàn đầu tiên
     const firstCard = document.querySelector('.table-card');
     if (firstCard) {
         const tableId = firstCard.getAttribute('data-table-id');
@@ -433,15 +1010,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 TableManager.showDetail(parseInt(tableId));
             }, 500);
         }
-    } else {
-        console.log('No table cards found on page');
     }
 
     // Apply initial filters
     TableManager.applyFilters();
 });
 
-// Export để sử dụng global
+// Export
 window.TableManager = TableManager;
 
 console.log('✅ TableManager script loaded successfully');

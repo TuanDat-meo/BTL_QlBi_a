@@ -25,9 +25,11 @@ namespace BTL_QlBi_a.Models.Entities
 
         public int? MaKH { get; set; }
 
-        public int ViTriX { get; set; } = 0;
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? ViTriX { get; set; }
 
-        public int ViTriY { get; set; } = 0;
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? ViTriY { get; set; }
 
         [MaxLength(255)]
         public string? GhiChu { get; set; }

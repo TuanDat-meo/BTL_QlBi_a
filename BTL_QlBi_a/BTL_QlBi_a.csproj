@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <Folder Include="resources\" />
-	  <Folder Include="wwwroot\asset\css\" />
+    <Folder Include="wwwroot\asset\img\tables\" />
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 

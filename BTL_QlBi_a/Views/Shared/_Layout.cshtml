@@ -4,6 +4,7 @@
     // Kiểm tra session MaNV
     if (Context.Session.GetInt32("MaNV") == null)
     {
+        // Redirect về login
         Context.Response.Redirect("/Account/Login");
         return;
     }
