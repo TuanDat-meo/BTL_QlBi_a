@@ -1,0 +1,522 @@
+﻿/* ==================== PAYMENT PANEL ==================== */
+.payment-panel-wrapper {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.payment-modal {
+    width: 100%;
+    max-width: 600px;
+    padding: 0;
+}
+
+/* ==================== PANEL HEADER ==================== */
+.payment-panel-wrapper .panel-header {
+    padding: 20px;
+    border-bottom: 2px solid #e9ecef;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.payment-panel-wrapper .panel-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.payment-panel-wrapper .btn-close-menu {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+    .payment-panel-wrapper .btn-close-menu:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg);
+    }
+
+/* ==================== PANEL BODY ==================== */
+.payment-panel-wrapper .panel-body-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .payment-panel-wrapper .panel-body-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .payment-panel-wrapper .panel-body-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .payment-panel-wrapper .panel-body-scroll::-webkit-scrollbar-thumb {
+        background: #c0c4cc;
+        border-radius: 10px;
+    }
+
+        .payment-panel-wrapper .panel-body-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0a4a8;
+        }
+
+/* ==================== INVOICE SECTION ==================== */
+.invoice-section {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.invoice-header h4 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.invoice-date {
+    opacity: 0.9;
+    font-size: 13px;
+    margin: 0;
+}
+
+.invoice-info {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+    .invoice-info .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+    }
+
+/* ==================== BILL DETAILS ==================== */
+.bill-details {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.bill-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    font-size: 15px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+    .bill-row:last-child {
+        border-bottom: none;
+    }
+
+    .bill-row.total {
+        border-top: 2px solid #2c3e50;
+        margin-top: 15px;
+        padding-top: 20px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .bill-row.discount {
+        color: #dc3545;
+    }
+
+.bill-amount {
+    font-weight: 600;
+}
+
+.bill-total {
+    color: #28a745;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* ==================== SERVICE BREAKDOWN ==================== */
+.service-breakdown {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.breakdown-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* ==================== PAYMENT METHOD ==================== */
+.payment-method-section {
+    margin: 25px 0;
+}
+
+    .payment-method-section .section-subtitle {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.payment-btn {
+    padding: 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+    .payment-btn:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .payment-btn.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+.payment-icon {
+    font-size: 32px;
+}
+
+/* ==================== PAYMENT DETAILS PANEL ==================== */
+.payment-details-panel {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.payment-panel-wrapper .form-group {
+    margin-bottom: 15px;
+}
+
+.payment-panel-wrapper .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.payment-panel-wrapper .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+    .payment-panel-wrapper .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+.money-input {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* ==================== CHANGE DISPLAY ==================== */
+.change-display {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.change-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.change-amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: #28a745;
+}
+
+/* ==================== QR CODE ==================== */
+.qr-code-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.qr-placeholder {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+.qr-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+.qr-amount {
+    font-size: 28px;
+    font-weight: 700;
+    color: #667eea;
+    margin: 15px 0;
+}
+
+/* ==================== BANK INFO ==================== */
+.bank-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+    .bank-info p {
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+/* ==================== ACTION SECTION ==================== */
+.payment-panel-wrapper .action-section {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.payment-panel-wrapper .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.payment-panel-wrapper .btn-block {
+    width: 100%;
+}
+
+.payment-panel-wrapper .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+    .payment-panel-wrapper .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+.payment-panel-wrapper .btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+    .payment-panel-wrapper .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    .payment-modal {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 12px;
+        margin: 10px;
+    }
+
+    .payment-panel-wrapper .panel-header {
+        padding: 16px;
+    }
+
+    .payment-panel-wrapper .panel-title {
+        font-size: 18px;
+    }
+
+    .payment-panel-wrapper .panel-body-scroll {
+        padding: 16px;
+    }
+
+    .invoice-section {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .invoice-header h4 {
+        font-size: 18px;
+    }
+
+    .bill-details {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .bill-row {
+        font-size: 14px;
+    }
+
+        .bill-row.total {
+            font-size: 18px;
+        }
+
+    .bill-total {
+        font-size: 20px;
+    }
+
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-btn {
+        padding: 16px;
+    }
+
+    .payment-icon {
+        font-size: 28px;
+    }
+
+    .payment-details-panel {
+        padding: 16px;
+    }
+
+    .change-amount {
+        font-size: 28px;
+    }
+
+    .qr-placeholder {
+        padding: 30px;
+    }
+
+    .qr-icon {
+        font-size: 48px;
+    }
+
+    .qr-amount {
+        font-size: 24px;
+    }
+
+    .payment-panel-wrapper .action-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-panel-wrapper .panel-header {
+        padding: 12px;
+    }
+
+    .payment-panel-wrapper .btn-close-menu {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .invoice-section {
+        padding: 12px;
+    }
+
+    .bill-details {
+        padding: 12px;
+    }
+
+    .payment-btn {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .change-display {
+        padding: 15px;
+    }
+
+    .change-amount {
+        font-size: 24px;
+    }
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.payment-panel-wrapper {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+    .payment-panel-wrapper .panel-header,
+    .payment-panel-wrapper .action-section,
+    .payment-methods,
+    .payment-details-panel {
+        display: none !important;
+    }
+
+    .invoice-section,
+    .bill-details {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
