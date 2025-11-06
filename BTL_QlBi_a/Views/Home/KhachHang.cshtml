@@ -1,5 +1,222 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.KhachHang>
+
+<div class="section-header">
+    <h2 class="section-title">Quản lý khách hàng</h2>
+    <div class="action-buttons">
+        <button class="btn btn-primary" onclick="openAddCustomerModal()">➕ Thêm khách hàng</button>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-row">
+        <div class="filter-group">
+            <span class="filter-label">Hạng thành viên:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all" onclick="filterCustomers('all')">Tất cả</button>
+                <button class="filter-btn" data-filter="Dong" onclick="filterCustomers('Dong')">🥉 Đồng</button>
+                <button class="filter-btn" data-filter="Bac" onclick="filterCustomers('Bac')">🥈 Bạc</button>
+                <button class="filter-btn" data-filter="Vang" onclick="filterCustomers('Vang')">🥇 Vàng</button>
+                <button class="filter-btn" data-filter="BachKim" onclick="filterCustomers('BachKim')">💎 Bạch kim</button>
+            </div>
+        </div>
+    </div>
+    <div class="filter-row">
+        <input type="text" class="search-input" placeholder="🔍 Tìm theo tên, SĐT..." id="searchCustomers" onkeyup="searchCustomers()">
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="tables-grid" id="customersGrid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        @foreach (var kh in Model)
+        {
+            string rankIcon = kh.HangTV switch
+            {
+                BTL_QlBi_a.Models.Entities.HangThanhVien.BachKim => "💎",
+                BTL_QlBi_a.Models.Entities.HangThanhVien.Vang => "🥇",
+                BTL_QlBi_a.Models.Entities.HangThanhVien.Bac => "🥈",
+                _ => "🥉"
+            };
+
+            string rankColor = kh.HangTV switch
+            {
+                BTL_QlBi_a.Models.Entities.HangThanhVien.BachKim => "#b9f2ff",
+                BTL_QlBi_a.Models.Entities.HangThanhVien.Vang => "#fff9e6",
+                BTL_QlBi_a.Models.Entities.HangThanhVien.Bac => "#f0f0f0",
+                _ => "#ffe4cc"
+            };
+
+            <div class="table-card available" data-rank="@kh.HangTV" style="background: linear-gradient(135deg, white, @rankColor);">
+                <span class="vip-badge" style="background: @rankColor; color: #000;">@rankIcon @kh.HangTV</span>
+
+                <div class="user-avatar" style="width: 60px; height: 60px; margin: 15px auto; font-size: 24px;">
+                    @kh.TenKH.Substring(0, 1)
+                </div>
+
+                <div class="table-name">@kh.TenKH</div>
+                <div class="table-info">📱 @kh.SDT</div>
+
+                @if (!string.IsNullOrEmpty(kh.Email))
+                {
+                    <div class="table-info">✉️ @kh.Email</div>
+                }
+
+                <div class="info-card" style="margin: 10px 0; padding: 8px;">
+                    <div class="info-row" style="padding: 4px 0;">
+                        <span class="info-label">Điểm tích lũy:</span>
+                        <span class="info-value" style="color: #e74c3c; font-weight: 700;">@kh.DiemTichLuy</span>
+                    </div>
+                    <div class="info-row" style="padding: 4px 0;">
+                        <span class="info-label">Tổng chi tiêu:</span>
+                        <span class="info-value">@kh.TongChiTieu.ToString("N0") đ</span>
+                    </div>
+                </div>
+
+                @if (kh.LanDenCuoi.HasValue)
+                {
+                    <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
+                }
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="viewCustomer(@kh.MaKH)">
+                        👁️ Chi tiết
+                    </button>
+                    <button class="btn btn-secondary" onclick="editCustomer(@kh.MaKH)">
+                        ✏️ Sửa
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="info-card" style="margin-top: 20px;">
+        <div class="info-row">
+            <span class="info-label">Tổng khách hàng:</span>
+            <span class="info-value">@Model.Count() khách</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tổng điểm tích lũy:</span>
+            <span class="info-value">@Model.Sum(k => k.DiemTichLuy) điểm</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tổng chi tiêu:</span>
+            <span class="info-value">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
+        </div>
+    </div>
 }
+else
+{
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>Chưa có khách hàng</h3>
+        <p class="empty-text">Thêm khách hàng đầu tiên vào hệ thống</p>
+    </div>
+}
+
+<script>
+    function filterCustomers(rank) {
+        const cards = document.querySelectorAll('#customersGrid .table-card');
+        const buttons = document.querySelectorAll('.filter-btn[data-filter]');
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.filter-btn[data-filter="' + rank + '"]')?.classList.add('active');
+
+        const searchValue = document.getElementById('searchCustomers').value.toLowerCase();
+
+        cards.forEach(card => {
+            const cardRank = card.dataset.rank;
+            const customerInfo = card.textContent.toLowerCase();
+
+            const rankMatch = (rank === 'all' || cardRank === rank);
+            const searchMatch = (searchValue === '' || customerInfo.includes(searchValue));
+
+            card.style.display = (rankMatch && searchMatch) ? 'block' : 'none';
+        });
+    }
+
+    function searchCustomers() {
+        filterCustomers(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
+    }
+
+    async function viewCustomer(maKH) {
+        const detailPanel = document.getElementById('detailPanel');
+        if (!detailPanel) {
+            console.error('Không tìm thấy #detailPanel');
+            return;
+        }
+
+        detailPanel.innerHTML = '<div class="empty-text">Đang tải chi tiết khách hàng...</div>';
+
+        const rightPanel = document.querySelector('.right-panel');
+        if (rightPanel) {
+            rightPanel.classList.add('active');
+        }
+
+        try {
+            const response = await fetch('/Home/ChiTietKhachHang?maKH=' + maKH);
+
+            if (!response.ok) {
+                detailPanel.innerHTML = '<div class="empty-state">Lỗi khi tải dữ liệu khách hàng.</div>';
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Đưa HTML vào panel
+            const html = await response.text();
+            detailPanel.innerHTML = html;
+
+        } catch (error) {
+            console.error('Lỗi fetch ChiTietKhachHang:', error);
+            detailPanel.innerHTML = '<div class="empty-state">Không thể tải chi tiết.</div>';
+        }
+    }
+
+    function openAddCustomerModal() {
+        // alert('Mở form thêm khách hàng mới');
+        openCustomerModal(0);
+
+    }
+
+    function editCustomer(maKH) {
+        // alert('Sửa thông tin khách hàng: ' + maKH);
+        openCustomerModal(maKH);
+    }
+
+       async function openCustomerModal(maKH) {
+        let url = '/Home/TaiFormKhachHang';
+        let title = '';
+
+        if (maKH > 0) {
+            url += '?maKH=' + maKH;
+            title = 'Sửa thông tin khách hàng';
+        } else {
+            title = 'Thêm khách hàng mới';
+        }
+
+        try {
+            // Hiển thị loading (tạm thời)
+            // (Chúng ta gọi hàm 'openModal' có sẵn của bạn)
+            openModal(title, '<div class="empty-text">Đang tải...</div>');
+
+            // 1. Gọi Controller để lấy HTML của form
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Tải form thất bại');
+            }
+            const formHtml = await response.text();
+
+            // 2. Lấy được HTML rồi, gọi lại hàm openModal
+            //    với nội dung là cái form
+            openModal(title, formHtml);
+
+        } catch (error) {
+            console.error('Lỗi khi mở modal:', error);
+            // Báo lỗi cũng dùng hàm openModal
+            openModal('Lỗi', '<div class="empty-state">Không thể tải form.</div>');
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        filterCustomers('all');
+    });
+</script>

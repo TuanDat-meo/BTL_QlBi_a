@@ -162,7 +162,6 @@
                     {
                         @foreach (var item in Model.ChiTietHoaDons)
                         {
-                            // === ĐÂY LÀ CHỖ SỬA LỖI ===
                             // Tính đơn giá = Thành Tiền / Số Lượng
                             var donGia = item.SoLuong > 0 ? ((item.ThanhTien ?? 0) / item.SoLuong) : 0;
 

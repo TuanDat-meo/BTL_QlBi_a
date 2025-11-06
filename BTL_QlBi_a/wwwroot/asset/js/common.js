@@ -194,6 +194,38 @@ spinnerStyle.textContent = `
 `;
 document.head.appendChild(spinnerStyle);
 
+async function saveCustomerForm(event) {
+    event.preventDefault(); // Ngăn form submit theo cách cũ
+
+    const form = document.getElementById('customerForm');
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('/Home/LuuKhachHang', {
+            method: 'POST',
+            body: formData,
+            // Header AntiForgeryToken (nếu bạn dùng .NET 6+ thì ko cần)
+            // headers: {
+            //     'RequestVerificationToken': formData.get('__RequestVerificationToken')
+            // }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Lưu thành công!');
+            closeModal(); // Đóng modal
+            location.reload(); // TẢI LẠI TRANG để cập nhật danh sách
+        } else {
+            alert('Đã xảy ra lỗi: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Lỗi khi submit form:', error);
+        alert('Lỗi kết nối. Không thể lưu.');
+    }
+}
+
+
 // Export to window for global access
 window.API = API;
 window.Toast = Toast;
