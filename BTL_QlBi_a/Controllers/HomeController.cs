@@ -31,10 +31,10 @@ namespace BTL_QlBi_a.Controllers
 
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
         }
-        public IActionResult Index()
+        public IActionResult BanBia()
         {
             // Redirect to QLBan controller
-            return RedirectToAction("Index", "QLBan");
+            return RedirectToAction("BanBia", "QLBan");
         }
         public async Task<IActionResult> DichVu()
         {

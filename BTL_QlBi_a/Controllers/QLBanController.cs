@@ -88,7 +88,7 @@ namespace BTL_QlBi_a.Controllers
 
         #region Views & Main Page
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> BanBia()
         {
             var tenNhom = HttpContext.Session.GetString("TenNhom") ?? "Nhân viên";
             ViewBag.TenNhom = tenNhom;
@@ -102,7 +102,7 @@ namespace BTL_QlBi_a.Controllers
                 .Include(b => b.KhuVuc)
                 .OrderBy(b => b.MaBan)
                 .ToListAsync();
-            return View("~/Views/Home/Index.cshtml", danhSachBan);
+            return View("~/Views/Home/BanBia.cshtml", danhSachBan);
         }
 
         #endregion
@@ -451,7 +451,6 @@ namespace BTL_QlBi_a.Controllers
         #endregion
 
         #region Đặt bàn
-
         // GET: Panel đặt bàn
         [HttpGet]
         public async Task<IActionResult> PanelDatBan()

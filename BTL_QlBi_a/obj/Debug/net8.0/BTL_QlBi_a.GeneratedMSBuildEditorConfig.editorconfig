@@ -38,6 +38,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxTaWdudXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/BanBia.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCYW5CaWEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/BangGia.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCYW5nR2lhLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -52,10 +56,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/HoaDon.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxIb2FEb24uY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/KhachHang.cshtml]

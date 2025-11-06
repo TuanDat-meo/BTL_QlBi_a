@@ -1000,7 +1000,6 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Right panel:', document.querySelector('.right-panel'));
     console.log('Table cards:', document.querySelectorAll('.table-card').length);
 
-    // Tự động load chi tiết bàn đầu tiên
     const firstCard = document.querySelector('.table-card');
     if (firstCard) {
         const tableId = firstCard.getAttribute('data-table-id');
@@ -1012,11 +1011,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Apply initial filters
     TableManager.applyFilters();
 });
 
 // Export
 window.TableManager = TableManager;
-
 console.log('✅ TableManager script loaded successfully');

@@ -34,6 +34,7 @@ wwwroot\asset\img\phanbia.jpg
 wwwroot\asset\img\service.svg
 wwwroot\asset\img\stingdau.jpg
 wwwroot\asset\img\table.svg
+wwwroot\asset\img\tables\ban_4ab6af38-ec08-42e9-8e1e-b84bfa18f9a4.webp
 wwwroot\asset\img\tables\ban_5faed4e1-ab57-438a-b495-16d930dab974.png
 wwwroot\asset\img\thong_ke.svg
 wwwroot\asset\img\tiger.png
@@ -47,6 +48,7 @@ wwwroot\asset\js\qlBan\datBan.js
 wwwroot\asset\js\qlBan\menuDichVu.js
 wwwroot\asset\js\qlBan\TableDiagram.js
 wwwroot\asset\js\qlBan\thanhToan.js
+wwwroot\asset\js\quanlyban.js
 wwwroot\asset\js\sidebar.js
 wwwroot\favicon.ico
 wwwroot\js\site.js
@@ -107,4 +109,3 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\asset\js\quanlyban.js
