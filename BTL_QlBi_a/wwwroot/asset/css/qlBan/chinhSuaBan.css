@@ -80,9 +80,9 @@
 /* ==================== EDIT SECTIONS ==================== */
 .edit-section {
     background: #f8f9fa;
-    padding: 20px;
+    padding: 15px;
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 2px solid #e9ecef;
 }
 
@@ -108,7 +108,7 @@
 
 .edit-panel-wrapper .form-control {
     width: 100%;
-    padding: 12px;
+    padding: 5px;
     border: 2px solid #e9ecef;
     border-radius: 8px;
     font-size: 14px;
@@ -124,9 +124,9 @@
 /* ==================== INFO DISPLAY ==================== */
 .info-display {
     background: white;
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
-    margin: 15px 0;
+    margin: 10px 0;
 }
 
     .info-display .info-row {
@@ -140,15 +140,21 @@
 .service-list-edit {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    max-height: 200px; /* Giới hạn chiều cao */
+    overflow-y: auto; /* Thêm scroll dọc */
+    overflow-x: hidden; /* Ẩn scroll ngang */
+    padding-right: 5px;
+    margin-bottom:15px;
 }
 
 .service-item-edit {
     background: white;
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
     border: 2px solid #e9ecef;
     transition: all 0.3s;
+    margin-bottom: 10px;
 }
 
     .service-item-edit:hover {
@@ -157,7 +163,7 @@
     }
 
 .service-info {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .service-name {
@@ -394,7 +400,7 @@
 
     .edit-section {
         padding: 16px;
-        margin-bottom: 16px;
+        margin-bottom: 10px;
     }
 
     .section-subtitle {

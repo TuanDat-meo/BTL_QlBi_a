@@ -1,13 +1,15 @@
-﻿<div class="modal-overlay" id="modalOverlay">
+﻿<link rel="stylesheet" href="~/asset/css/index.css" />
+<div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <div class="modal-header">
             <h3 class="modal-title" id="modalTitle">Modal</h3>
-            <button class="close-btn" onclick="closeModal()">✕</button>
+            < button class="close-btn" onclick="closeModal()">✕</button>
         </div>
         <div id="modalContent"></div>
     </div>
 </div>
-
+<script src="~/asset/js/qlBan/menuDichVu.js" asp-append-version="true"></script>
+<script src="~/asset/js/qlBan/thanhToan.js" asp-append-version="true"></script>
 <script>
     function closeModal() {
         document.getElementById('modalOverlay').classList.remove('active');

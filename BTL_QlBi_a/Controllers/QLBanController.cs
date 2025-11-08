@@ -21,18 +21,23 @@ namespace BTL_QlBi_a.Controllers
         private async Task LoadHeaderStats()
         {
             var danhSachBan = await _context.BanBia.ToListAsync();
+
+            // Sử dụng client-side evaluation để tránh lỗi LINQ
             ViewBag.BanTrong = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.Trong);
             ViewBag.BanDangChoi = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.DangChoi);
             ViewBag.BanDaDat = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.DaDat);
 
             var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+
             var doanhThuHomNay = await _context.HoaDon
                 .Where(h => h.ThoiGianKetThuc.HasValue &&
-                           h.ThoiGianKetThuc.Value.Date == today &&
+                           h.ThoiGianKetThuc.Value >= today &&
+                           h.ThoiGianKetThuc.Value < tomorrow &&
                            h.TrangThai == TrangThaiHoaDon.DaThanhToan)
-                .SumAsync(h => h.TongTien);
-            ViewBag.DoanhThuHomNay = doanhThuHomNay.ToString("N0") + "đ";
+                .SumAsync(h => (decimal?)h.TongTien) ?? 0;
 
+            ViewBag.DoanhThuHomNay = doanhThuHomNay.ToString("N0") + "đ";
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
         }
 
@@ -151,29 +156,36 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                var danhSachBan = await _context.BanBia
+                // Lấy tất cả bàn trước (không filter trong query)
+                var allBan = await _context.BanBia
                     .Include(b => b.LoaiBan)
                     .Include(b => b.KhuVuc)
                     .Include(b => b.KhachHang)
+                    .ToListAsync();
+
+                // Filter ở client-side để tránh lỗi LINQ
+                var danhSachBan = allBan
                     .Where(b => b.TrangThai != TrangThaiBan.BaoTri)
                     .Select(b => new
                     {
                         maBan = b.MaBan,
                         tenBan = b.TenBan,
-                        khuVuc = b.KhuVuc.TenKhuVuc,
-                        loaiBan = b.LoaiBan.TenLoai,
+                        khuVuc = b.KhuVuc?.TenKhuVuc ?? "",
+                        loaiBan = b.LoaiBan?.TenLoai ?? "",
                         trangThai = b.TrangThai.ToString(),
                         viTriX = b.ViTriX ?? 0,
                         viTriY = b.ViTriY ?? 0,
                         gioBatDau = b.GioBatDau,
-                        khachHang = b.KhachHang != null ? b.KhachHang.TenKH : null
+                        khachHang = b.KhachHang?.TenKH
                     })
-                    .ToListAsync();
+                    .ToList();
 
                 return Json(danhSachBan);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in LayDanhSachBan: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
@@ -192,7 +204,7 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.LoaiBan = loaiBan;
             ViewBag.KhuVuc = khuVuc;
 
-            return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_FormThemBan.cshtml");
+            return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_AddBan.cshtml");
         }
 
         // GET: Form chỉnh sửa bàn
@@ -213,7 +225,7 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.LoaiBan = loaiBan;
             ViewBag.KhuVuc = khuVuc;
 
-            return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_FormChinhSuaBan.cshtml", ban);
+            return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_EditVtriBan.cshtml", ban);
         }
 
         // POST: Thêm bàn mới
@@ -231,8 +243,10 @@ namespace BTL_QlBi_a.Controllers
                 if (request.MaKhuVuc <= 0)
                     return Json(new { success = false, message = "Vui lòng chọn khu vực" });
 
+                var tenBanLower = request.TenBan.ToLower();
                 var banTonTai = await _context.BanBia
-                    .AnyAsync(b => b.TenBan.ToLower() == request.TenBan.ToLower());
+                    .Where(b => b.TenBan.ToLower() == tenBanLower)
+                    .AnyAsync();
 
                 if (banTonTai)
                     return Json(new { success = false, message = "Tên bàn đã tồn tại" });
@@ -260,6 +274,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in ThemBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -277,9 +292,10 @@ namespace BTL_QlBi_a.Controllers
                 if (string.IsNullOrWhiteSpace(request.TenBan))
                     return Json(new { success = false, message = "Vui lòng nhập tên bàn" });
 
+                var tenBanLower = request.TenBan.ToLower();
                 var banTrung = await _context.BanBia
-                    .AnyAsync(b => b.TenBan.ToLower() == request.TenBan.ToLower()
-                                && b.MaBan != request.MaBan);
+                    .Where(b => b.TenBan.ToLower() == tenBanLower && b.MaBan != request.MaBan)
+                    .AnyAsync();
 
                 if (banTrung)
                     return Json(new { success = false, message = "Tên bàn đã tồn tại" });
@@ -305,6 +321,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in CapNhatBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -340,6 +357,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in XoaBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -385,6 +403,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in BatDauChoi: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -409,17 +428,20 @@ namespace BTL_QlBi_a.Controllers
                     return Json(new { success = false, message = "Không tìm thấy hóa đơn" });
 
                 hoaDon.ThoiGianKetThuc = DateTime.Now;
-                var duration = (hoaDon.ThoiGianKetThuc.Value - hoaDon.ThoiGianBatDau.Value).TotalMinutes;
-                hoaDon.ThoiLuongPhut = (int)Math.Ceiling(duration);
 
-                // Làm tròn 15 phút
-                var soPhutLamTron = Math.Ceiling(duration / 15) * 15;
-                var soGio = soPhutLamTron / 60;
+                if (hoaDon.ThoiGianBatDau.HasValue)
+                {
+                    var duration = (hoaDon.ThoiGianKetThuc.Value - hoaDon.ThoiGianBatDau.Value).TotalMinutes;
 
-                if (hoaDon.BanBia?.LoaiBan != null)
-                    hoaDon.TienBan = hoaDon.BanBia.LoaiBan.GiaGio * (decimal)soGio;
-                else
-                    hoaDon.TienBan = 0;
+                    // Làm tròn 15 phút
+                    var soPhutLamTron = Math.Ceiling(duration / 15) * 15;
+                    var soGio = soPhutLamTron / 60;
+
+                    if (hoaDon.BanBia?.LoaiBan != null)
+                        hoaDon.TienBan = hoaDon.BanBia.LoaiBan.GiaGio * (decimal)soGio;
+                    else
+                        hoaDon.TienBan = 0;
+                }
 
                 var chiTiet = await _context.ChiTietHoaDon
                     .Include(ct => ct.DichVu)
@@ -444,6 +466,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in KetThucChoi: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -451,16 +474,21 @@ namespace BTL_QlBi_a.Controllers
         #endregion
 
         #region Đặt bàn
+
         // GET: Panel đặt bàn
         [HttpGet]
         public async Task<IActionResult> PanelDatBan()
         {
-            var danhSachBan = await _context.BanBia
+            var allBan = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhuVuc)
+                .ToListAsync();
+
+            // Filter ở client-side
+            var danhSachBan = allBan
                 .Where(b => b.TrangThai == TrangThaiBan.Trong)
                 .OrderBy(b => b.TenBan)
-                .ToListAsync();
+                .ToList();
 
             return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_PanelDatBan.cshtml", danhSachBan);
         }
@@ -509,6 +537,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in TaoDatBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -558,6 +587,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in XacNhanDatBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -593,6 +623,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in HuyDatBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -615,11 +646,14 @@ namespace BTL_QlBi_a.Controllers
                 var tenNhom = HttpContext.Session.GetString("TenNhom") ?? "Nhân viên";
                 ViewBag.TenNhom = tenNhom;
 
-                var danhSachDV = await _context.DichVu
+                var allDichVu = await _context.DichVu.ToListAsync();
+
+                // Filter ở client-side
+                var danhSachDV = allDichVu
                     .Where(dv => dv.TrangThai == TrangThaiDichVu.ConHang)
                     .OrderBy(dv => dv.Loai)
                     .ThenBy(dv => dv.TenDV)
-                    .ToListAsync();
+                    .ToList();
 
                 return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_MenuDichVu.cshtml", danhSachDV);
             }
@@ -682,6 +716,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in ThemDichVu: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -716,6 +751,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in XoaDichVu: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -760,6 +796,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in CapNhatSoLuongDichVu: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -825,6 +862,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in LuuChinhSuaBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -866,6 +904,7 @@ namespace BTL_QlBi_a.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Error in PanelThanhToan: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return StatusCode(500, new
                 {
                     message = "Lỗi khi tải panel thanh toán",
@@ -880,18 +919,28 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
+                Console.WriteLine($"Received payment request: MaHD={request.MaHD}, Method={request.PhuongThucThanhToan}, Amount={request.TienKhachDua}");
+
                 var hoaDon = await _context.HoaDon
                     .Include(h => h.BanBia)
                     .FirstOrDefaultAsync(h => h.MaHD == request.MaHD);
 
                 if (hoaDon == null)
+                {
+                    Console.WriteLine($"Invoice not found: {request.MaHD}");
                     return Json(new { success = false, message = "Không tìm thấy hóa đơn" });
+                }
+
+                Console.WriteLine($"Invoice found: MaHD={hoaDon.MaHD}, TongTien={hoaDon.TongTien}");
 
                 // Kiểm tra tiền khách đưa nếu là tiền mặt
                 if (request.PhuongThucThanhToan == PhuongThucThanhToan.TienMat)
                 {
                     if (request.TienKhachDua < hoaDon.TongTien)
+                    {
+                        Console.WriteLine($"Insufficient payment: Received={request.TienKhachDua}, Required={hoaDon.TongTien}");
                         return Json(new { success = false, message = "Số tiền khách đưa không đủ" });
+                    }
                 }
 
                 hoaDon.TrangThai = TrangThaiHoaDon.DaThanhToan;
@@ -923,10 +972,13 @@ namespace BTL_QlBi_a.Controllers
 
                 await _context.SaveChangesAsync();
 
+                Console.WriteLine($"Payment completed successfully for invoice {hoaDon.MaHD}");
                 return Json(new { success = true, message = "Thanh toán thành công" });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error in XacNhanThanhToan: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -964,6 +1016,7 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in CapNhatViTriBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -1036,6 +1089,7 @@ namespace BTL_QlBi_a.Controllers
         public int MaHD { get; set; }
         public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
         public decimal TienKhachDua { get; set; }
+        public string? MaGiaoDichQR { get; set; }
     }
 
     public class TaoDatBanRequest

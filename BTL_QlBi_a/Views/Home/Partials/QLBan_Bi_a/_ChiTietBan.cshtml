@@ -1,4 +1,5 @@
 ﻿@model BTL_QlBi_a.Models.Entities.BanBia
+<link href="~/asset/css/qlBan/chiTietBan.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
 @{
     var hoaDon = ViewBag.HoaDon as BTL_QlBi_a.Models.Entities.HoaDon;
     var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>;
@@ -25,7 +26,6 @@
         _ => Model.TrangThai.ToString()
     };
 }
-
 <div class="detail-header">
     <h3 class="detail-title">@Model.TenBan</h3>
     <div class="detail-header-actions">
@@ -61,38 +61,67 @@
 
             <div class="info-row">
                 <span class="info-label">Bắt đầu:</span>
-                <span class="info-value">@hoaDon.ThoiGianBatDau.Value.ToString("HH:mm")</span>
+                <span class="info-value">@hoaDon.ThoiGianBatDau.Value.ToString("HH:mm dd/MM/yyyy")</span>
             </div>
 
             @{
-                var duration = DateTime.Now - hoaDon.ThoiGianBatDau;
-                var soPhutLamTron = Math.Ceiling(duration.Value.TotalMinutes / 15) * 15;
-                var soGio = soPhutLamTron / 60;
-                var tienBanUocTinh = Model.LoaiBan != null ? Model.LoaiBan.GiaGio * (decimal)soGio : 0;
+                // Tính thời gian chơi THỰC TẾ
+                var duration = DateTime.Now - hoaDon.ThoiGianBatDau.Value;
+                var totalMinutes = duration.TotalMinutes;
+
+                // Số giờ thực tế (không làm tròn)
+                var soGioThucTe = totalMinutes / 60;
+
+                // Tính tiền bàn theo thời gian THỰC TẾ
+                var giaGio = Model.LoaiBan?.GiaGio ?? 0;
+                var tienBanThucTe = giaGio * (decimal)soGioThucTe;
+
+                // Hiển thị thời gian
+                var hours = (int)duration.TotalHours;
+                var minutes = duration.Minutes;
             }
 
             <div class="info-row">
                 <span class="info-label">Thời gian:</span>
-                <span class="info-value time-highlight">@((int)duration.Value.TotalHours)h @(duration.Value.Minutes)m</span>
+                <span class="info-value time-highlight">
+                    @hours giờ @minutes phút
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Giá giờ:</span>
+                <span class="info-value">@giaGio.ToString("N0") đ/giờ</span>
             </div>
         </div>
 
         <div class="bill-section">
             <div class="bill-row">
                 <span>Tiền bàn:</span>
-                <span>@tienBanUocTinh.ToString("N0") đ</span>
+                <span>@tienBanThucTe.ToString("N0") đ</span>
             </div>
 
             @{
                 var tongDichVu = chiTiet?.Sum(ct => ct.ThanhTien ?? 0) ?? 0;
-                var tongTienTruocLamTron = tienBanUocTinh + tongDichVu;
+
+                var tongTienTruocLamTron = tienBanThucTe + tongDichVu;
+
                 var tongTienSauLamTron = Math.Ceiling(tongTienTruocLamTron / 1000) * 1000;
+
+                var chenhLech = tongTienSauLamTron - tongTienTruocLamTron;
             }
 
             <div class="bill-row">
                 <span>Dịch vụ:</span>
                 <span>@tongDichVu.ToString("N0") đ</span>
             </div>
+
+            @if (chenhLech > 0)
+            {
+                <div class="bill-row" style="font-size: 0.9em; color: #666;">
+                    <span>Tạm tính:</span>
+                    <span>@tongTienSauLamTron.ToString("N0") đ</span>
+                </div>
+            }
 
             <div class="bill-row total">
                 <span>Tổng cộng:</span>
@@ -103,19 +132,39 @@
         @if (chiTiet != null && chiTiet.Any())
         {
             <div class="service-section">
-                <h4 class="section-subtitle">Dịch vụ đã order:</h4>
+                <h4 class="section-subtitle">Dịch vụ đã order (@chiTiet.Count món):</h4>
                 <div class="service-list">
                     @foreach (var item in chiTiet)
                     {
                         <div class="service-item">
                             <div class="service-info">
                                 <div class="service-name">@item.DichVu?.TenDV</div>
-                                <div class="service-quantity">x@item.SoLuong</div>
+                                <div class="service-quantity">
+                                    @item.SoLuong x @(item.DichVu?.Gia.ToString("N0") ?? "0") đ
+                                </div>
                             </div>
-                            <div class="service-price">@item.ThanhTien?.ToString("N0") đ</div>
+                            <div class="service-actions">
+                                <div class="service-price">@item.ThanhTien?.ToString("N0") đ</div>
+                                @if (isPhucVu || isThuNgan)
+                                {
+                                    <button class="btn-icon-sm btn-danger-icon"
+                                            onclick="TableManager.removeService(@item.ID)"
+                                            title="Xóa">
+                                        ×
+                                    </button>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
+            </div>
+        }
+        else
+        {
+            <div class="service-section">
+                <p style="text-align: center; color: #999; padding: 20px;">
+                    Chưa có dịch vụ nào
+                </p>
             </div>
         }
 
@@ -128,7 +177,7 @@
             }
             @if (isThuNgan)
             {
-                <button class="btn btn-success btn-block" onclick="TableManager.end(@Model.MaBan)">
+                <button class="btn btn-success btn-block" onclick="TableManager.end(@Model.MaBan)" style="margin-top: 8px;">
                     💰 Kết thúc & Thanh toán
                 </button>
             }
@@ -164,6 +213,9 @@
                 <button class="btn btn-success btn-block" onclick="TableManager.confirmReservation(@Model.MaBan)">
                     ✅ Xác nhận đặt bàn
                 </button>
+                <button class="btn btn-danger btn-block" onclick="TableManager.cancelReservation(@Model.MaBan)" style="margin-top: 8px;">
+                    ❌ Hủy đặt bàn
+                </button>
             </div>
         }
     }
@@ -179,9 +231,16 @@
                 <span class="info-value">@(Model.KhuVuc?.TenKhuVuc ?? "Không rõ")</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Giá:</span>
+                <span class="info-label">Giá giờ:</span>
                 <span class="info-value price-highlight">@(Model.LoaiBan?.GiaGio.ToString("N0") ?? "0") đ/giờ</span>
             </div>
+            @if (!string.IsNullOrEmpty(Model.GhiChu))
+            {
+                <div class="info-row">
+                    <span class="info-label">Ghi chú:</span>
+                    <span class="info-value">@Model.GhiChu</span>
+                </div>
+            }
         </div>
 
         @if (isThuNgan || isPhucVu)
@@ -196,258 +255,56 @@
 </div>
 
 <style>
-    .detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #e9ecef;
-        margin-bottom: 20px;
-    }
-
-    .detail-header-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-icon {
-        width: 32px;
-        height: 32px;
-        border: none;
-        background: #f8f9fa;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        transition: all 0.3s;
-    }
-
-        .btn-icon:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-        }
-
-    .btn-danger-icon:hover {
-        background: #dc3545;
-        color: white;
-    }
-
-    .detail-title {
-        font-size: 24px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0;
-    }
-
-    .detail-body {
-        padding: 10px 0;
-        max-height: calc(100vh - 300px);
-        overflow-y: auto;
-    }
-
-    .info-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-    .info-label {
-        font-weight: 500;
-        color: #6c757d;
-    }
-
-    .info-value {
-        font-weight: 600;
-        color: #2c3e50;
-        text-align: right;
-    }
-
-    .time-highlight {
-        color: #007bff;
-        font-size: 16px;
-    }
-
-    .price-highlight {
-        color: #28a745;
-        font-size: 18px;
-    }
-
-    .bill-section {
-        background: #fff;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .bill-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        font-size: 15px;
-    }
-
-        .bill-row.total {
-            border-top: 2px solid #2c3e50;
-            margin-top: 10px;
-            padding-top: 15px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-    .service-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .section-subtitle {
-        font-size: 16px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0 0 15px 0;
-    }
-
-    .service-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
     .service-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 12px;
-        background: white;
-        border-radius: 6px;
-        border: 1px solid #e9ecef;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 8px;
     }
 
-    .service-info {
+    .service-actions {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        align-items: center;
+        gap: 12px;
     }
 
-    .service-name {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 14px;
+    .btn-icon-sm {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        color: #dc3545;
+        font-size: 20px;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
     }
+
+        .btn-icon-sm:hover {
+            background: #dc3545;
+            color: white;
+        }
 
     .service-quantity {
-        font-size: 12px;
-        color: #6c757d;
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 2px;
     }
 
-    .service-price {
-        font-weight: 700;
-        color: #007bff;
-        font-size: 15px;
-    }
-
-    .action-section {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-block {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .btn-primary {
-        background: #007bff;
-        color: white;
-    }
-
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
-        }
-
-    .btn-success {
-        background: #28a745;
-        color: white;
-    }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
-        }
-
-    .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 13px;
+    .time-highlight {
+        color: #0066cc;
         font-weight: 600;
     }
 
-        .status-badge.available {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-badge.occupied {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-badge.reserved {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-    /* Scrollbar styling */
-    .service-section::-webkit-scrollbar,
-    .detail-body::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .service-section::-webkit-scrollbar-track,
-    .detail-body::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    .service-section::-webkit-scrollbar-thumb,
-    .detail-body::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
-    }
-
-        .service-section::-webkit-scrollbar-thumb:hover,
-        .detail-body::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .time-highlight small {
+            font-weight: normal;
+            display: block;
+            margin-top: 2px;
         }
 </style>

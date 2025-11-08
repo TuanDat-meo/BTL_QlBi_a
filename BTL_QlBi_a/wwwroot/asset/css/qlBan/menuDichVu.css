@@ -1,18 +1,10 @@
 ﻿/* ==================== SERVICE MENU MODAL ==================== */
-.service-modal {
-    width: 100%;
-    max-width: 700px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
 
 /* ==================== MENU HEADER ==================== */
 .menu-header {
     padding: 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    color: white; /* Màu chữ cố định */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -31,7 +23,7 @@
     height: 36px;
     border: none;
     background: rgba(255, 255, 255, 0.2);
-    color: white;
+    color: white; /* Màu chữ cố định */
     border-radius: 50%;
     cursor: pointer;
     font-size: 20px;
@@ -48,19 +40,21 @@
 
 /* ==================== MENU SEARCH ==================== */
 .menu-search {
-    padding: 16px 20px;
-    background: white;
-    border-bottom: 2px solid #f3f4f6;
-    flex-shrink: 0;
+    padding: 6px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 13px;
 }
 
 .menu-search-input {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e5e7eb;
+    border: 2px solid #e5e7eb; /* Màu viền cố định */
     border-radius: 10px;
     font-size: 14px;
     transition: all 0.3s;
+    background: white; /* Màu nền cố định */
+    color: #1f2937; /* Màu chữ cố định */
 }
 
     .menu-search-input:focus {
@@ -74,7 +68,7 @@
     display: flex;
     gap: 10px;
     padding: 16px 20px;
-    background: white;
+    background: white; /* Màu nền cố định */
     border-bottom: 2px solid #f3f4f6;
     overflow-x: auto;
     flex-shrink: 0;
@@ -82,30 +76,26 @@
 }
 
 .menu-category-btn {
-    padding: 8px 20px;
-    border: 2px solid #e5e7eb;
+    padding: 6px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
     background: white;
-    border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
-    color: #6b7280;
-    transition: all 0.3s;
+    transition: all 0.2s;
     white-space: nowrap;
-    flex-shrink: 0;
 }
 
     .menu-category-btn:hover {
         border-color: #667eea;
         color: #667eea;
-        background: #f5f3ff;
     }
 
     .menu-category-btn.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #667eea;
         color: white;
         border-color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
 /* Hide scrollbar for categories but keep functionality */
@@ -127,7 +117,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 20px;
-    background: #f9fafb;
+    background: #f9fafb; /* Màu nền cố định */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -154,7 +144,7 @@
 .menu-item {
     display: flex;
     gap: 16px;
-    background: white;
+    background: white; /* Màu nền cố định */
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
@@ -222,7 +212,7 @@
 .menu-item-name {
     font-size: 16px;
     font-weight: 700;
-    color: #1f2937;
+    color: #1f2937; /* Màu chữ cố định */
     line-height: 1.3;
 }
 
@@ -235,7 +225,7 @@
 
 .menu-item-desc {
     font-size: 13px;
-    color: #6b7280;
+    color: #6b7280; /* Màu chữ cố định */
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -256,7 +246,7 @@
     width: 36px;
     height: 36px;
     border: 2px solid #667eea;
-    background: white;
+    background: white; /* Màu nền cố định */
     color: #667eea;
     border-radius: 8px;
     font-size: 20px;
@@ -297,7 +287,8 @@
     border-radius: 8px;
     font-size: 16px;
     font-weight: 600;
-    color: #1f2937;
+    color: #1f2937; /* Màu chữ cố định */
+    background: white; /* Màu nền cố định */
     flex-shrink: 0;
 }
 
@@ -532,59 +523,3 @@
     animation: fadeIn 0.3s ease;
 }
 
-    .menu-item:nth-child(1) {
-        animation-delay: 0.05s;
-    }
-
-    .menu-item:nth-child(2) {
-        animation-delay: 0.1s;
-    }
-
-    .menu-item:nth-child(3) {
-        animation-delay: 0.15s;
-    }
-
-    .menu-item:nth-child(4) {
-        animation-delay: 0.2s;
-    }
-
-    .menu-item:nth-child(5) {
-        animation-delay: 0.25s;
-    }
-
-/* ==================== DARK MODE SUPPORT (Optional) ==================== */
-@media (prefers-color-scheme: dark) {
-    .menu-body {
-        background: #1f2937;
-    }
-
-    .menu-item {
-        background: #374151;
-        border-color: #4b5563;
-    }
-
-    .menu-item-name {
-        color: #f9fafb;
-    }
-
-    .menu-item-desc {
-        color: #d1d5db;
-    }
-
-    .menu-search-input,
-    .quantity-input {
-        background: #374151;
-        color: #f9fafb;
-        border-color: #4b5563;
-    }
-
-    .menu-category-btn {
-        background: #374151;
-        color: #d1d5db;
-        border-color: #4b5563;
-    }
-
-    .btn-quantity {
-        background: #374151;
-    }
-}

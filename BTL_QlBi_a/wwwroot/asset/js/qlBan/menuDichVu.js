@@ -1,243 +1,360 @@
-﻿/**
- * Module quản lý thanh toán
- */
-const PaymentManager = {
-    currentInvoiceId: null,
-    currentPaymentMethod: 'TienMat',
+﻿const MenuDichVu = {
+    currentCategory: 'all',
+    currentTableId: null,
 
     /**
-     * Hiển thị panel thanh toán
+     * Khởi tạo MenuDichVu
      */
-    show: async function (hoaDonId) {
-        try {
-            console.log('Loading payment panel for invoice:', hoaDonId);
+    init: function () {
+        console.log('🎯 MenuDichVu initialized');
 
-            this.currentInvoiceId = hoaDonId;
+        // Lấy mã bàn từ nhiều nguồn
+        this.currentTableId = this.getTableId();
+        console.log('📌 Current table ID:', this.currentTableId);
 
-            const modalOverlay = document.getElementById('modalOverlay');
-            if (!modalOverlay) {
-                console.error('Modal overlay not found');
-                return;
-            }
+        // Reset category về "Tất cả"
+        this.currentCategory = 'all';
 
-            // Show loading state
-            modalOverlay.innerHTML = `
-                <div class="modal-content payment-modal">
-                    <div class="loading-state" style="text-align: center; padding: 40px;">
-                        <div class="spinner" style="margin: 0 auto 20px;"></div>
-                        <p>Đang tải thông tin thanh toán...</p>
-                    </div>
-                </div>
-            `;
-            modalOverlay.classList.add('active');
-
-            const response = await fetch(`/QLBan/PanelThanhToan?maHD=${hoaDonId}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'text/html'
-                }
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Server error:', response.status, errorText);
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const html = await response.text();
-
-            // Wrap content in modal structure
-            modalOverlay.innerHTML = `
-                <div class="modal-content payment-modal">
-                    ${html}
-                </div>
-            `;
-
-            console.log('✅ Payment panel loaded successfully');
-        } catch (error) {
-            console.error('❌ Error loading payment panel:', error);
-
-            const modalOverlay = document.getElementById('modalOverlay');
-            if (modalOverlay) {
-                modalOverlay.innerHTML = `
-                    <div class="modal-content payment-modal">
-                        <div class="error-state" style="text-align: center; padding: 40px;">
-                            <div class="error-icon" style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
-                            <h4 style="color: #dc3545; margin-bottom: 10px;">Không thể tải panel thanh toán</h4>
-                            <p style="font-size: 14px; color: #6c757d; margin: 10px 0;">${error.message}</p>
-                            <button class="btn btn-primary" onclick="PaymentManager.close()">Đóng</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (window.Toast) {
-                Toast.error('Không thể tải panel thanh toán. Vui lòng thử lại.');
-            }
-        }
+        // Apply initial filter
+        this.applyFilters();
     },
 
     /**
-     * Chọn phương thức thanh toán
+     * Lấy mã bàn từ nhiều nguồn
      */
-    selectMethod: function (method, button) {
-        console.log('Selected payment method:', method);
+    getTableId: function () {
+        // 1. Từ TableManager
+        if (typeof TableManager !== 'undefined' && TableManager.currentTableId) {
+            return TableManager.currentTableId;
+        }
 
-        this.currentPaymentMethod = method;
+        // 2. Từ data attribute của modal
+        const modal = document.querySelector('[data-table-id]');
+        if (modal) {
+            return parseInt(modal.getAttribute('data-table-id'));
+        }
 
-        // Update active state
-        document.querySelectorAll('.payment-btn').forEach(btn => {
+        // 3. Từ global variable
+        if (typeof window.currentTableId !== 'undefined') {
+            return window.currentTableId;
+        }
+
+        console.warn('⚠️ Cannot determine table ID');
+        return null;
+    },
+
+    /**
+     * Lọc theo danh mục
+     */
+    filterByCategory: function (category, event) {
+        console.log('🔖 Filtering by category:', category);
+
+        this.currentCategory = category;
+
+        // Update active button
+        const buttons = document.querySelectorAll('.menu-category-btn');
+        buttons.forEach(btn => {
             btn.classList.remove('active');
         });
 
-        if (button) {
-            button.classList.add('active');
+        if (event && event.target) {
+            event.target.classList.add('active');
         }
 
-        // Update hidden input
-        const selectedMethodInput = document.getElementById('selectedPaymentMethod');
-        if (selectedMethodInput) {
-            selectedMethodInput.value = method;
-        }
+        // Apply filters
+        this.applyFilters();
+    },
 
-        // Hide all panels
-        const cashPanel = document.getElementById('cashPaymentPanel');
-        const qrPanel = document.getElementById('qrPaymentPanel');
-        const bankPanel = document.getElementById('bankPaymentPanel');
+    /**
+     * Tìm kiếm dịch vụ
+     */
+    searchServices: function () {
+        const searchInput = document.getElementById('menuSearch');
+        if (!searchInput) return;
 
-        if (cashPanel) cashPanel.style.display = 'none';
-        if (qrPanel) qrPanel.style.display = 'none';
-        if (bankPanel) bankPanel.style.display = 'none';
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        console.log('🔍 Searching for:', searchTerm);
 
-        // Show relevant panel
-        if (method === 'TienMat' && cashPanel) {
-            cashPanel.style.display = 'block';
-        } else if (method === 'QRCode' && qrPanel) {
-            qrPanel.style.display = 'block';
-        } else if (bankPanel) {
-            bankPanel.style.display = 'block';
+        this.applyFilters(searchTerm);
+    },
+
+    /**
+     * Áp dụng các bộ lọc (danh mục + tìm kiếm)
+     */
+    applyFilters: function (searchTerm = '') {
+        const menuItems = document.querySelectorAll('.menu-item');
+        let visibleCount = 0;
+
+        menuItems.forEach(item => {
+            const category = item.getAttribute('data-category') || '';
+            const serviceName = item.querySelector('.menu-item-name')?.textContent.toLowerCase() || '';
+            const serviceDesc = item.querySelector('.menu-item-desc')?.textContent.toLowerCase() || '';
+
+            // Check category filter
+            const categoryMatch = this.currentCategory === 'all' || category === this.currentCategory;
+
+            // Check search filter
+            const searchMatch = searchTerm === '' ||
+                serviceName.includes(searchTerm) ||
+                serviceDesc.includes(searchTerm);
+
+            if (categoryMatch && searchMatch) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        console.log(`✅ ${visibleCount} services visible`);
+
+        // Show empty message if no services
+        this.toggleEmptyMessage(visibleCount === 0);
+    },
+
+    /**
+     * Hiển thị/ẩn thông báo không có dịch vụ
+     */
+    toggleEmptyMessage: function (show) {
+        const menuBody = document.querySelector('.menu-body');
+        if (!menuBody) return;
+
+        let emptyMsg = menuBody.querySelector('.menu-no-results');
+
+        if (show && !emptyMsg) {
+            emptyMsg = document.createElement('div');
+            emptyMsg.className = 'menu-no-results';
+            emptyMsg.innerHTML = `
+                <div class="menu-empty-icon">🔍</div>
+                <p>Không tìm thấy dịch vụ phù hợp</p>
+            `;
+            menuBody.appendChild(emptyMsg);
+        } else if (!show && emptyMsg) {
+            emptyMsg.remove();
         }
     },
 
     /**
-     * Tính tiền thối
+     * Tăng số lượng
      */
-    calculateChange: function (tongTien) {
-        const tienKhachDuaInput = document.getElementById('tienKhachDua');
-        if (!tienKhachDuaInput) return;
+    increaseQuantity: function (serviceId) {
+        const input = document.getElementById(`qty-${serviceId}`);
+        if (!input) return;
 
-        const tienKhachDua = parseFloat(tienKhachDuaInput.value) || 0;
-        const tienThoi = tienKhachDua - tongTien;
+        let currentValue = parseInt(input.value) || 1;
+        const maxValue = parseInt(input.max) || 99;
 
-        const changeDisplay = document.getElementById('changeDisplay');
-        const changeAmount = document.getElementById('changeAmount');
-
-        if (!changeDisplay || !changeAmount) return;
-
-        if (tienKhachDua >= tongTien && tienKhachDua > 0) {
-            changeDisplay.style.display = 'block';
-            changeAmount.textContent = tienThoi.toLocaleString('vi-VN') + ' đ';
-            changeAmount.style.color = tienThoi >= 0 ? '#28a745' : '#dc3545';
-        } else {
-            changeDisplay.style.display = 'none';
+        if (currentValue < maxValue) {
+            input.value = currentValue + 1;
+            console.log(`➕ Increased quantity for service ${serviceId}: ${input.value}`);
         }
     },
 
     /**
-     * Xác nhận thanh toán
+     * Giảm số lượng
      */
-    confirm: async function (hoaDonId, method) {
+    decreaseQuantity: function (serviceId) {
+        const input = document.getElementById(`qty-${serviceId}`);
+        if (!input) return;
+
+        let currentValue = parseInt(input.value) || 1;
+        const minValue = parseInt(input.min) || 1;
+
+        if (currentValue > minValue) {
+            input.value = currentValue - 1;
+            console.log(`➖ Decreased quantity for service ${serviceId}: ${input.value}`);
+        }
+    },
+
+    /**
+     * Thêm dịch vụ - GỌI TRỰC TIẾP API
+     */
+    addService: async function (serviceId) {
+        console.log('📝 Adding service:', serviceId);
+
+        // Validate table ID
+        this.currentTableId = this.getTableId();
+
+        if (!this.currentTableId) {
+            if (window.Toast) {
+                Toast.error('Không xác định được bàn');
+            } else {
+                alert('Không xác định được bàn');
+            }
+            return;
+        }
+
+        // Get quantity
+        const input = document.getElementById(`qty-${serviceId}`);
+        const quantity = input ? parseInt(input.value) || 1 : 1;
+
+        console.log(`🎯 Adding ${quantity}x service ${serviceId} to table ${this.currentTableId}`);
+
         try {
-            // Validate payment method
-            if (!method) {
-                method = this.currentPaymentMethod;
-            }
-
-            // Additional validation for cash payment
-            if (method === 'TienMat') {
-                const tienKhachDuaInput = document.getElementById('tienKhachDua');
-                const tienKhachDua = parseFloat(tienKhachDuaInput?.value) || 0;
-
-                // Get total from DOM
-                const tongTienText = document.querySelector('.bill-total')?.textContent || '0';
-                const tongTien = parseFloat(tongTienText.replace(/[^\d]/g, ''));
-
-                if (tienKhachDua < tongTien) {
-                    if (window.Toast) {
-                        Toast.error('Số tiền khách đưa không đủ!');
-                    } else {
-                        alert('Số tiền khách đưa không đủ!');
-                    }
-                    return;
-                }
-            }
-
-            // Get transaction data
-            const tienKhachDua = document.getElementById('tienKhachDua')?.value || 0;
-            const transactionCode = document.getElementById('transactionCode')?.value || '';
-
-            const response = await fetch('/QLBan/XacNhanThanhToan', {
+            // GỌI TRỰC TIẾP API
+            const response = await fetch('/QLBan/ThemDichVu', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    maHD: hoaDonId,
-                    phuongThucThanhToan: method,
-                    tienKhachDua: parseFloat(tienKhachDua),
-                    maGiaoDich: transactionCode
+                    maBan: this.currentTableId,
+                    maDV: serviceId,
+                    soLuong: quantity
                 })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                if (window.Toast) Toast.success(result.message);
-                this.close();
-                setTimeout(() => location.reload(), 1000);
+                if (window.Toast) {
+                    Toast.success(result.message || 'Thêm dịch vụ thành công');
+                } else {
+                    alert(result.message || 'Thêm dịch vụ thành công');
+                }
+
+                // Reset quantity to 1
+                if (input) {
+                    input.value = 1;
+                }
+
+                // Đóng modal sau 500ms
+                setTimeout(() => {
+                    if (typeof TableManager !== 'undefined' && typeof TableManager.closeModal === 'function') {
+                        TableManager.closeModal();
+                    }
+                }, 500);
+
+                // Reload chi tiết bàn để hiển thị dịch vụ vừa thêm
+                setTimeout(async () => {
+                    if (typeof TableManager !== 'undefined' && typeof TableManager.loadTableDetail === 'function') {
+                        await TableManager.loadTableDetail(this.currentTableId);
+                    } else {
+                        // Fallback: reload trực tiếp
+                        this.reloadTableDetail(this.currentTableId);
+                    }
+                }, 600);
+
             } else {
-                if (window.Toast) Toast.error(result.message);
+                if (window.Toast) {
+                    Toast.error(result.message || 'Không thể thêm dịch vụ');
+                } else {
+                    alert(result.message || 'Không thể thêm dịch vụ');
+                }
             }
+
         } catch (error) {
-            console.error('Error:', error);
+            console.error('❌ Error adding service:', error);
             if (window.Toast) {
-                Toast.error('Có lỗi xảy ra khi thanh toán');
+                Toast.error('Lỗi kết nối server');
             } else {
-                alert('Có lỗi xảy ra khi thanh toán');
+                alert('Lỗi kết nối server');
             }
         }
     },
 
     /**
-     * Đóng panel
+     * Reload chi tiết bàn (fallback method)
      */
-    close: function () {
-        const modalOverlay = document.getElementById('modalOverlay');
-        if (modalOverlay) {
-            modalOverlay.classList.remove('active');
-            setTimeout(() => {
-                modalOverlay.innerHTML = '';
-            }, 300);
+    reloadTableDetail: async function (tableId) {
+        try {
+            const response = await fetch(`/QLBan/ChiTietBan?maBan=${tableId}`);
+            const html = await response.text();
+
+            const detailPanel = document.getElementById('detailPanel');
+            if (detailPanel) {
+                detailPanel.innerHTML = html;
+                console.log('✅ Reloaded table detail');
+            }
+        } catch (error) {
+            console.error('❌ Error reloading table detail:', error);
+        }
+    },
+
+    /**
+     * Reset form
+     */
+    reset: function () {
+        console.log('🔄 Resetting menu');
+
+        this.currentCategory = 'all';
+
+        // Reset search input
+        const searchInput = document.getElementById('menuSearch');
+        if (searchInput) {
+            searchInput.value = '';
         }
 
-        this.currentInvoiceId = null;
-        this.currentPaymentMethod = 'TienMat';
+        // Reset category buttons
+        const buttons = document.querySelectorAll('.menu-category-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-category') === 'all') {
+                btn.classList.add('active');
+            }
+        });
+
+        // Reset all quantity inputs
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        quantityInputs.forEach(input => {
+            input.value = 1;
+        });
+
+        // Apply filters
+        this.applyFilters();
     }
 };
 
-// Export global functions for HTML onclick handlers
-window.PaymentManager = PaymentManager;
+/**
+ * Khởi tạo MenuDichVu khi modal được load
+ */
+function initMenuDichVu() {
+    if (typeof MenuDichVu === 'undefined') {
+        console.error('MenuDichVu not found!');
+        return;
+    }
 
-window.selectPaymentMethod = function (method, button) {
-    PaymentManager.selectMethod(method, button);
-};
+    const menuModal = document.querySelector('.menu-header');
+    if (menuModal) {
+        console.log('Initializing MenuDichVu for modal');
+        setTimeout(() => {
+            MenuDichVu.init();
+        }, 100);
+    }
+}
 
-window.calculateChange = function (tongTien) {
-    PaymentManager.calculateChange(tongTien);
-};
+// Listen for modal content changes
+if (typeof MutationObserver !== 'undefined') {
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.addedNodes.length) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeType === 1) { // Element node
+                        const menu = node.querySelector ? node.querySelector('.menu-header') : null;
+                        if (menu || (node.classList && node.classList.contains('menu-header'))) {
+                            initMenuDichVu();
+                        }
+                    }
+                });
+            }
+        });
+    });
 
-window.confirmPayment = function (hoaDonId, method) {
-    PaymentManager.confirm(hoaDonId, method);
-};
+    // Observe modal overlay
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay) {
+            observer.observe(modalOverlay, {
+                childList: true,
+                subtree: true
+            });
+        }
 
-console.log('✅ PaymentManager loaded');
+        // Check if modal is already loaded
+        initMenuDichVu();
+    });
+}
+
+// Export to global scope
+window.MenuDichVu = MenuDichVu;
+window.initMenuDichVu = initMenuDichVu;
