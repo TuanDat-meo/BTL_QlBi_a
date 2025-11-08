@@ -48,10 +48,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDaGlUaWV0QmFuLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/ChiTietHoaDon.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDaGlUaWV0SG9hRG9uLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/DichVu.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxEaWNoVnUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -64,16 +60,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/InHoaDon.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbkhvYURvbi5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/KhachHang.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxLaGFjaEhhbmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/NhanVien.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxOaGFuVmllbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/HoaDon/ChiTietHoaDon.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xIb2FEb25cQ2hpVGlldEhvYURvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/HoaDon/InHoaDon.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xIb2FEb25cSW5Ib2FEb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/HoaDon/_HoaDon.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xIb2FEb25cX0hvYURvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/KhachHang/_KhachHang.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xLaGFjaEhhbmdcX0toYWNoSGFuZy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_BangGia.cshtml]
@@ -86,14 +94,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_DichVu.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfRGljaFZ1LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_HoaDon.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfSG9hRG9uLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_KhachHang.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfS2hhY2hIYW5nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_NhanVien.cshtml]
