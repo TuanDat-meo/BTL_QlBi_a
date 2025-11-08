@@ -66,16 +66,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxOaGFuVmllbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_AddBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9BZGRCYW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_ChiTietBan.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9DaGlUaWV0QmFuLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_FormChinhSuaBan.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9Gb3JtQ2hpbmhTdWFCYW4uY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_FormThemBan.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9Gb3JtVGhlbUJhbi5jc2h0bWw=
+[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_EditVtriBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9FZGl0VnRyaUJhbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_MenuDichVu.cshtml]
@@ -136,10 +136,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/ThongKe.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxUaG9uZ0tlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Home/TrangChu.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxUcmFuZ0NodS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/LTWeb/BTL_QlBi_a/BTL_QlBi_a/Views/Shared/Error.cshtml]

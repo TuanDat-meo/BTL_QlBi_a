@@ -6,14 +6,39 @@
 </div>
 
 <div class="menu-search">
-    <input type="text" class="menu-search-input" placeholder="🔍 Tìm dịch vụ..." id="menuSearch">
+    <input type="text"
+           class="menu-search-input"
+           placeholder="🔍 Tìm dịch vụ..."
+           id="menuSearch"
+           autocomplete="off"
+           onkeyup="MenuDichVu.searchServices()">
 </div>
 
 <div class="menu-categories">
-    <button class="menu-category-btn active" data-category="all">Tất cả</button>
-    <button class="menu-category-btn" data-category="DoUong">Đồ uống</button>
-    <button class="menu-category-btn" data-category="DoAn">Đồ ăn</button>
-    <button class="menu-category-btn" data-category="Khac">Khác</button>
+    <button class="menu-category-btn active"
+            data-category="all"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('all', event)">
+        Tất cả
+    </button>
+    <button class="menu-category-btn"
+            data-category="DoUong"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('DoUong', event)">
+        Đồ uống
+    </button>
+    <button class="menu-category-btn"
+            data-category="DoAn"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('DoAn', event)">
+        Đồ ăn
+    </button>
+    <button class="menu-category-btn"
+            data-category="Khac"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('Khac', event)">
+        Khác
+    </button>
 </div>
 
 <div class="menu-body">
@@ -21,7 +46,6 @@
     {
         @foreach (var dv in Model)
         {
-            var loaiClass = dv.Loai.ToString().ToLower();
             var imagePath = !string.IsNullOrEmpty(dv.HinhAnh)
             ? Url.Content($"~/asset/img/{dv.HinhAnh}")
             : Url.Content("~/asset/img/default-service.jpg");
@@ -47,10 +71,26 @@
                 @if (dv.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDichVu.ConHang)
                 {
                     <div class="menu-item-actions">
-                        <button class="btn-quantity btn-minus" onclick="TableManager.decreaseQuantity(@dv.MaDV)">−</button>
-                        <input type="number" class="quantity-input" id="qty-@dv.MaDV" value="1" min="1" max="99">
-                        <button class="btn-quantity btn-plus" onclick="TableManager.increaseQuantity(@dv.MaDV)">+</button>
-                        <button class="btn-add-service" onclick="TableManager.confirmAddService(@dv.MaDV)">
+                        <button class="btn-quantity btn-minus"
+                                type="button"
+                                onclick="MenuDichVu.decreaseQuantity(@dv.MaDV)">
+                            −
+                        </button>
+                        <input type="number"
+                               class="quantity-input"
+                               id="qty-@dv.MaDV"
+                               value="1"
+                               min="1"
+                               max="99"
+                               readonly>
+                        <button class="btn-quantity btn-plus"
+                                type="button"
+                                onclick="MenuDichVu.increaseQuantity(@dv.MaDV)">
+                            +
+                        </button>
+                        <button class="btn-add-service"
+                                type="button"
+                                onclick="MenuDichVu.addService(@dv.MaDV)">
                             Thêm
                         </button>
                     </div>
@@ -66,4 +106,20 @@
         </div>
     }
 </div>
-<script src="~/asset/js/qlBan/menuDichVu.js"></script>
+
+<script>
+    // Khởi tạo MenuDichVu khi modal được load
+    (function() {
+        console.log('=== MENU DICH VU VIEW LOADED ===');
+
+        // Đợi một chút để đảm bảo DOM đã sẵn sàng
+        setTimeout(function() {
+            if (typeof window.MenuDichVu !== 'undefined') {
+                window.MenuDichVu.init();
+                console.log('✅ MenuDichVu initialized from view');
+            } else {
+                console.error('❌ MenuDichVu not found!');
+            }
+        }, 100);
+    })();
+</script>
