@@ -77,16 +77,12 @@ namespace BTL_QlBi_a.Migrations
                         .HasDefaultValue("Trống")
                         .HasColumnName("trang_thai");
 
-                    b.Property<int>("ViTriX")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                    b.Property<decimal?>("ViTriX")
+                        .HasColumnType("decimal(5,2)")
                         .HasColumnName("vi_tri_x");
 
-                    b.Property<int>("ViTriY")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                    b.Property<decimal?>("ViTriY")
+                        .HasColumnType("decimal(5,2)")
                         .HasColumnName("vi_tri_y");
 
                     b.HasKey("MaBan");

@@ -155,31 +155,32 @@ GO
 -- =============================================
 -- 10. DỊCH VỤ
 -- =============================================
-INSERT INTO dich_vu (ten_dv, loai, gia, don_vi, ma_hang, trang_thai, mo_ta) VALUES
+INSERT INTO dich_vu (ten_dv, loai, gia, don_vi, ma_hang, trang_thai, mo_ta, hinh_anh) VALUES
 -- Đồ uống (liên kết với mặt hàng)
-(N'Bia Tiger lạnh', N'Đồ uống', 25000, N'chai', 1, N'Còn hàng', N'Bia Tiger bán lẻ'),
-(N'Bia Heineken lạnh', N'Đồ uống', 30000, N'chai', 2, N'Còn hàng', N'Bia Heineken bán lẻ'),
-(N'Bia Sài Gòn lạnh', N'Đồ uống', 20000, N'chai', 3, N'Còn hàng', N'Bia Sài Gòn bán lẻ'),
-(N'Coca Cola', N'Đồ uống', 15000, N'lon', 4, N'Còn hàng', N'Nước ngọt'),
-(N'Pepsi', N'Đồ uống', 15000, N'lon', 5, N'Còn hàng', N'Nước ngọt'),
-(N'Nước suối', N'Đồ uống', 8000, N'chai', 6, N'Còn hàng', N'Nước suối lạnh'),
-(N'Nước cam ép tươi', N'Đồ uống', 35000, N'cốc', NULL, N'Còn hàng', N'Nước cam ép tại quán'),
-(N'Sting', N'Đồ uống', 18000, N'chai', 8, N'Còn hàng', N'Nước tăng lực'),
-(N'Trà xanh', N'Đồ uống', 12000, N'chai', 9, N'Còn hàng', N'Trà xanh C2'),
+(N'Bia Tiger lạnh', N'Đồ uống', 25000, N'chai', 1, N'Còn hàng', N'Bia Tiger bán lẻ', N'biatiger.jpg'),
+(N'Bia Heineken lạnh', N'Đồ uống', 30000, N'chai', 2, N'Còn hàng', N'Bia Heineken bán lẻ', N'/biaheineken.jpg'),
+(N'Bia Sài Gòn lạnh', N'Đồ uống', 20000, N'chai', 3, N'Còn hàng', N'Bia Sài Gòn bán lẻ', N'biasaigon.jpg'),
+(N'Coca Cola', N'Đồ uống', 15000, N'lon', 4, N'Còn hàng', N'Nước ngọt', N'cocacola.jpg'),
+(N'Pepsi', N'Đồ uống', 15000, N'lon', 5, N'Còn hàng', N'Nước ngọt', N'pepsi.jpg'),
+(N'Nước suối', N'Đồ uống', 8000, N'chai', 6, N'Còn hàng', N'Nước suối lạnh', N'nuocsuoilavie.jpg'),
+(N'Nước cam ép tươi', N'Đồ uống', 35000, N'cốc', NULL, N'Còn hàng', N'Nước cam ép tại quán', N'nuoccamep.jpg'),
+(N'Sting', N'Đồ uống', 18000, N'chai', 8, N'Còn hàng', N'Nước tăng lực', N'stingdau.jpg'),
+(N'Trà xanh', N'Đồ uống', 12000, N'chai', 9, N'Còn hàng', N'Trà xanh C2', N'traxanhc2.jpg'),
 -- Đồ ăn (liên kết với mặt hàng)
-(N'Khô bò rang muối', N'Đồ ăn', 45000, N'đĩa', 10, N'Còn hàng', N'Khô bò tươi'),
-(N'Đậu phộng', N'Đồ ăn', 15000, N'đĩa', 11, N'Còn hàng', N'Đậu phộng rang muối'),
-(N'Mực nướng sa tế', N'Đồ ăn', 55000, N'đĩa', 12, N'Còn hàng', N'Mực nướng thơm ngon'),
-(N'Nem chua rán', N'Đồ ăn', 40000, N'đĩa', 13, N'Còn hàng', N'Nem chua rán giòn'),
-(N'Chân gà sả tắc', N'Đồ ăn', 60000, N'đĩa', 14, N'Còn hàng', N'Chân gà cay nồng'),
-(N'Khoai tây chiên', N'Đồ ăn', 30000, N'đĩa', 15, N'Còn hàng', N'Khoai tây chiên'),
-(N'Tôm chiên giòn', N'Đồ ăn', 70000, N'đĩa', 16, N'Còn hàng', N'Tôm tươi chiên bột'),
+(N'Khô bò rang muối', N'Đồ ăn', 45000, N'đĩa', 10, N'Còn hàng', N'Khô bò tươi', N'khobo.jpg'),
+(N'Đậu phộng', N'Đồ ăn', 15000, N'đĩa', 11, N'Còn hàng', N'Đậu phộng rang muối', N'dauphongrang.jpg'),
+(N'Mực nướng sa tế', N'Đồ ăn', 55000, N'đĩa', 12, N'Còn hàng', N'Mực nướng thơm ngon', N'mucnuong.jpg'),
+(N'Nem chua rán', N'Đồ ăn', 40000, N'đĩa', 13, N'Còn hàng', N'Nem chua rán giòn', N'nemchuaran.jpg'),
+(N'Chân gà sả tắc', N'Đồ ăn', 60000, N'đĩa', 14, N'Còn hàng', N'Chân gà cay nồng', N'changasatac.jpg'),
+(N'Khoai tây chiên', N'Đồ ăn', 30000, N'đĩa', 15, N'Còn hàng', N'Khoai tây chiên', N'khoaitaychien.jpg'),
+(N'Tôm chiên giòn', N'Đồ ăn', 70000, N'đĩa', 16, N'Còn hàng', N'Tôm tươi chiên bột', N'tomchiengion.jpg'),
 -- Dịch vụ khác (không liên kết mặt hàng)
-(N'Thuê cơ VIP', N'Khác', 50000, N'lần', NULL, N'Còn hàng', N'Thuê cơ cao cấp'),
-(N'Thuê cơ thường', N'Khác', 20000, N'lần', NULL, N'Còn hàng', N'Thuê cơ phổ thông'),
-(N'Thuê phấn', N'Khác', 10000, N'lần', NULL, N'Còn hàng', N'Thuê phấn bi-a'),
-(N'Phục vụ riêng VIP', N'Khác', 100000, N'giờ', NULL, N'Còn hàng', N'Phục vụ riêng phòng VIP');
+(N'Thuê cơ VIP', N'Khác', 50000, N'lần', NULL, N'Còn hàng', N'Thuê cơ cao cấp', N'cobiaaoccap.jpg'),
+(N'Thuê cơ thường', N'Khác', 20000, N'lần', NULL, N'Còn hàng', N'Thuê cơ phổ thông', N'cobia.jpg'),
+(N'Thuê phấn', N'Khác', 10000, N'lần', NULL, N'Còn hàng', N'Thuê phấn bi-a', N'img/phanbia.jpg'),
+(N'Phục vụ riêng VIP', N'Khác', 100000, N'giờ', NULL, N'Còn hàng', N'Phục vụ riêng phòng VIP', NULL);
 GO
+-- ====
 
 
 -- =============================================

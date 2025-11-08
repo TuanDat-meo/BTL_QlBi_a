@@ -1,0 +1,310 @@
+﻿@model BTL_QlBi_a.Models.Entities.BanBia
+<link href="~/asset/css/qlBan/chiTietBan.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
+@{
+    var hoaDon = ViewBag.HoaDon as BTL_QlBi_a.Models.Entities.HoaDon;
+    var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>;
+    var tenNhom = ViewBag.TenNhom as string ?? "Nhân viên";
+
+    bool isAdmin = tenNhom == "Admin";
+    bool isQuanLy = tenNhom == "Quản lý" || isAdmin;
+    bool isThuNgan = tenNhom == "Thu ngân" || isQuanLy;
+    bool isPhucVu = tenNhom == "Phục vụ";
+
+    string statusBadgeClass = Model.TrangThai switch
+    {
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "status-badge available",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "status-badge occupied",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "status-badge reserved",
+        _ => "status-badge"
+    };
+
+    string statusText = Model.TrangThai switch
+    {
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trống",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "Đang chơi",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "Đã đặt",
+        _ => Model.TrangThai.ToString()
+    };
+}
+<div class="detail-header">
+    <h3 class="detail-title">@Model.TenBan</h3>
+    <div class="detail-header-actions">
+        <span class="@statusBadgeClass">@statusText</span>
+        @if (isQuanLy)
+        {
+            <button class="btn-icon" onclick="TableManager.editTable(@Model.MaBan)" title="Sửa bàn">
+                ✏️
+            </button>
+            <button class="btn-icon btn-danger-icon" onclick="TableManager.deleteTable(@Model.MaBan)" title="Xóa bàn">
+                🗑️
+            </button>
+        }
+    </div>
+</div>
+
+<div class="detail-body">
+    @if (Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi && hoaDon != null)
+    {
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">Khách hàng:</span>
+                <span class="info-value">@(hoaDon.KhachHang?.TenKH ?? "Khách lẻ")</span>
+            </div>
+
+            @if (hoaDon.KhachHang != null)
+            {
+                <div class="info-row">
+                    <span class="info-label">SĐT:</span>
+                    <span class="info-value">@hoaDon.KhachHang.SDT</span>
+                </div>
+            }
+
+            <div class="info-row">
+                <span class="info-label">Bắt đầu:</span>
+                <span class="info-value">@hoaDon.ThoiGianBatDau.Value.ToString("HH:mm dd/MM/yyyy")</span>
+            </div>
+
+            @{
+                // Tính thời gian chơi THỰC TẾ
+                var duration = DateTime.Now - hoaDon.ThoiGianBatDau.Value;
+                var totalMinutes = duration.TotalMinutes;
+
+                // Số giờ thực tế (không làm tròn)
+                var soGioThucTe = totalMinutes / 60;
+
+                // Tính tiền bàn theo thời gian THỰC TẾ
+                var giaGio = Model.LoaiBan?.GiaGio ?? 0;
+                var tienBanThucTe = giaGio * (decimal)soGioThucTe;
+
+                // Hiển thị thời gian
+                var hours = (int)duration.TotalHours;
+                var minutes = duration.Minutes;
+            }
+
+            <div class="info-row">
+                <span class="info-label">Thời gian:</span>
+                <span class="info-value time-highlight">
+                    @hours giờ @minutes phút
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Giá giờ:</span>
+                <span class="info-value">@giaGio.ToString("N0") đ/giờ</span>
+            </div>
+        </div>
+
+        <div class="bill-section">
+            <div class="bill-row">
+                <span>Tiền bàn:</span>
+                <span>@tienBanThucTe.ToString("N0") đ</span>
+            </div>
+
+            @{
+                var tongDichVu = chiTiet?.Sum(ct => ct.ThanhTien ?? 0) ?? 0;
+
+                var tongTienTruocLamTron = tienBanThucTe + tongDichVu;
+
+                var tongTienSauLamTron = Math.Ceiling(tongTienTruocLamTron / 1000) * 1000;
+
+                var chenhLech = tongTienSauLamTron - tongTienTruocLamTron;
+            }
+
+            <div class="bill-row">
+                <span>Dịch vụ:</span>
+                <span>@tongDichVu.ToString("N0") đ</span>
+            </div>
+
+            @if (chenhLech > 0)
+            {
+                <div class="bill-row" style="font-size: 0.9em; color: #666;">
+                    <span>Tạm tính:</span>
+                    <span>@tongTienSauLamTron.ToString("N0") đ</span>
+                </div>
+            }
+
+            <div class="bill-row total">
+                <span>Tổng cộng:</span>
+                <span>@tongTienSauLamTron.ToString("N0") đ</span>
+            </div>
+        </div>
+
+        @if (chiTiet != null && chiTiet.Any())
+        {
+            <div class="service-section">
+                <h4 class="section-subtitle">Dịch vụ đã order (@chiTiet.Count món):</h4>
+                <div class="service-list">
+                    @foreach (var item in chiTiet)
+                    {
+                        <div class="service-item">
+                            <div class="service-info">
+                                <div class="service-name">@item.DichVu?.TenDV</div>
+                                <div class="service-quantity">
+                                    @item.SoLuong x @(item.DichVu?.Gia.ToString("N0") ?? "0") đ
+                                </div>
+                            </div>
+                            <div class="service-actions">
+                                <div class="service-price">@item.ThanhTien?.ToString("N0") đ</div>
+                                @if (isPhucVu || isThuNgan)
+                                {
+                                    <button class="btn-icon-sm btn-danger-icon"
+                                            onclick="TableManager.removeService(@item.ID)"
+                                            title="Xóa">
+                                        ×
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="service-section">
+                <p style="text-align: center; color: #999; padding: 20px;">
+                    Chưa có dịch vụ nào
+                </p>
+            </div>
+        }
+
+        <div class="action-section">
+            @if (isPhucVu || isThuNgan)
+            {
+                <button class="btn btn-primary btn-block" onclick="TableManager.addService(@Model.MaBan)">
+                    ➕ Thêm dịch vụ
+                </button>
+            }
+            @if (isThuNgan)
+            {
+                <button class="btn btn-success btn-block" onclick="TableManager.end(@Model.MaBan)" style="margin-top: 8px;">
+                    💰 Kết thúc & Thanh toán
+                </button>
+            }
+        </div>
+    }
+    else if (Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat)
+    {
+        <div class="info-section">
+            @if (Model.KhachHang != null)
+            {
+                <div class="info-row">
+                    <span class="info-label">Khách hàng:</span>
+                    <span class="info-value">@Model.KhachHang.TenKH</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">SĐT:</span>
+                    <span class="info-value">@Model.KhachHang.SDT</span>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.GhiChu))
+            {
+                <div class="info-row">
+                    <span class="info-label">Ghi chú:</span>
+                    <span class="info-value">@Model.GhiChu</span>
+                </div>
+            }
+        </div>
+
+        @if (isThuNgan)
+        {
+            <div class="action-section">
+                <button class="btn btn-success btn-block" onclick="TableManager.confirmReservation(@Model.MaBan)">
+                    ✅ Xác nhận đặt bàn
+                </button>
+                <button class="btn btn-danger btn-block" onclick="TableManager.cancelReservation(@Model.MaBan)" style="margin-top: 8px;">
+                    ❌ Hủy đặt bàn
+                </button>
+            </div>
+        }
+    }
+    else if (Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong)
+    {
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">Loại bàn:</span>
+                <span class="info-value">@(Model.LoaiBan?.TenLoai ?? "Không rõ")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Khu vực:</span>
+                <span class="info-value">@(Model.KhuVuc?.TenKhuVuc ?? "Không rõ")</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Giá giờ:</span>
+                <span class="info-value price-highlight">@(Model.LoaiBan?.GiaGio.ToString("N0") ?? "0") đ/giờ</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.GhiChu))
+            {
+                <div class="info-row">
+                    <span class="info-label">Ghi chú:</span>
+                    <span class="info-value">@Model.GhiChu</span>
+                </div>
+            }
+        </div>
+
+        @if (isThuNgan || isPhucVu)
+        {
+            <div class="action-section">
+                <button class="btn btn-success btn-block" onclick="TableManager.start(@Model.MaBan)">
+                    ▶️ Bắt đầu chơi
+                </button>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .service-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .service-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-icon-sm {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        color: #dc3545;
+        font-size: 20px;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+        .btn-icon-sm:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+    .service-quantity {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 2px;
+    }
+
+    .time-highlight {
+        color: #0066cc;
+        font-weight: 600;
+    }
+
+        .time-highlight small {
+            font-weight: normal;
+            display: block;
+            margin-top: 2px;
+        }
+</style>

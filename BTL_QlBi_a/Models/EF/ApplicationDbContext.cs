@@ -111,8 +111,13 @@ namespace BTL_QlBi_a.Models.EF
                      .HasDefaultValue(TrangThaiBan.Trong);
                 entity.Property(e => e.GioBatDau).HasColumnName("gio_bat_dau");
                 entity.Property(e => e.MaKH).HasColumnName("ma_kh");
-                entity.Property(e => e.ViTriX).HasColumnName("vi_tri_x").HasDefaultValue(0);
-                entity.Property(e => e.ViTriY).HasColumnName("vi_tri_y").HasDefaultValue(0);
+                entity.Property(e => e.ViTriX)
+                    .HasColumnName("vi_tri_x")
+                    .HasColumnType("decimal(5,2)");
+
+                entity.Property(e => e.ViTriY)
+                    .HasColumnName("vi_tri_y")
+                    .HasColumnType("decimal(5,2)");
                 entity.Property(e => e.GhiChu).HasColumnName("ghi_chu").HasMaxLength(255);
                 entity.Property(e => e.NgayTao).HasColumnName("ngay_tao").HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.HinhAnh).HasColumnName("hinh_anh").HasMaxLength(255);

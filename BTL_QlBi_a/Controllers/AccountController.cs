@@ -81,7 +81,7 @@ namespace BTL_QlBi_a.Controllers
                 _context.LichSuHoatDong.Add(logHoatDong);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("BanBia", "Home");
             }
             catch (Exception ex)
             {

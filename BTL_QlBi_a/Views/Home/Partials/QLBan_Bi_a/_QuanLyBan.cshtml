@@ -1,0 +1,101 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
+@{
+    var tenNhom = ViewBag.TenNhom as string ?? "Nhân viên";
+    bool isAdmin = tenNhom == "Admin";
+    bool isQuanLy = tenNhom == "Quản lý" || isAdmin;
+    bool isThuNgan = tenNhom == "Thu ngân" || isQuanLy;
+    bool isPhucVu = tenNhom == "Phục vụ";
+}
+
+<section class="page-section active" id="page-tables">
+    <div class="section-header">
+        <h2 class="section-title">Quản lý bàn</h2>
+        <div class="action-buttons">
+            <!-- Nút xem sơ đồ - Tất cả nhân viên đều thấy -->
+            <button class="btn btn-secondary" onclick="TableDiagramManager.openDiagram()" title="Xem sơ đồ bàn">
+                🗺️ Xem sơ đồ
+            </button>
+
+            @if (isThuNgan)
+            {
+                <button class="btn btn-warning" onclick="TableManager.openReservationModal()">📅 Đặt bàn trước</button>
+            }
+            @if (isQuanLy)
+            {
+                <button class="btn btn-primary" onclick="BanBiaManager.openAddModal()">➕ Thêm bàn mới</button>
+            }
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">Khu vực:</span>
+                <div class="filter-buttons" id="areaFilters">
+                    <button class="filter-btn active" data-filter="all" onclick="TableManager.filterByArea('all', event)">Tất cả</button>
+                    <button class="filter-btn" data-filter="Tầng 1" onclick="TableManager.filterByArea('Tầng 1', event)">Tầng 1</button>
+                    <button class="filter-btn" data-filter="Tầng 2" onclick="TableManager.filterByArea('Tầng 2', event)">Tầng 2</button>
+                    <button class="filter-btn" data-filter="VIP" onclick="TableManager.filterByArea('VIP', event)">VIP</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">Trạng thái:</span>
+                <div class="filter-buttons" id="statusFilters">
+                    <button class="filter-btn active" data-status="all" onclick="TableManager.filterByStatus('all', event)">Tất cả</button>
+                    <button class="filter-btn" data-status="Trong" onclick="TableManager.filterByStatus('Trong', event)">Trống</button>
+                    <button class="filter-btn" data-status="DangChoi" onclick="TableManager.filterByStatus('DangChoi', event)">Đang chơi</button>
+                    <button class="filter-btn" data-status="DaDat" onclick="TableManager.filterByStatus('DaDat', event)">Đã đặt</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">Loại bàn:</span>
+                <div class="filter-buttons" id="tableTypeFilters">
+                    <button class="filter-btn active" onclick="TableManager.filterByTableType('all', event)">Tất cả</button>
+                    <button class="filter-btn" onclick="TableManager.filterByTableType('Bàn Lỗ 9 bi', event)">Lỗ 9 bi</button>
+                    <button class="filter-btn" onclick="TableManager.filterByTableType('Bàn Phăng Carom', event)">Phăng Carom</button>
+                    <button class="filter-btn" onclick="TableManager.filterByTableType('Bàn Snooker', event)">Snooker</button>
+                    <button class="filter-btn" onclick="TableManager.filterByTableType('Bàn VIP Lỗ', event)">VIP Lỗ</button>
+                    <button class="filter-btn" onclick="TableManager.filterByTableType('Bàn VIP Phăng', event)">VIP Phăng</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <input type="text" class="search-input" placeholder="🔍 Tìm kiếm bàn..." id="searchTables" onkeyup="TableManager.search()">
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="tables-grid" id="tablesGrid" data-role="@tenNhom">
+            @foreach (var ban in Model.Where(b => b.TrangThai != BTL_QlBi_a.Models.Entities.TrangThaiBan.BaoTri))
+            {
+                @await Html.PartialAsync("~/Views/Home/Partials/QLBan_Bi_a/_TableCard.cshtml", ban)
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🎱</div>
+            <h3>Không có bàn nào</h3>
+            <p class="empty-text">Chưa có bàn bi-a trong hệ thống</p>
+            @if (isQuanLy)
+            {
+                <button class="btn btn-primary" onclick="BanBiaManager.openAddModal()" style="margin-top: 20px;">
+                    ➕ Thêm bàn đầu tiên
+                </button>
+            }
+        </div>
+    }
+</section>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target === this) TableManager.closeModal()">
+</div>
+
+<!-- Load TableDiagramManager Script -->
+<script src="~/asset/js/qlban/tableDiagram.js"></script>

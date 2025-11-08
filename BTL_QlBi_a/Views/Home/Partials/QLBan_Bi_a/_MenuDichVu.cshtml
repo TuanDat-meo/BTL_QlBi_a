@@ -1,0 +1,125 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.DichVu>
+<link rel="stylesheet" href="~/asset/css/qlBan/menuDichVu.css" />
+<div class="menu-header">
+    <h4 class="menu-title">📋 Thêm dịch vụ</h4>
+    <button class="btn-close-menu" onclick="TableManager.closeModal()">✕</button>
+</div>
+
+<div class="menu-search">
+    <input type="text"
+           class="menu-search-input"
+           placeholder="🔍 Tìm dịch vụ..."
+           id="menuSearch"
+           autocomplete="off"
+           onkeyup="MenuDichVu.searchServices()">
+</div>
+
+<div class="menu-categories">
+    <button class="menu-category-btn active"
+            data-category="all"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('all', event)">
+        Tất cả
+    </button>
+    <button class="menu-category-btn"
+            data-category="DoUong"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('DoUong', event)">
+        Đồ uống
+    </button>
+    <button class="menu-category-btn"
+            data-category="DoAn"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('DoAn', event)">
+        Đồ ăn
+    </button>
+    <button class="menu-category-btn"
+            data-category="Khac"
+            type="button"
+            onclick="MenuDichVu.filterByCategory('Khac', event)">
+        Khác
+    </button>
+</div>
+
+<div class="menu-body">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var dv in Model)
+        {
+            var imagePath = !string.IsNullOrEmpty(dv.HinhAnh)
+            ? Url.Content($"~/asset/img/{dv.HinhAnh}")
+            : Url.Content("~/asset/img/default-service.jpg");
+
+            <div class="menu-item" data-category="@dv.Loai" data-service-id="@dv.MaDV">
+                <div class="menu-item-image">
+                    <img src="@imagePath"
+                         alt="@dv.TenDV"
+                         onerror="this.style.display='none'; this.parentElement.style.background='#f0f0f0';">
+                    @if (dv.TrangThai != BTL_QlBi_a.Models.Entities.TrangThaiDichVu.ConHang)
+                    {
+                        <div class="out-of-stock-overlay">Hết hàng</div>
+                    }
+                </div>
+                <div class="menu-item-info">
+                    <div class="menu-item-name">@dv.TenDV</div>
+                    <div class="menu-item-price">@dv.Gia.ToString("N0") đ</div>
+                    @if (!string.IsNullOrEmpty(dv.MoTa))
+                    {
+                        <div class="menu-item-desc">@dv.MoTa</div>
+                    }
+                </div>
+                @if (dv.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDichVu.ConHang)
+                {
+                    <div class="menu-item-actions">
+                        <button class="btn-quantity btn-minus"
+                                type="button"
+                                onclick="MenuDichVu.decreaseQuantity(@dv.MaDV)">
+                            −
+                        </button>
+                        <input type="number"
+                               class="quantity-input"
+                               id="qty-@dv.MaDV"
+                               value="1"
+                               min="1"
+                               max="99"
+                               readonly>
+                        <button class="btn-quantity btn-plus"
+                                type="button"
+                                onclick="MenuDichVu.increaseQuantity(@dv.MaDV)">
+                            +
+                        </button>
+                        <button class="btn-add-service"
+                                type="button"
+                                onclick="MenuDichVu.addService(@dv.MaDV)">
+                            Thêm
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="menu-empty">
+            <div class="menu-empty-icon">🍽️</div>
+            <p>Không có dịch vụ nào</p>
+        </div>
+    }
+</div>
+
+<script>
+    // Khởi tạo MenuDichVu khi modal được load
+    (function() {
+        console.log('=== MENU DICH VU VIEW LOADED ===');
+
+        // Đợi một chút để đảm bảo DOM đã sẵn sàng
+        setTimeout(function() {
+            if (typeof window.MenuDichVu !== 'undefined') {
+                window.MenuDichVu.init();
+                console.log('✅ MenuDichVu initialized from view');
+            } else {
+                console.error('❌ MenuDichVu not found!');
+            }
+        }, 100);
+    })();
+</script>

@@ -1,0 +1,103 @@
+﻿@model BTL_QlBi_a.Models.Entities.BanBia
+
+@{
+    var tenNhom = ViewBag.TenNhom as string ?? "Nhân viên";
+    bool isAdmin = tenNhom == "Admin";
+    bool isQuanLy = tenNhom == "Quản lý" || isAdmin;
+
+    string statusBadgeClass = Model.TrangThai switch
+    {
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "status-badge available",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "status-badge occupied",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "status-badge reserved",
+        _ => "status-badge"
+    };
+
+    string statusText = Model.TrangThai switch
+    {
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trống",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "Đang chơi",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "Đã đặt",
+        _ => Model.TrangThai.ToString()
+    };
+
+    string statusDataAttr = Model.TrangThai switch
+    {
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trong",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "DangChoi",
+        BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "DaDat",
+        _ => Model.TrangThai.ToString()
+    };
+
+    var imagePath = !string.IsNullOrEmpty(Model.HinhAnh)
+        ? Url.Content($"~/asset/img/{Model.HinhAnh}")
+        : null;
+
+    var tableType = Model.LoaiBan?.TenLoai ?? "Không rõ";
+}
+
+<div class="table-card"
+     data-area="@Model.KhuVuc?.TenKhuVuc"
+     data-status="@statusDataAttr"
+     data-table-type="@tableType"
+     data-table-id="@Model.MaBan"
+     onclick="TableManager.showDetail(@Model.MaBan)">
+
+    <div class="table-image">
+        <img src="@imagePath"
+             alt="@Model.TenBan"
+             class="table-img"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+        <div class="placeholder-icon" style="display: none;">🎱</div>
+
+        <span class="@statusBadgeClass">@statusText</span>
+
+        @if (Model.KhuVuc?.TenKhuVuc == "VIP")
+        {
+            <span class="vip-badge">⭐ VIP</span>
+        }
+
+        @* Nút chỉnh sửa cho Admin và Quản lý *@
+        @if (isQuanLy)
+        {
+            <button class="btn-edit-table"
+                    onclick="event.stopPropagation(); BanBiaManager.openEditModal(@Model.MaBan)"
+                    title="Chỉnh sửa bàn">
+                ✏️
+            </button>
+        }
+    </div>
+
+    <div class="table-content">
+        <div class="table-header">
+            <div class="table-name">@Model.TenBan</div>
+        </div>
+
+        @if (Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi)
+        {
+            if (Model.GioBatDau.HasValue)
+            {
+                var duration = DateTime.Now - Model.GioBatDau.Value;
+                <div class="table-info">👤 <strong>@(Model.KhachHang?.TenKH ?? "Khách lẻ")</strong></div>
+                <div class="table-timer">⏱️ @((int)duration.TotalHours)h @(duration.Minutes)m</div>
+            }
+        }
+        else if (Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat)
+        {
+            if (!string.IsNullOrEmpty(Model.GhiChu))
+            {
+                <div class="table-info">📅 @Model.GhiChu</div>
+            }
+            if (Model.KhachHang != null)
+            {
+                <div class="table-info">👤 <strong>@Model.KhachHang.TenKH</strong></div>
+            }
+        }
+        else
+        {
+            <div class="table-info">@tableType</div>
+            <div class="table-price">@(Model.LoaiBan?.GiaGio.ToString("N0") ?? "0") đ/giờ</div>
+        }
+    </div>
+</div>

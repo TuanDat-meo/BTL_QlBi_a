@@ -36,16 +36,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxTaWdudXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/BanBia.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCYW5CaWEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/BangGia.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCYW5nR2lhLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/CaiDat.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDYWlEYXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/ChiTietBan.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDaGlUaWV0QmFuLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/DichVu.cshtml]
@@ -56,16 +56,48 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxIb2FEb24uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/KhachHang.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxLaGFjaEhhbmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/NhanVien.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxOaGFuVmllbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_AddBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9BZGRCYW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_ChiTietBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9DaGlUaWV0QmFuLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_EditVtriBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9FZGl0VnRyaUJhbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_MenuDichVu.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9NZW51RGljaFZ1LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_PanelChinhSuaBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9QYW5lbENoaW5oU3VhQmFuLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_PanelDatBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9QYW5lbERhdEJhbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_PanelThanhToan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9QYW5lbFRoYW5oVG9hbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_QuanLyBan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9RdWFuTHlCYW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/QLBan_Bi_a/_TableCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xRTEJhbl9CaV9hXF9UYWJsZUNhcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_BangGia.cshtml]
@@ -92,14 +124,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfTmhhblZpZW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_QuanLyBan.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfUXVhbkx5QmFuLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_TableCard.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfVGFibGVDYXJkLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/Partials/_ThongKe.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQYXJ0aWFsc1xfVGhvbmdLZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -110,10 +134,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/ThongKe.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxUaG9uZ0tlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Home/TrangChu.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxUcmFuZ0NodS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Subject_in_class/03. Programing Web/Project/BTL_QlBi_a/BTL_QlBi_a/Views/Shared/Error.cshtml]
