@@ -15,6 +15,7 @@ namespace BTL_QlBi_a.Controllers
             _context = context;
         }
 
+        #region Hàm Phụ
         private async Task LoadHeaderStats()
         {
             var danhSachBan = await _context.BanBia.ToListAsync();
@@ -32,6 +33,9 @@ namespace BTL_QlBi_a.Controllers
 
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
         }
+
+
+        #endregion
         public async Task<IActionResult> HoaDon(
             DateTime? fromDate, DateTime? toDate, string status = "All")
         {
@@ -77,7 +81,7 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.ToDate = toDate;
             ViewBag.Status = status;
 
-            return View(danhSachHD);
+            return View("~/Views/Home/HoaDon.cshtml", danhSachHD);
         }
 
         public async Task<IActionResult> ChiTietHoaDon(int maHD)
@@ -104,7 +108,7 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.ChiTietDichVu = chiTiet;
             Console.WriteLine($"Chi tiết dịch vụ: {chiTiet.Count} items");
 
-            return PartialView("ChiTietHoaDon", hoaDon);
+            return PartialView("~/Views/Home/Partials/HoaDon/_ChiTietHoaDon.cshtml", hoaDon);
         }
         public async Task<IActionResult> InHoaDon(int maHD)
         {
@@ -124,7 +128,7 @@ namespace BTL_QlBi_a.Controllers
                 return NotFound("Không tìm thấy hóa đơn.");
             }
 
-            return View("InHoaDon", hoaDon);
+            return PartialView("~/Views/Home/Partials/HoaDon/_InHoaDon.cshtml", hoaDon);
         }
     }
 }

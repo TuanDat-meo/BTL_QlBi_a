@@ -1,184 +1,117 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.HoaDon>
 
-<div class="section-header">
-    <h2 class="section-title">Quản lý hóa đơn</h2>
-    <div class="action-buttons">
-        <button class="btn btn-success" onclick="exportInvoices()">📥 Xuất báo cáo</button>
-    </div>
-</div>
-
-<div class="filter-bar">
-    <div class="filter-row">
-        <div class="filter-group">
-            <span class="filter-label">Trạng thái:</span>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-status="all" onclick="filterInvoices('all')">Tất cả</button>
-                <button class="filter-btn" data-status="DangChoi" onclick="filterInvoices('DangChoi')">Đang chơi</button>
-                <button class="filter-btn" data-status="DaThanhToan" onclick="filterInvoices('DaThanhToan')">Đã thanh toán</button>
-            </div>
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">Thời gian:</span>
-            <input type="date" class="search-input" id="dateFrom" onchange="filterByDate()">
-            <input type="date" class="search-input" id="dateTo" onchange="filterByDate()">
-        </div>
-    </div>
-    <div class="filter-row">
-        <input type="text" class="search-input" placeholder="🔍 Tìm theo mã HĐ, khách hàng..." id="searchInvoices" onkeyup="searchInvoices()">
-    </div>
-</div>
-
-@if (Model != null && Model.Any())
-{
-        <div class="data-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mã HĐ</th>
-                        <th>Bàn</th>
-                        <th>Khách hàng</th>
-                        <th>Nhân viên</th>
-                        <th>Thời gian</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="invoiceTableBody">
-                @foreach (var hd in Model)
-                {
-                    string statusClass = hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
-                    ? "status-available" : "status-occupied";
-                    string statusText = hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
-                    ? "Đã thanh toán" : "Đang chơi";
-
-                            <tr data-status="@hd.TrangThai" data-date="@hd.ThoiGianBatDau?.ToString("yyyy-MM-dd")">
-                                <td><strong>HD@(hd.MaHD.ToString("D4"))</strong></td>
-                                <td>@hd.BanBia?.TenBan</td>
-                                <td>@(hd.KhachHang?.TenKH ?? "Khách lẻ")</td>
-                                <td>@hd.NhanVien?.TenNV</td>
-                                <td>@hd.ThoiGianBatDau?.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td><strong>@hd.TongTien.ToString("N0") đ</strong></td>
-                                <td><span class="table-status @statusClass">@statusText</span></td>
-                                <td>
-                                    <button class="btn btn-primary" onclick="viewInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
-                                        👁️ Xem
-                                    </button>
-                            @if (hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan)
-                            {
-                                            <button class="btn btn-secondary" onclick="printInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
-                                                🖨️ In
-                                            </button>
-                            }
-                                </td>
-                            </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="info-card" style="margin-top: 20px;">
-            <div class="info-row">
-                <span class="info-label">Tổng hóa đơn:</span>
-                <span class="info-value">@Model.Count() hóa đơn</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Tổng doanh thu:</span>
-                <span class="info-value">@Model.Sum(h => h.TongTien).ToString("N0") đ</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Đã thanh toán:</span>
-                <span class="info-value">@Model.Count(h => h.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan) hóa đơn</span>
-            </div>
-        </div>
-}
-else
-{
-        <div class="empty-state">
-            <div class="empty-icon">📄</div>
-            <h3>Chưa có hóa đơn</h3>
-            <p class="empty-text">Hóa đơn sẽ xuất hiện khi có khách chơi</p>
-        </div>
+@{
+    ViewData["Tittle"] = "Quản lý hóa đơn";
 }
 
-<script>
-    function filterInvoices(status) {
-        const rows = document.querySelectorAll('#invoiceTableBody tr');
-        const buttons = document.querySelectorAll('.filter-btn[data-status]');
+@await Html.PartialAsync("~/Views/Home/Partials/HoaDon/_HoaDon.cshtml",Model);
 
-        buttons.forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.filter-btn[data-status="' + status + '"]')?.classList.add('active');
 
-        rows.forEach(row => {
-            const rowStatus = row.dataset.status;
-            row.style.display = (status === 'all' || rowStatus === status) ? '' : 'none';
-        });
-    }
+@section Scripts {
+        <script>
+            // Test debug
+            console.log('✅ Page loaded');
+            console.log('Detail Panel:', document.getElementById('detailPanel'));
+            console.log('Table Cards:', document.querySelectorAll('.table-card').length);
 
-    function filterByDate() {
-        const dateFrom = document.getElementById('dateFrom').value;
-        const dateTo = document.getElementById('dateTo').value;
-        const rows = document.querySelectorAll('#invoiceTableBody tr');
+            // Adjust container layout when detail is shown
+            const detailPanel = document.getElementById('detailPanel');
+            const container = document.querySelector('.container');
 
-        if (!dateFrom && !dateTo) return;
+            if (detailPanel && container) {
+                // Watch for changes in detail panel
+                const observer = new MutationObserver(function(mutations) {
+                    if (detailPanel.innerHTML.trim() !== '') {
+                        container.classList.add('with-detail');
+                    } else {
+                        container.classList.remove('with-detail');
+                    }
+                });
 
-        rows.forEach(row => {
-            const rowDate = row.dataset.date;
-            let show = true;
-
-            if (dateFrom && rowDate < dateFrom) show = false;
-            if (dateTo && rowDate > dateTo) show = false;
-
-            row.style.display = show ? '' : 'none';
-        });
-    }
-
-    function searchInvoices() {
-        const searchValue = document.getElementById('searchInvoices').value.toLowerCase();
-        const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchValue) ? '' : 'none';
-        });
-    }
-
-      async function viewInvoice(maHD) {
-        const detailPanel = document.getElementById('detailPanel');
-        if (!detailPanel) {
-            console.error('Không tìm thấy #detailPanel');
-            return;
-        }
-
-        detailPanel.innerHTML = '<div class="empty-text">Đang tải chi tiết...</div>';
-
-        const rightPanel = document.querySelector('.right-panel');
-        if (rightPanel) {
-            rightPanel.classList.add('active');
-        }
-
-        try {
-            const response = await fetch('/Home/ChiTietHoaDon?maHD=' + maHD); // <-- ĐÃ SỬA
-
-            if (!response.ok) {
-                detailPanel.innerHTML = '<div class="empty-state">Lỗi khi tải dữ liệu.</div>';
-                throw new Error(`HTTP error! status: ${response.status}`);
+                observer.observe(detailPanel, {
+                    childList: true,
+                    subtree: true
+                });
             }
 
-            const html = await response.text();
-            detailPanel.innerHTML = html;
+       function filterInvoices(status) {
+            const rows = document.querySelectorAll('#invoiceTableBody tr');
+            const buttons = document.querySelectorAll('.filter-btn[data-status]');
 
-        } catch (error) {
-            console.error('Lỗi fetch ChiTietHoaDon:', error);
-            detailPanel.innerHTML = '<div class="empty-state">Không thể tải chi tiết.</div>';
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-status="' + status + '"]')?.classList.add('active');
+
+            rows.forEach(row => {
+                const rowStatus = row.dataset.status;
+                row.style.display = (status === 'all' || rowStatus === status) ? '' : 'none';
+            });
         }
-    }
 
-    function printInvoice(maHD) {
-        window.open('/Home/InHoaDon?maHD=' + maHD, '_blank');
-    }
+        function filterByDate() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const rows = document.querySelectorAll('#invoiceTableBody tr');
 
-    function exportInvoices() {
-        alert('Xuất báo cáo hóa đơn');
-    }
-</script>
+            if (!dateFrom && !dateTo) return;
+
+            rows.forEach(row => {
+                const rowDate = row.dataset.date;
+                let show = true;
+
+                if (dateFrom && rowDate < dateFrom) show = false;
+                if (dateTo && rowDate > dateTo) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function searchInvoices() {
+            const searchValue = document.getElementById('searchInvoices').value.toLowerCase();
+            const rows = document.querySelectorAll('#invoiceTableBody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        }
+
+          async function viewInvoice(maHD) {
+            const detailPanel = document.getElementById('detailPanel');
+            if (!detailPanel) {
+                console.error('Không tìm thấy #detailPanel');
+                return;
+            }
+
+            detailPanel.innerHTML = '<div class="empty-text">Đang tải chi tiết...</div>';
+
+            const rightPanel = document.querySelector('.right-panel');
+            if (rightPanel) {
+                rightPanel.classList.add('active');
+            }
+
+            try {
+                const response = await fetch('/HoaDon/ChiTietHoaDon?maHD=' + maHD); // <-- ĐÃ SỬA
+
+                if (!response.ok) {
+                    detailPanel.innerHTML = '<div class="empty-state">Lỗi khi tải dữ liệu.</div>';
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const html = await response.text();
+                detailPanel.innerHTML = html;
+
+            } catch (error) {
+                console.error('Lỗi fetch ChiTietHoaDon:', error);
+                detailPanel.innerHTML = '<div class="empty-state">Không thể tải chi tiết.</div>';
+            }
+        }
+
+        function printInvoice(maHD) {
+            window.open('/HoaDon/InHoaDon?maHD=' + maHD, '_blank');
+        }
+
+        function exportInvoices() {
+            alert('Xuất báo cáo hóa đơn');
+        }
+        </script>
+}

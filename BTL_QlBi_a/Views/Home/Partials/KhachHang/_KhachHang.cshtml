@@ -27,7 +27,7 @@
 
 @if (Model != null && Model.Any())
 {
-    <div class="tables-grid" id="customersGrid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        <div class="tables-grid" id="customersGrid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
         @foreach (var kh in Model)
         {
             string rankIcon = kh.HangTV switch
@@ -46,111 +46,69 @@
                 _ => "#ffe4cc"
             };
 
-            <div class="table-card available" data-rank="@kh.HangTV" style="background: linear-gradient(135deg, white, @rankColor);">
-                <span class="vip-badge" style="background: @rankColor; color: #000;">@rankIcon @kh.HangTV</span>
+                    <div class="table-card available" data-rank="@kh.HangTV" style="background: linear-gradient(135deg, white, @rankColor);">
+                        <span class="vip-badge" style="background: @rankColor; color: #000;">@rankIcon @kh.HangTV</span>
 
-                <div class="user-avatar" style="width: 60px; height: 60px; margin: 15px auto; font-size: 24px;">
+                        <div class="user-avatar" style="width: 60px; height: 60px; margin: 15px auto; font-size: 24px;">
                     @kh.TenKH.Substring(0, 1)
-                </div>
+                        </div>
 
-                <div class="table-name">@kh.TenKH</div>
-                <div class="table-info">📱 @kh.SDT</div>
+                        <div class="table-name">@kh.TenKH</div>
+                        <div class="table-info">📱 @kh.SDT</div>
 
                 @if (!string.IsNullOrEmpty(kh.Email))
                 {
-                    <div class="table-info">✉️ @kh.Email</div>
+                                <div class="table-info">✉️ @kh.Email</div>
                 }
 
-                <div class="info-card" style="margin: 10px 0; padding: 8px;">
-                    <div class="info-row" style="padding: 4px 0;">
-                        <span class="info-label">Điểm tích lũy:</span>
-                        <span class="info-value" style="color: #e74c3c; font-weight: 700;">@kh.DiemTichLuy</span>
-                    </div>
-                    <div class="info-row" style="padding: 4px 0;">
-                        <span class="info-label">Tổng chi tiêu:</span>
-                        <span class="info-value">@kh.TongChiTieu.ToString("N0") đ</span>
-                    </div>
-                </div>
+                        <div class="info-card" style="margin: 10px 0; padding: 8px;">
+                            <div class="info-row" style="padding: 4px 0;">
+                                <span class="info-label">Điểm tích lũy:</span>
+                                <span class="info-value" style="color: #e74c3c; font-weight: 700;">@kh.DiemTichLuy</span>
+                            </div>
+                            <div class="info-row" style="padding: 4px 0;">
+                                <span class="info-label">Tổng chi tiêu:</span>
+                                <span class="info-value">@kh.TongChiTieu.ToString("N0") đ</span>
+                            </div>
+                        </div>
 
                 @if (kh.LanDenCuoi.HasValue)
                 {
-                    <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
+                                <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
                 }
 
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="viewCustomer(@kh.MaKH)">
-                        👁️ Chi tiết
-                    </button>
-                    <button class="btn btn-secondary" onclick="editCustomer(@kh.MaKH)">
-                        ✏️ Sửa
-                    </button>
-                </div>
-            </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="viewCustomer(@kh.MaKH)">
+                                👁️ Chi tiết
+                            </button>
+                            <button class="btn btn-secondary" onclick="editCustomer(@kh.MaKH)">
+                                ✏️ Sửa
+                            </button>
+                        </div>
+                    </div>
         }
-    </div>
+        </div>
 
-    <div class="info-card" style="margin-top: 20px;">
-        <div class="info-row">
-            <span class="info-label">Tổng khách hàng:</span>
-            <span class="info-value">@Model.Count() khách</span>
+        <div class="info-card" style="margin-top: 20px;">
+            <div class="info-row">
+                <span class="info-label">Tổng khách hàng:</span>
+                <span class="info-value">@Model.Count() khách</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tổng điểm tích lũy:</span>
+                <span class="info-value">@Model.Sum(k => k.DiemTichLuy) điểm</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tổng chi tiêu:</span>
+                <span class="info-value">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
+            </div>
         </div>
-        <div class="info-row">
-            <span class="info-label">Tổng điểm tích lũy:</span>
-            <span class="info-value">@Model.Sum(k => k.DiemTichLuy) điểm</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Tổng chi tiêu:</span>
-            <span class="info-value">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
-        </div>
-    </div>
 }
 else
 {
-    <div class="empty-state">
-        <div class="empty-icon">👥</div>
-        <h3>Chưa có khách hàng</h3>
-        <p class="empty-text">Thêm khách hàng đầu tiên vào hệ thống</p>
-    </div>
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <h3>Chưa có khách hàng</h3>
+            <p class="empty-text">Thêm khách hàng đầu tiên vào hệ thống</p>
+        </div>
 }
-
-<script>
-    function filterCustomers(rank) {
-        const cards = document.querySelectorAll('#customersGrid .table-card');
-        const buttons = document.querySelectorAll('.filter-btn[data-filter]');
-
-        buttons.forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.filter-btn[data-filter="' + rank + '"]')?.classList.add('active');
-
-        const searchValue = document.getElementById('searchCustomers').value.toLowerCase();
-
-        cards.forEach(card => {
-            const cardRank = card.dataset.rank;
-            const customerInfo = card.textContent.toLowerCase();
-
-            const rankMatch = (rank === 'all' || cardRank === rank);
-            const searchMatch = (searchValue === '' || customerInfo.includes(searchValue));
-
-            card.style.display = (rankMatch && searchMatch) ? 'block' : 'none';
-        });
-    }
-
-    function searchCustomers() {
-        filterCustomers(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
-    }
-
-    function openAddCustomerModal() {
-        alert('Mở form thêm khách hàng mới');
-    }
-
-    function viewCustomer(maKH) {
-        alert('Xem chi tiết khách hàng: ' + maKH);
-    }
-
-    function editCustomer(maKH) {
-        alert('Sửa thông tin khách hàng: ' + maKH);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        filterCustomers('all');
-    });
-</script>

@@ -1,0 +1,3 @@
+﻿# Bỏ qua các file build của .NET
+**/[Bb]in/
+**/[Oo]bj/g

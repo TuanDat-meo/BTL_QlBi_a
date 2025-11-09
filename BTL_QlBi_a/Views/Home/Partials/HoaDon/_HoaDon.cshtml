@@ -30,21 +30,21 @@
 
 @if (Model != null && Model.Any())
 {
-    <div class="data-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Mã HĐ</th>
-                    <th>Bàn</th>
-                    <th>Khách hàng</th>
-                    <th>Nhân viên</th>
-                    <th>Thời gian</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody id="invoiceTableBody">
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã HĐ</th>
+                            <th>Bàn</th>
+                            <th>Khách hàng</th>
+                            <th>Nhân viên</th>
+                            <th>Thời gian</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceTableBody">
                 @foreach (var hd in Model)
                 {
                     string statusClass = hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
@@ -52,106 +52,52 @@
                     string statusText = hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
                     ? "Đã thanh toán" : "Đang chơi";
 
-                    <tr data-status="@hd.TrangThai" data-date="@hd.ThoiGianBatDau?.ToString("yyyy-MM-dd")">
-                        <td><strong>HD@(hd.MaHD.ToString("D4"))</strong></td>
-                        <td>@hd.BanBia?.TenBan</td>
-                        <td>@(hd.KhachHang?.TenKH ?? "Khách lẻ")</td>
-                        <td>@hd.NhanVien?.TenNV</td>
-                        <td>@hd.ThoiGianBatDau?.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td><strong>@hd.TongTien.ToString("N0") đ</strong></td>
-                        <td><span class="table-status @statusClass">@statusText</span></td>
-                        <td>
-                            <button class="btn btn-primary" onclick="viewInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
-                                👁️ Xem
-                            </button>
+                                    <tr data-status="@hd.TrangThai" data-date="@hd.ThoiGianBatDau?.ToString("yyyy-MM-dd")">
+                                        <td><strong>HD@(hd.MaHD.ToString("D4"))</strong></td>
+                                        <td>@hd.BanBia?.TenBan</td>
+                                        <td>@(hd.KhachHang?.TenKH ?? "Khách lẻ")</td>
+                                        <td>@hd.NhanVien?.TenNV</td>
+                                        <td>@hd.ThoiGianBatDau?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td><strong>@hd.TongTien.ToString("N0") đ</strong></td>
+                                        <td><span class="table-status @statusClass">@statusText</span></td>
+                                        <td>
+                                            <button class="btn btn-primary" onclick="viewInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
+                                                👁️ Xem
+                                            </button>
                             @if (hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan)
                             {
-                                <button class="btn btn-secondary" onclick="printInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
-                                    🖨️ In
-                                </button>
+                                                        <button class="btn btn-secondary" onclick="printInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
+                                                            🖨️ In
+                                                        </button>
                             }
-                        </td>
-                    </tr>
+                                        </td>
+                                    </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+                    </tbody>
+                </table>
+            </div>
 
-    <div class="info-card" style="margin-top: 20px;">
-        <div class="info-row">
-            <span class="info-label">Tổng hóa đơn:</span>
-            <span class="info-value">@Model.Count() hóa đơn</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Tổng doanh thu:</span>
-            <span class="info-value">@Model.Sum(h => h.TongTien).ToString("N0") đ</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Đã thanh toán:</span>
-            <span class="info-value">@Model.Count(h => h.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan) hóa đơn</span>
-        </div>
-    </div>
+            <div class="info-card" style="margin-top: 20px;">
+                <div class="info-row">
+                    <span class="info-label">Tổng hóa đơn:</span>
+                    <span class="info-value">@Model.Count() hóa đơn</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tổng doanh thu:</span>
+                    <span class="info-value">@Model.Sum(h => h.TongTien).ToString("N0") đ</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Đã thanh toán:</span>
+                    <span class="info-value">@Model.Count(h => h.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan) hóa đơn</span>
+                </div>
+            </div>
 }
 else
 {
-    <div class="empty-state">
-        <div class="empty-icon">📄</div>
-        <h3>Chưa có hóa đơn</h3>
-        <p class="empty-text">Hóa đơn sẽ xuất hiện khi có khách chơi</p>
-    </div>
+            <div class="empty-state">
+                <div class="empty-icon">📄</div>
+                <h3>Chưa có hóa đơn</h3>
+                <p class="empty-text">Hóa đơn sẽ xuất hiện khi có khách chơi</p>
+            </div>
 }
 
-<script>
-    function filterInvoices(status) {
-        const rows = document.querySelectorAll('#invoiceTableBody tr');
-        const buttons = document.querySelectorAll('.filter-btn[data-status]');
-
-        buttons.forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.filter-btn[data-status="' + status + '"]')?.classList.add('active');
-
-        rows.forEach(row => {
-            const rowStatus = row.dataset.status;
-            row.style.display = (status === 'all' || rowStatus === status) ? '' : 'none';
-        });
-    }
-
-    function filterByDate() {
-        const dateFrom = document.getElementById('dateFrom').value;
-        const dateTo = document.getElementById('dateTo').value;
-        const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-        if (!dateFrom && !dateTo) return;
-
-        rows.forEach(row => {
-            const rowDate = row.dataset.date;
-            let show = true;
-
-            if (dateFrom && rowDate < dateFrom) show = false;
-            if (dateTo && rowDate > dateTo) show = false;
-
-            row.style.display = show ? '' : 'none';
-        });
-    }
-
-    function searchInvoices() {
-        const searchValue = document.getElementById('searchInvoices').value.toLowerCase();
-        const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchValue) ? '' : 'none';
-        });
-    }
-
-    function viewInvoice(maHD) {
-        window.location.href = '/Home/ChiTietHoaDon?maHD=' + maHD;
-    }
-
-    function printInvoice(maHD) {
-        window.open('/Home/InHoaDon?maHD=' + maHD, '_blank');
-    }
-
-    function exportInvoices() {
-        alert('Xuất báo cáo hóa đơn');
-    }
-</script>
