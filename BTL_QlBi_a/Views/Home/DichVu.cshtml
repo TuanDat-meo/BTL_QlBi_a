@@ -1,0 +1,14 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.DichVu>
+@{
+    ViewData["Title"] = "Dịch vụ & Menu";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/service.css" />
+}
+
+@await Html.PartialAsync("Partials/_DichVu", Model)
+
+@section Scripts {
+    <script src="~/asset/js/dichvu.js" asp-append-version="true"></script>
+}

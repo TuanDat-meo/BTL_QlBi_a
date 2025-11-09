@@ -1,0 +1,43 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
+@{
+    ViewData["Title"] = "Quản lý bàn";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/qlBan/table.css" />
+    <link rel="stylesheet" href="~/asset/css/qlBan/datBan.css" />
+    <link rel="stylesheet" href="~/asset/css/qlBan/diagram.css" />
+}
+
+@await Html.PartialAsync("~/Views/Home/Partials/QLBan_Bi_a/_QuanLyBan.cshtml", Model)
+@section Scripts {
+    <script src="~/asset/js/qlban/quanlyban.js"></script>
+    <script src="~/asset/js/qlban/datBan.js"></script>
+    <script src="~/asset/js/qlban/banBiaManager.js"></script>
+    <script>
+        // Test debug
+        console.log('✅ Page loaded');
+        console.log('Detail Panel:', document.getElementById('detailPanel'));
+        console.log('Table Cards:', document.querySelectorAll('.table-card').length);
+
+        // Adjust container layout when detail is shown
+        const detailPanel = document.getElementById('detailPanel');
+        const container = document.querySelector('.container');
+
+        if (detailPanel && container) {
+            // Watch for changes in detail panel
+            const observer = new MutationObserver(function(mutations) {
+                if (detailPanel.innerHTML.trim() !== '') {
+                    container.classList.add('with-detail');
+                } else {
+                    container.classList.remove('with-detail');
+                }
+            });
+
+            observer.observe(detailPanel, {
+                childList: true,
+                subtree: true
+            });
+        }
+    </script>
+}

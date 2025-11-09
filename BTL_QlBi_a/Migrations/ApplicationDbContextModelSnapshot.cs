@@ -22,7 +22,7 @@ namespace BTL_QlBi_a.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.BanBi_a", b =>
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.BanBia", b =>
                 {
                     b.Property<int>("MaBan")
                         .ValueGeneratedOnAdd()
@@ -45,16 +45,13 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("hinh_anh");
 
-                    b.Property<string>("KhuVuc")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Tang1")
-                        .HasColumnName("khu_vuc");
-
                     b.Property<int?>("MaKH")
                         .HasColumnType("int")
                         .HasColumnName("ma_kh");
+
+                    b.Property<int>("MaKhuVuc")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_khu_vuc");
 
                     b.Property<int>("MaLoai")
                         .HasColumnType("int")
@@ -73,15 +70,26 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ten_ban");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Trong")
+                        .HasDefaultValue("Trống")
                         .HasColumnName("trang_thai");
+
+                    b.Property<decimal?>("ViTriX")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("vi_tri_x");
+
+                    b.Property<decimal?>("ViTriY")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("vi_tri_y");
 
                     b.HasKey("MaBan");
 
                     b.HasIndex("MaKH");
+
+                    b.HasIndex("MaKhuVuc");
 
                     b.HasIndex("MaLoai");
 
@@ -208,17 +216,19 @@ namespace BTL_QlBi_a.Migrations
                         .HasComputedColumnSql("(CASE WHEN [gio_ra] IS NOT NULL THEN CAST(DATEDIFF(MINUTE, [gio_vao], [gio_ra]) AS DECIMAL(5,2)) / 60.0 ELSE 0 END)", true);
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DungGio")
+                        .HasDefaultValue("Đúng giờ")
                         .HasColumnName("trang_thai");
 
                     b.Property<string>("XacThucBang")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ThuCong")
+                        .HasDefaultValue("Thủ công")
                         .HasColumnName("xac_thuc_bang");
 
                     b.HasKey("ID");
@@ -264,6 +274,69 @@ namespace BTL_QlBi_a.Migrations
                     b.ToTable("chi_tiet_hoa_don", (string)null);
                 });
 
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.ChiTietPhieuNhap", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<decimal>("DonGiaNhap")
+                        .HasColumnType("decimal(10,0)")
+                        .HasColumnName("don_gia_nhap");
+
+                    b.Property<int>("MaHang")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_hang");
+
+                    b.Property<int>("MaPN")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_pn");
+
+                    b.Property<int>("SoLuongNhap")
+                        .HasColumnType("int")
+                        .HasColumnName("so_luong_nhap");
+
+                    b.Property<decimal?>("ThanhTien")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("decimal(10,0)")
+                        .HasColumnName("thanh_tien")
+                        .HasComputedColumnSql("[so_luong_nhap] * [don_gia_nhap]", true);
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MaHang");
+
+                    b.HasIndex("MaPN");
+
+                    b.ToTable("chi_tiet_phieu_nhap", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.ChucNang", b =>
+                {
+                    b.Property<string>("MaCN")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ma_cn");
+
+                    b.Property<string>("MoTa")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("mo_ta");
+
+                    b.Property<string>("TenCN")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ten_cn");
+
+                    b.HasKey("MaCN");
+
+                    b.ToTable("chuc_nang", (string)null);
+                });
+
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.DatBan", b =>
                 {
                     b.Property<int>("MaDat")
@@ -272,11 +345,6 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ma_dat");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDat"));
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("email");
 
                     b.Property<string>("GhiChu")
                         .HasColumnType("nvarchar(max)")
@@ -317,10 +385,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("thoi_gian_dat");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangCho")
+                        .HasDefaultValue("Đang chờ")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaDat");
@@ -358,8 +427,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("hinh_anh");
 
                     b.Property<string>("Loai")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Khác")
                         .HasColumnName("loai");
 
                     b.Property<int?>("MaHang")
@@ -377,29 +449,18 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ngay_tao")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<int>("SoLuongTon")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
-                        .HasColumnName("so_luong_ton");
-
                     b.Property<string>("TenDV")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("ten_dv");
 
-                    b.Property<decimal>("TiLeLoiNhuan")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(5,2)")
-                        .HasDefaultValue(30.00m)
-                        .HasColumnName("ti_le_loi_nhuan");
-
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ConHang")
+                        .HasDefaultValue("Còn hàng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaDV");
@@ -445,10 +506,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ma_loai");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangApDung")
+                        .HasDefaultValue("Đang áp dụng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("ID");
@@ -471,6 +533,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ghi_chu");
 
+                    b.Property<string>("GhiChuGiamGia")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("ghi_chu_giam_gia");
+
                     b.Property<decimal>("GiamGia")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(12,0)")
@@ -481,6 +548,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("int")
                         .HasColumnName("ma_ban");
 
+                    b.Property<string>("MaGiaoDichQR")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ma_giao_dich_qr");
+
                     b.Property<int?>("MaKH")
                         .HasColumnType("int")
                         .HasColumnName("ma_kh");
@@ -490,11 +562,17 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ma_nv");
 
                     b.Property<string>("PhuongThucThanhToan")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("TienMat")
+                        .HasDefaultValue("Tiền mặt")
                         .HasColumnName("phuong_thuc_thanh_toan");
+
+                    b.Property<string>("QRCodeUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("qr_code_url");
 
                     b.Property<DateTime?>("ThoiGianBatDau")
                         .HasColumnType("datetime2")
@@ -505,8 +583,10 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("thoi_gian_ket_thuc");
 
                     b.Property<int?>("ThoiLuongPhut")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("int")
-                        .HasColumnName("thoi_luong_phut");
+                        .HasColumnName("thoi_luong_phut")
+                        .HasComputedColumnSql("(CASE WHEN [thoi_gian_ket_thuc] IS NOT NULL THEN DATEDIFF(MINUTE, [thoi_gian_bat_dau], [thoi_gian_ket_thuc]) ELSE 0 END)", true);
 
                     b.Property<decimal>("TienBan")
                         .ValueGeneratedOnAdd()
@@ -527,10 +607,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("tong_tien");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangChoi")
+                        .HasDefaultValue("Đang chơi")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaHD");
@@ -560,21 +641,25 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("diem_tich_luy");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("email");
 
                     b.Property<string>("HangTV")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Dong")
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Đồng")
                         .HasColumnName("hang_tv");
 
                     b.Property<DateTime?>("LanDenCuoi")
                         .HasColumnType("datetime2")
                         .HasColumnName("lan_den_cuoi");
+
+                    b.Property<string>("MatKhau")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("mat_khau");
 
                     b.Property<DateTime>("NgayDangKy")
                         .ValueGeneratedOnAdd()
@@ -587,7 +672,6 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ngay_sinh");
 
                     b.Property<string>("SDT")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)")
                         .HasColumnName("sdt");
@@ -607,9 +691,38 @@ namespace BTL_QlBi_a.Migrations
                     b.HasKey("MaKH");
 
                     b.HasIndex("SDT")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[sdt] IS NOT NULL");
 
                     b.ToTable("khach_hang", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.KhuVuc", b =>
+                {
+                    b.Property<int>("MaKhuVuc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_khu_vuc");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaKhuVuc"));
+
+                    b.Property<string>("MoTa")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("mo_ta");
+
+                    b.Property<string>("TenKhuVuc")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ten_khu_vuc");
+
+                    b.HasKey("MaKhuVuc");
+
+                    b.HasIndex("TenKhuVuc")
+                        .IsUnique();
+
+                    b.ToTable("khu_vuc", (string)null);
                 });
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.LichSuHoatDong", b =>
@@ -672,10 +785,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ten_loai");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangApDung")
+                        .HasDefaultValue("Đang áp dụng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaLoai");
@@ -712,9 +826,16 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("hinh_anh");
 
                     b.Property<string>("Loai")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Khác")
                         .HasColumnName("loai");
+
+                    b.Property<int?>("MaNCCDefault")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_ncc_default");
 
                     b.Property<string>("MoTa")
                         .HasMaxLength(255)
@@ -731,10 +852,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ngay_tao")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<string>("NhaCungCap")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("nha_cung_cap");
+                    b.Property<int>("NguongCanhBao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(10)
+                        .HasColumnName("nguong_canh_bao");
 
                     b.Property<int>("SoLuongTon")
                         .ValueGeneratedOnAdd()
@@ -749,15 +871,53 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ten_hang");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ConHang")
+                        .HasDefaultValue("Còn hàng")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaHang");
 
+                    b.HasIndex("MaNCCDefault");
+
                     b.ToTable("mat_hang", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhaCungCap", b =>
+                {
+                    b.Property<int>("MaNCC")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_ncc");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaNCC"));
+
+                    b.Property<string>("DiaChi")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("dia_chi");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("SDT")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)")
+                        .HasColumnName("sdt");
+
+                    b.Property<string>("TenNCC")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ten_ncc");
+
+                    b.HasKey("MaNCC");
+
+                    b.ToTable("nha_cung_cap", (string)null);
                 });
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhanVien", b =>
@@ -770,22 +930,12 @@ namespace BTL_QlBi_a.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaNV"));
 
                     b.Property<string>("CaMacDinh")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
-                        .HasDefaultValue("Sang")
+                        .HasDefaultValue("Sáng")
                         .HasColumnName("ca_mac_dinh");
-
-                    b.Property<string>("ChucVu")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("chuc_vu");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("email");
 
                     b.Property<string>("FaceIDAnh")
                         .HasMaxLength(255)
@@ -803,6 +953,10 @@ namespace BTL_QlBi_a.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("luong_co_ban");
 
+                    b.Property<int>("MaNhom")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_nhom");
+
                     b.Property<string>("MaVanTay")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
@@ -814,12 +968,6 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("mat_khau");
 
-                    b.Property<DateTime>("NgayVaoLam")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ngay_vao_lam")
-                        .HasDefaultValueSql("GETDATE()");
-
                     b.Property<decimal>("PhuCap")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(12,0)")
@@ -827,7 +975,6 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("phu_cap");
 
                     b.Property<string>("SDT")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)")
                         .HasColumnName("sdt");
@@ -839,10 +986,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ten_nv");
 
                     b.Property<string>("TrangThai")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("DangLam")
+                        .HasDefaultValue("Đang làm")
                         .HasColumnName("trang_thai");
 
                     b.HasKey("MaNV");
@@ -851,6 +999,8 @@ namespace BTL_QlBi_a.Migrations
                         .IsUnique()
                         .HasFilter("[faceid_hash] IS NOT NULL");
 
+                    b.HasIndex("MaNhom");
+
                     b.HasIndex("MaVanTay")
                         .IsUnique()
                         .HasFilter("[ma_van_tay] IS NOT NULL");
@@ -858,20 +1008,160 @@ namespace BTL_QlBi_a.Migrations
                     b.ToTable("nhan_vien", (string)null);
                 });
 
-            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.BanBi_a", b =>
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhomQuyen", b =>
+                {
+                    b.Property<int>("MaNhom")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_nhom");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaNhom"));
+
+                    b.Property<string>("TenNhom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ten_nhom");
+
+                    b.HasKey("MaNhom");
+
+                    b.HasIndex("TenNhom")
+                        .IsUnique();
+
+                    b.ToTable("nhom_quyen", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.PhanQuyen", b =>
+                {
+                    b.Property<int>("MaNhom")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_nhom");
+
+                    b.Property<string>("MaCN")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ma_cn");
+
+                    b.HasKey("MaNhom", "MaCN");
+
+                    b.HasIndex("MaCN");
+
+                    b.ToTable("phan_quyen", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.PhieuNhap", b =>
+                {
+                    b.Property<int>("MaPN")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_pn");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaPN"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("ghi_chu");
+
+                    b.Property<int>("MaNCC")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_ncc");
+
+                    b.Property<int>("MaNV")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_nv");
+
+                    b.Property<DateTime>("NgayNhap")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ngay_nhap")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<decimal>("TongTien")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(12,0)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("tong_tien");
+
+                    b.HasKey("MaPN");
+
+                    b.HasIndex("MaNCC");
+
+                    b.HasIndex("MaNV");
+
+                    b.ToTable("phieu_nhap", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.SoQuy", b =>
+                {
+                    b.Property<int>("MaPhieu")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_phieu");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaPhieu"));
+
+                    b.Property<string>("LoaiPhieu")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("loai_phieu");
+
+                    b.Property<string>("LyDo")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("ly_do");
+
+                    b.Property<int?>("MaHDLienQuan")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_hd_lien_quan");
+
+                    b.Property<int>("MaNV")
+                        .HasColumnType("int")
+                        .HasColumnName("ma_nv");
+
+                    b.Property<DateTime>("NgayLap")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ngay_lap")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<decimal>("SoTien")
+                        .HasColumnType("decimal(12,0)")
+                        .HasColumnName("so_tien");
+
+                    b.HasKey("MaPhieu");
+
+                    b.HasIndex("MaHDLienQuan");
+
+                    b.HasIndex("MaNV");
+
+                    b.ToTable("so_quy", (string)null);
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.BanBia", b =>
                 {
                     b.HasOne("BTL_QlBi_a.Models.Entities.KhachHang", "KhachHang")
                         .WithMany("BanBias")
                         .HasForeignKey("MaKH")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("BTL_QlBi_a.Models.Entities.KhuVuc", "KhuVuc")
+                        .WithMany("BanBias")
+                        .HasForeignKey("MaKhuVuc")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("BTL_QlBi_a.Models.Entities.LoaiBan", "LoaiBan")
-                        .WithMany("BanBi_a")
+                        .WithMany("BanBias")
                         .HasForeignKey("MaLoai")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("KhachHang");
+
+                    b.Navigation("KhuVuc");
 
                     b.Navigation("LoaiBan");
                 });
@@ -915,9 +1205,28 @@ namespace BTL_QlBi_a.Migrations
                     b.Navigation("HoaDon");
                 });
 
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.ChiTietPhieuNhap", b =>
+                {
+                    b.HasOne("BTL_QlBi_a.Models.Entities.MatHang", "MatHang")
+                        .WithMany("ChiTietPhieuNhaps")
+                        .HasForeignKey("MaHang")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BTL_QlBi_a.Models.Entities.PhieuNhap", "PhieuNhap")
+                        .WithMany("ChiTietPhieuNhaps")
+                        .HasForeignKey("MaPN")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MatHang");
+
+                    b.Navigation("PhieuNhap");
+                });
+
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.DatBan", b =>
                 {
-                    b.HasOne("BTL_QlBi_a.Models.Entities.BanBi_a", "BanBia")
+                    b.HasOne("BTL_QlBi_a.Models.Entities.BanBia", "BanBia")
                         .WithMany("DatBans")
                         .HasForeignKey("MaBan")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -954,7 +1263,7 @@ namespace BTL_QlBi_a.Migrations
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.HoaDon", b =>
                 {
-                    b.HasOne("BTL_QlBi_a.Models.Entities.BanBi_a", "BanBia")
+                    b.HasOne("BTL_QlBi_a.Models.Entities.BanBia", "BanBia")
                         .WithMany("HoaDons")
                         .HasForeignKey("MaBan")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -986,11 +1295,93 @@ namespace BTL_QlBi_a.Migrations
                     b.Navigation("NhanVien");
                 });
 
-            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.BanBi_a", b =>
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.MatHang", b =>
+                {
+                    b.HasOne("BTL_QlBi_a.Models.Entities.NhaCungCap", "NhaCungCap")
+                        .WithMany("MatHangs")
+                        .HasForeignKey("MaNCCDefault")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("NhaCungCap");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhanVien", b =>
+                {
+                    b.HasOne("BTL_QlBi_a.Models.Entities.NhomQuyen", "NhomQuyen")
+                        .WithMany("NhanViens")
+                        .HasForeignKey("MaNhom")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NhomQuyen");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.PhanQuyen", b =>
+                {
+                    b.HasOne("BTL_QlBi_a.Models.Entities.ChucNang", "ChucNang")
+                        .WithMany("PhanQuyens")
+                        .HasForeignKey("MaCN")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BTL_QlBi_a.Models.Entities.NhomQuyen", "NhomQuyen")
+                        .WithMany("PhanQuyens")
+                        .HasForeignKey("MaNhom")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChucNang");
+
+                    b.Navigation("NhomQuyen");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.PhieuNhap", b =>
+                {
+                    b.HasOne("BTL_QlBi_a.Models.Entities.NhaCungCap", "NhaCungCap")
+                        .WithMany("PhieuNhaps")
+                        .HasForeignKey("MaNCC")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BTL_QlBi_a.Models.Entities.NhanVien", "NhanVien")
+                        .WithMany("PhieuNhaps")
+                        .HasForeignKey("MaNV")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NhaCungCap");
+
+                    b.Navigation("NhanVien");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.SoQuy", b =>
+                {
+                    b.HasOne("BTL_QlBi_a.Models.Entities.HoaDon", "HoaDon")
+                        .WithMany("SoQuys")
+                        .HasForeignKey("MaHDLienQuan")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("BTL_QlBi_a.Models.Entities.NhanVien", "NhanVien")
+                        .WithMany("SoQuys")
+                        .HasForeignKey("MaNV")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HoaDon");
+
+                    b.Navigation("NhanVien");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.BanBia", b =>
                 {
                     b.Navigation("DatBans");
 
                     b.Navigation("HoaDons");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.ChucNang", b =>
+                {
+                    b.Navigation("PhanQuyens");
                 });
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.DichVu", b =>
@@ -1001,6 +1392,8 @@ namespace BTL_QlBi_a.Migrations
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.HoaDon", b =>
                 {
                     b.Navigation("ChiTietHoaDons");
+
+                    b.Navigation("SoQuys");
                 });
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.KhachHang", b =>
@@ -1012,16 +1405,30 @@ namespace BTL_QlBi_a.Migrations
                     b.Navigation("HoaDons");
                 });
 
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.KhuVuc", b =>
+                {
+                    b.Navigation("BanBias");
+                });
+
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.LoaiBan", b =>
                 {
-                    b.Navigation("BanBi_a");
+                    b.Navigation("BanBias");
 
                     b.Navigation("GiaGioChois");
                 });
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.MatHang", b =>
                 {
+                    b.Navigation("ChiTietPhieuNhaps");
+
                     b.Navigation("DichVus");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhaCungCap", b =>
+                {
+                    b.Navigation("MatHangs");
+
+                    b.Navigation("PhieuNhaps");
                 });
 
             modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhanVien", b =>
@@ -1033,6 +1440,22 @@ namespace BTL_QlBi_a.Migrations
                     b.Navigation("HoaDons");
 
                     b.Navigation("LichSuHoatDongs");
+
+                    b.Navigation("PhieuNhaps");
+
+                    b.Navigation("SoQuys");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.NhomQuyen", b =>
+                {
+                    b.Navigation("NhanViens");
+
+                    b.Navigation("PhanQuyens");
+                });
+
+            modelBuilder.Entity("BTL_QlBi_a.Models.Entities.PhieuNhap", b =>
+                {
+                    b.Navigation("ChiTietPhieuNhaps");
                 });
 #pragma warning restore 612, 618
         }

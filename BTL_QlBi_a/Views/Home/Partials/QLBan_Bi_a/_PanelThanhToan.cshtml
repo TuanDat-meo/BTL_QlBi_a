@@ -1,0 +1,167 @@
+﻿@model BTL_QlBi_a.Models.Entities.HoaDon
+<link rel="stylesheet" href="~/asset/css/qlBan/thanhToan.css" />
+@{
+    var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>;
+}
+
+<div class="payment-panel-wrapper">
+    <div class="panel-header">
+        <h3 class="panel-title">💰 Thanh toán</h3>
+        <button class="btn-close-menu" onclick="TableManager.closeModal()">✕</button>
+    </div>
+
+    <div class="panel-body-scroll">
+        <!-- Thông tin hóa đơn -->
+        <div class="invoice-section">
+            <div class="invoice-header">
+                <h4>HÓA ĐƠN #@Model.MaHD</h4>
+                <p class="invoice-date">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+
+            <div class="invoice-info">
+                <div class="info-row">
+                    <span>Bàn:</span>
+                    <strong>@Model.BanBia?.TenBan</strong>
+                </div>
+                <div class="info-row">
+                    <span>Khách hàng:</span>
+                    <strong>@(Model.KhachHang?.TenKH ?? "Khách lẻ")</strong>
+                </div>
+                <div class="info-row">
+                    <span>Thời gian chơi:</span>
+                    <strong>@Model.ThoiLuongPhut phút</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi tiết hóa đơn -->
+        <div class="bill-details">
+            <div class="bill-row">
+                <span>Tiền bàn:</span>
+                <span class="bill-amount">@Model.TienBan.ToString("N0") đ</span>
+            </div>
+
+            @if (chiTiet != null && chiTiet.Any())
+            {
+                <div class="service-breakdown">
+                    <div class="breakdown-header">Dịch vụ:</div>
+                    @foreach (var item in chiTiet)
+                    {
+                        <div class="breakdown-item">
+                            <span>@item.DichVu?.TenDV X @item.SoLuong</span>
+                            <span>@item.ThanhTien?.ToString("N0") đ</span>
+                        </div>
+                    }
+                </div>
+                <div class="bill-row">
+                    <span>Tổng dịch vụ:</span>
+                    <span class="bill-amount">@Model.TienDichVu.ToString("N0") đ</span>
+                </div>
+            }
+
+            @if (Model.GiamGia > 0)
+            {
+                <div class="bill-row discount">
+                    <span>Giảm giá:</span>
+                    <span class="bill-amount">-@Model.GiamGia.ToString("N0") đ</span>
+                </div>
+            }
+
+            <div class="bill-row total">
+                <span>TỔNG CỘNG:</span>
+                <span class="bill-total" id="totalAmount" data-amount="@Model.TongTien">@Model.TongTien.ToString("N0") đ</span>
+            </div>
+        </div>
+
+        <!-- Phương thức thanh toán -->
+        <div class="payment-method-section">
+            <h4 class="section-subtitle">Phương thức thanh toán</h4>
+
+            <div class="payment-methods">
+                <button type="button" class="payment-btn active" onclick="PaymentManager.selectPaymentMethod('TienMat', this)">
+                    <span class="payment-icon">💵</span>
+                    <span>Tiền mặt</span>
+                </button>
+                <button type="button" class="payment-btn" onclick="PaymentManager.selectPaymentMethod('ChuyenKhoan', this)">
+                    <span class="payment-icon">🏦</span>
+                    <span>Chuyển khoản</span>
+                </button>
+                <button type="button" class="payment-btn" onclick="PaymentManager.selectPaymentMethod('QRCode', this)">
+                    <span class="payment-icon">📱</span>
+                    <span>QR Code</span>
+                </button>
+            </div>
+
+            <input type="hidden" id="selectedPaymentMethod" value="TienMat">
+            <input type="hidden" id="invoiceId" value="@Model.MaHD">
+        </div>
+
+        <!-- Panel tiền mặt -->
+        <div id="cashPaymentPanel" class="payment-details-panel">
+            <div class="form-group">
+                <label class="form-label">Tiền khách đưa:</label>
+                <input type="text"
+                       class="form-control money-input"
+                       id="tienKhachDua"
+                       placeholder="Nhập số tiền..."
+                       oninput="PaymentManager.formatAndCalculateChange(this)">
+            </div>
+            <div class="change-display" id="changeDisplay" style="display: none;">
+                <div class="change-label">Tiền thối:</div>
+                <div class="change-amount" id="changeAmount">0 đ</div>
+            </div>
+        </div>
+
+        <!-- Panel QR Code -->
+        <div id="qrPaymentPanel" class="payment-details-panel" style="display: none;">
+            <div class="qr-code-container">
+                <div class="qr-placeholder">
+                    <div class="qr-icon">📱</div>
+                    <p>Mã QR thanh toán</p>
+                    <p class="qr-amount">@Model.TongTien.ToString("N0") đ</p>
+                    <small>Quét mã để thanh toán</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel chuyển khoản/thẻ -->
+        <div id="bankPaymentPanel" class="payment-details-panel" style="display: none;">
+            <div class="form-group">
+                <label class="form-label">Mã giao dịch:</label>
+                <input type="text"
+                       class="form-control"
+                       id="transactionCode"
+                       placeholder="Nhập mã giao dịch...">
+            </div>
+            <div class="bank-info">
+                <p><strong>Ngân hàng:</strong> Vietcombank</p>
+                <p><strong>Số tài khoản:</strong> 0123456789</p>
+                <p><strong>Chủ tài khoản:</strong> QUAN BI-A PRO</p>
+            </div>
+        </div>
+
+        <!-- Nút xác nhận -->
+        <div class="action-section">
+            <button type="button" class="btn btn-secondary btn-block" onclick="TableManager.closeModal()">
+                Hủy
+            </button>
+            <button type="button" class="btn btn-success btn-block" onclick="PaymentManager.confirmPayment()">
+                ✅ Xác nhận thanh toán
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize PaymentManager when panel is loaded
+    (function() {
+        if (typeof PaymentManager !== 'undefined') {
+            console.log('Initializing PaymentManager for payment panel');
+            setTimeout(() => {
+                PaymentManager.init();
+            }, 100);
+        } else {
+            console.error('PaymentManager is not loaded!');
+        }
+    })();
+</script>

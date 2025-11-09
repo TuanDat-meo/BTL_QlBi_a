@@ -1,5 +1,7 @@
-﻿using BTL_QlBi_a.Models.EF;
+﻿#nullable enable
+using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
+using BTL_QlBi_a.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -14,6 +16,7 @@ namespace BTL_QlBi_a.Controllers
         private readonly ApplicationDbContext _context;
         private readonly string gmailAddress = "snsnj6179@gmail.com";
         private readonly string gmailAppPassword = "gank qhxm mmsc bsvn";
+
         public AccountController(ApplicationDbContext context)
         {
             _context = context;
@@ -26,7 +29,7 @@ namespace BTL_QlBi_a.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string sdt, string matkhau)
+        public async Task<IActionResult> Login(string? sdt, string? matkhau)
         {
             try
             {
@@ -38,14 +41,15 @@ namespace BTL_QlBi_a.Controllers
 
                 string hashedPassword = HashPassword(matkhau);
 
+                // Tìm nhân viên với mật khẩu đã hash
                 var nhanVien = await _context.NhanVien
+                    .Include(nv => nv.NhomQuyen)
                     .FirstOrDefaultAsync(nv => nv.SDT == sdt && nv.MatKhau == hashedPassword);
 
-                if (nhanVien == null)
-                {
-                    nhanVien = await _context.NhanVien
-                        .FirstOrDefaultAsync(nv => nv.SDT == sdt && nv.MatKhau == matkhau);
-                }
+                // Nếu không tìm thấy, thử với mật khẩu không hash (backward compatibility)
+                nhanVien ??= await _context.NhanVien
+                    .Include(nv => nv.NhomQuyen)
+                    .FirstOrDefaultAsync(nv => nv.SDT == sdt && nv.MatKhau == matkhau);
 
                 if (nhanVien == null)
                 {
@@ -53,16 +57,20 @@ namespace BTL_QlBi_a.Controllers
                     return View();
                 }
 
-                if (nhanVien.TrangThai != "Đang làm")
+                // So sánh với enum
+                if (nhanVien.TrangThai != TrangThaiNhanVien.DangLam)
                 {
                     ViewBag.Error = "Tài khoản của bạn đã bị khóa";
                     return View();
                 }
 
+                // Lưu thông tin vào Session
                 HttpContext.Session.SetInt32("MaNV", nhanVien.MaNV);
                 HttpContext.Session.SetString("TenNV", nhanVien.TenNV);
-                HttpContext.Session.SetString("ChucVu", nhanVien.ChucVu);
+                HttpContext.Session.SetInt32("MaNhom", nhanVien.MaNhom);
+                HttpContext.Session.SetString("TenNhom", nhanVien.NhomQuyen?.TenNhom ?? "Nhân viên");
 
+                // Ghi log hoạt động
                 var logHoatDong = new LichSuHoatDong
                 {
                     MaNV = nhanVien.MaNV,
@@ -73,7 +81,7 @@ namespace BTL_QlBi_a.Controllers
                 _context.LichSuHoatDong.Add(logHoatDong);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("BanBia", "Home");
             }
             catch (Exception ex)
             {
@@ -82,10 +90,6 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-        // =================================================================================
-        // THÊM: Action Đăng Ký (Signup)
-        // =================================================================================
-
         [HttpGet]
         public IActionResult Signup()
         {
@@ -93,9 +97,10 @@ namespace BTL_QlBi_a.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Signup(string tenNV, string sdt, string email, string matkhau, string xacnhanMatkhau)
+        public async Task<IActionResult> Signup(string? tenNV, string? sdt, string? matkhau, string? xacnhanMatkhau)
         {
-            if (string.IsNullOrEmpty(tenNV) || string.IsNullOrEmpty(sdt) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(matkhau) || string.IsNullOrEmpty(xacnhanMatkhau))
+            if (string.IsNullOrEmpty(tenNV) || string.IsNullOrEmpty(sdt) ||
+                string.IsNullOrEmpty(matkhau) || string.IsNullOrEmpty(xacnhanMatkhau))
             {
                 ViewBag.Error = "Vui lòng nhập đầy đủ thông tin";
                 return View();
@@ -113,43 +118,46 @@ namespace BTL_QlBi_a.Controllers
                 return View();
             }
 
-            // Kiểm tra email duy nhất (tùy chọn)
-            if (await _context.NhanVien.AnyAsync(nv => nv.Email == email))
-            {
-                ViewBag.Error = "Email đã được đăng ký";
-                return View();
-            }
-
             try
             {
+                // Tìm nhóm quyền mặc định (ví dụ: "Nhân viên")
+                var nhomMacDinh = await _context.NhomQuyen
+                    .FirstOrDefaultAsync(n => n.TenNhom == "Nhân viên");
+
+                if (nhomMacDinh == null)
+                {
+                    ViewBag.Error = "Không tìm thấy nhóm quyền mặc định";
+                    return View();
+                }
+
                 // Tạo nhân viên mới
                 var newNhanVien = new NhanVien
                 {
                     TenNV = tenNV,
                     SDT = sdt,
-                    Email = email,
-                    MatKhau = HashPassword(matkhau), // Hash mật khẩu trước khi lưu
-                    ChucVu = "Nhân viên", // Gán chức vụ mặc định
-                    TrangThai = "Đang làm", // Mặc định là đang làm
-                    //NgayVaoLam = DateTime.Now
+                    MatKhau = HashPassword(matkhau),
+                    MaNhom = nhomMacDinh.MaNhom,
+                    TrangThai = TrangThaiNhanVien.DangLam,
+                    CaMacDinh = CaLamViec.Sang,
+                    LuongCoBan = 0,
+                    PhuCap = 0
                 };
 
                 _context.NhanVien.Add(newNhanVien);
+                await _context.SaveChangesAsync();
 
                 // Ghi log hoạt động
                 var logHoatDong = new LichSuHoatDong
                 {
-                    MaNV = newNhanVien.MaNV, // MaNV sẽ được set sau SaveChanges() nếu MaNV là Identity
+                    MaNV = newNhanVien.MaNV,
                     HanhDong = "Đăng ký",
                     ChiTiet = $"Nhân viên {tenNV} đăng ký tài khoản mới",
                     ThoiGian = DateTime.Now
                 };
                 _context.LichSuHoatDong.Add(logHoatDong);
-
                 await _context.SaveChangesAsync();
 
                 ViewBag.Success = "Đăng ký thành công! Vui lòng đăng nhập.";
-                // Sau khi đăng ký thành công, chuyển hướng về trang Login
                 return View("Login");
             }
             catch (Exception ex)
@@ -159,11 +167,6 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-
-        // =================================================================================
-        // THÊM: Action Quên Mật Khẩu (Forgot Password - Gửi OTP qua Email)
-        // =================================================================================
-
         [HttpGet]
         public IActionResult ForgotPassword()
         {
@@ -171,63 +174,65 @@ namespace BTL_QlBi_a.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword(string? sdt)
         {
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(sdt))
             {
-                ViewBag.Error = "Vui lòng nhập địa chỉ email";
+                ViewBag.Error = "Vui lòng nhập số điện thoại";
                 return View();
             }
 
-            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.Email == email);
+            // Tìm nhân viên theo SDT
+            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.SDT == sdt);
 
             if (nhanVien == null)
             {
-                // Tránh lộ thông tin email đã đăng ký hay chưa
-                ViewBag.Success = "Nếu email tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến email của bạn.";
+                ViewBag.Success = "Nếu số điện thoại tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến bạn.";
                 return View();
             }
 
             try
             {
-                // 1. Tạo mã OTP ngẫu nhiên.
                 string otp = GenerateOTP();
+                // Lưu OTP vào Session
+                HttpContext.Session.SetString("PasswordResetOTP_" + sdt, otp);
+                HttpContext.Session.SetString("PasswordResetSDT", sdt);
 
-                // 2. Gửi OTP qua Email
-                await SendOtpEmail(email, otp); // THAY THẾ: Gọi phương thức gửi email đã tạo
+                // Gửi OTP qua SMS hoặc email (nếu có)
+                // await SendOtpSMS(sdt, otp);
 
-                // 3. Lưu OTP vào Session
-                HttpContext.Session.SetString("PasswordResetOTP_" + email, otp);
-                HttpContext.Session.SetString("PasswordResetEmail", email);
-
-                // Chuyển hướng đến trang nhập OTP
-                return RedirectToAction("ResetPassword", new { email = email });
+                return RedirectToAction("ResetPassword", new { sdt });
             }
             catch (Exception ex)
             {
-                // Sử dụng thông báo lỗi chung nếu lỗi là do dịch vụ gửi email
-                ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau.";
+                ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng thử lại sau.";
                 return View();
             }
         }
+
         [HttpGet]
-        public IActionResult ResetPassword(string email)
+        public IActionResult ResetPassword(string? sdt)
         {
-            // Kiểm tra xem có email nào đang trong quá trình reset không
-            if (HttpContext.Session.GetString("PasswordResetEmail") != email || string.IsNullOrEmpty(email))
+            if (HttpContext.Session.GetString("PasswordResetSDT") != sdt || string.IsNullOrEmpty(sdt))
             {
                 return RedirectToAction("ForgotPassword");
             }
-            ViewBag.Email = email;
-            return View(); // Cần tạo View ResetPassword.cshtml
+            ViewBag.SDT = sdt;
+            return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> ResetPassword(string email, string otp, string matkhauMoi, string xacnhanMatkhau)
+        public async Task<IActionResult> ResetPassword(string? sdt, string? otp, string? matkhauMoi, string? xacnhanMatkhau)
         {
-            var storedOtp = HttpContext.Session.GetString("PasswordResetOTP_" + email);
+            if (string.IsNullOrEmpty(sdt))
+            {
+                ViewBag.Error = "Số điện thoại không hợp lệ.";
+                return View("ForgotPassword");
+            }
 
-            if (storedOtp == null || HttpContext.Session.GetString("PasswordResetEmail") != email)
+            var storedOtp = HttpContext.Session.GetString("PasswordResetOTP_" + sdt);
+
+            if (storedOtp == null || HttpContext.Session.GetString("PasswordResetSDT") != sdt)
             {
                 ViewBag.Error = "Phiên đặt lại mật khẩu đã hết hạn hoặc không hợp lệ. Vui lòng thử lại.";
                 return View("ForgotPassword");
@@ -236,18 +241,19 @@ namespace BTL_QlBi_a.Controllers
             if (otp != storedOtp)
             {
                 ViewBag.Error = "Mã xác nhận (OTP) không đúng.";
-                ViewBag.Email = email;
+                ViewBag.SDT = sdt;
                 return View();
             }
 
             if (matkhauMoi != xacnhanMatkhau)
             {
                 ViewBag.Error = "Mật khẩu mới và xác nhận mật khẩu không khớp.";
-                ViewBag.Email = email;
+                ViewBag.SDT = sdt;
                 return View();
             }
 
-            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.Email == email);
+            // Tìm nhân viên theo SDT
+            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.SDT == sdt);
 
             if (nhanVien == null)
             {
@@ -257,13 +263,11 @@ namespace BTL_QlBi_a.Controllers
 
             try
             {
-                // Cập nhật mật khẩu mới (đã hash)
-                nhanVien.MatKhau = HashPassword(matkhauMoi);
+                nhanVien.MatKhau = HashPassword(matkhauMoi!);
                 await _context.SaveChangesAsync();
 
-                // Xóa OTP khỏi Session
-                HttpContext.Session.Remove("PasswordResetOTP_" + email);
-                HttpContext.Session.Remove("PasswordResetEmail");
+                HttpContext.Session.Remove("PasswordResetOTP_" + sdt);
+                HttpContext.Session.Remove("PasswordResetSDT");
 
                 ViewBag.Success = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập.";
                 return View("Login");
@@ -271,11 +275,10 @@ namespace BTL_QlBi_a.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = "Lỗi trong quá trình đặt lại mật khẩu: " + ex.Message;
-                ViewBag.Email = email;
+                ViewBag.SDT = sdt;
                 return View();
             }
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Logout()
@@ -289,7 +292,6 @@ namespace BTL_QlBi_a.Controllers
                     var nhanVien = await _context.NhanVien.FindAsync(maNV.Value);
                     if (nhanVien != null)
                     {
-                        // Ghi log hoạt động
                         var logHoatDong = new LichSuHoatDong
                         {
                             MaNV = nhanVien.MaNV,
@@ -302,9 +304,7 @@ namespace BTL_QlBi_a.Controllers
                     }
                 }
 
-                // Xóa Session
                 HttpContext.Session.Clear();
-
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -313,69 +313,57 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
-        // Helper method để hash password
-        private string HashPassword(string password)
+        private static string HashPassword(string password)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+            StringBuilder builder = new();
+            foreach (byte b in bytes)
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                StringBuilder builder = new StringBuilder();
-                foreach (byte b in bytes)
-                {
-                    builder.Append(b.ToString("x2"));
-                }
-                return builder.ToString();
+                builder.Append(b.ToString("x2"));
             }
+            return builder.ToString();
         }
 
-        // Helper method để tạo OTP ngẫu nhiên (6 chữ số)
-        private string GenerateOTP()
+        private static string GenerateOTP()
         {
-            Random random = new Random();
+            Random random = new();
             return random.Next(100000, 999999).ToString();
         }
+
         private async Task SendOtpEmail(string recipientEmail, string otp)
         {
             try
             {
-                using (MailMessage mail = new MailMessage())
-                {
-                    mail.From = new MailAddress(gmailAddress, "Hệ thống Quản Lý Quán Bi-a");
-                    mail.To.Add(recipientEmail);
-                    mail.Subject = "Mã xác nhận đặt lại mật khẩu (OTP)";
-                    mail.Body = $@"
-                        <html>
-                            <body>
-                                <p>Xin chào,</p>
-                                <p>Bạn đã yêu cầu đặt lại mật khẩu. Mã xác nhận (OTP) của bạn là:</p>
-                                <h2 style='color:#1b6ec2; text-align:center;'>{otp}</h2>
-                                <p>Mã này sẽ hết hạn trong thời gian ngắn. Vui lòng nhập mã để tiếp tục.</p>
-                                <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-                                <p>Trân trọng,</p>
-                                <p>Đội ngũ Quản Lý Quán Bi-a Pro</p>
-                            </body>
-                        </html>
-                    ";
-                    mail.IsBodyHtml = true;
+                using MailMessage mail = new();
+                mail.From = new MailAddress(gmailAddress, "Hệ thống Quản Lý Quán Bi-a");
+                mail.To.Add(recipientEmail);
+                mail.Subject = "Mã xác nhận đặt lại mật khẩu (OTP)";
+                mail.Body = $@"
+                    <html>
+                        <body>
+                            <p>Xin chào,</p>
+                            <p>Bạn đã yêu cầu đặt lại mật khẩu. Mã xác nhận (OTP) của bạn là:</p>
+                            <h2 style='color:#1b6ec2; text-align:center;'>{otp}</h2>
+                            <p>Mã này sẽ hết hạn trong thời gian ngắn. Vui lòng nhập mã để tiếp tục.</p>
+                            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                            <p>Trân trọng,</p>
+                            <p>Đội ngũ Quản Lý Quán Bi-a Pro</p>
+                        </body>
+                    </html>
+                ";
+                mail.IsBodyHtml = true;
 
-                    using (SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
-                    {
-                        smtp.Credentials = new NetworkCredential(gmailAddress, gmailAppPassword);
-                        smtp.EnableSsl = true;
-                        // Thời gian chờ (tùy chọn)
-                        smtp.Timeout = 20000;
-                        await smtp.SendMailAsync(mail);
-                    }
-                }
+                using SmtpClient smtp = new("smtp.gmail.com", 587);
+                smtp.Credentials = new NetworkCredential(gmailAddress, gmailAppPassword);
+                smtp.EnableSsl = true;
+                smtp.Timeout = 20000;
+                await smtp.SendMailAsync(mail);
             }
             catch (Exception ex)
             {
-                // Ghi log lỗi email nhưng không ném lỗi ra ngoài để tránh lộ thông tin nhạy cảm
-                // Có thể thay bằng một dịch vụ logging thích hợp hơn
                 Console.WriteLine($"Lỗi gửi email đến {recipientEmail}: {ex.Message}");
                 throw new Exception("Lỗi dịch vụ gửi email. Vui lòng thử lại sau.", ex);
             }
         }
-
     }
 }

@@ -6,6 +6,7 @@ namespace BTL_QlBi_a.Models.Entities
     public class NhanVien
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaNV { get; set; }
 
         [Required]
@@ -13,25 +14,19 @@ namespace BTL_QlBi_a.Models.Entities
         public string TenNV { get; set; }
 
         [MaxLength(50)]
-        public string MaVanTay { get; set; }
+        public string? MaVanTay { get; set; }
 
         [MaxLength(255)]
-        public string FaceIDHash { get; set; }
+        public string? FaceIDHash { get; set; }
 
         [MaxLength(255)]
-        public string FaceIDAnh { get; set; }
-
-        // Đã thay thế ChucVu? bằng string
-        [MaxLength(20)]
-        public string ChucVu { get; set; } = "Phục Vụ"; // Giá trị mặc định là chuỗi
+        public string? FaceIDAnh { get; set; }
 
         [Required]
+        public int MaNhom { get; set; }
+
         [MaxLength(15)]
-        public string SDT { get; set; } 
-
-        [Required]
-        [MaxLength(100)]
-        public string Email { get; set; }
+        public string? SDT { get; set; }
 
         [Column(TypeName = "decimal(12,0)")]
         public decimal LuongCoBan { get; set; } = 0;
@@ -39,22 +34,23 @@ namespace BTL_QlBi_a.Models.Entities
         [Column(TypeName = "decimal(12,0)")]
         public decimal PhuCap { get; set; } = 0;
 
-        public DateTime NgayVaoLam { get; set; } = DateTime.Now; 
+        public CaLamViec CaMacDinh { get; set; } = CaLamViec.Sang;
 
-        [MaxLength(10)]
-        public string CaMacDinh { get; set; } = "Sáng"; 
-
-        [MaxLength(20)]
-        public string TrangThai { get; set; } = "Đang Làm"; 
+        public TrangThaiNhanVien TrangThai { get; set; } = TrangThaiNhanVien.DangLam;
 
         [Required]
         [MaxLength(255)]
         public string MatKhau { get; set; }
 
-        // Navigation Properties
-        public ICollection<ChamCong> ChamCongs { get; set; }
-        public ICollection<BangLuong> BangLuongs { get; set; }
-        public ICollection<HoaDon> HoaDons { get; set; }
-        public ICollection<LichSuHoatDong> LichSuHoatDongs { get; set; }
+        // Navigation properties
+        [ForeignKey("MaNhom")]
+        public virtual NhomQuyen NhomQuyen { get; set; }
+
+        public virtual ICollection<PhieuNhap> PhieuNhaps { get; set; }
+        public virtual ICollection<ChamCong> ChamCongs { get; set; }
+        public virtual ICollection<BangLuong> BangLuongs { get; set; }
+        public virtual ICollection<HoaDon> HoaDons { get; set; }
+        public virtual ICollection<SoQuy> SoQuys { get; set; }
+        public virtual ICollection<LichSuHoatDong> LichSuHoatDongs { get; set; }
     }
 }

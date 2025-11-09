@@ -1,0 +1,7 @@
+﻿# Ignore build outputs
+**/[Bb]in/
+**/[Oo]bj/
+
+# Ignore sensitive configuration files
+appsettings.json
+appsettings.*.json

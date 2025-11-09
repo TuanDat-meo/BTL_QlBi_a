@@ -1,0 +1,106 @@
+﻿@model BTL_QlBi_a.Models.Entities.BanBia
+<link rel="stylesheet" href="~/asset/css/qlBan/chinhSuaBan.css" />
+@{
+    var hoaDon = ViewBag.HoaDon as BTL_QlBi_a.Models.Entities.HoaDon;
+    var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>;
+}
+
+<div class="edit-panel-wrapper">
+    <div class="panel-header">
+        <h3 class="panel-title">✏️ Chỉnh sửa bàn @Model.TenBan</h3>
+        <button class="btn-close-menu" onclick="TableManager.closeModal()">✕</button>
+    </div>
+
+    <div class="panel-body-scroll">
+        @if (hoaDon != null)
+        {
+            <!-- Chỉnh sửa giờ bắt đầu -->
+            <div class="edit-section">
+                <h4 class="section-subtitle">Thông tin thời gian</h4>
+                <div class="form-group">
+                    <label class="form-label">Giờ bắt đầu:</label>
+                    <input type="datetime-local" class="form-control" id="gioBatDau"
+                           value="@hoaDon.ThoiGianBatDau.Value.ToString("yyyy-MM-ddTHH:mm")">
+                </div>
+
+                <div class="info-display">
+                    <div class="info-row">
+                        <span>Thời gian hiện tại:</span>
+                        <strong id="currentDuration">Đang tính...</strong>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="TableManager.saveEditTable(@Model.MaBan)">
+                    💾 Lưu thay đổi giờ
+                </button>
+            </div>
+
+            <!-- Danh sách dịch vụ đã order -->
+            @if (chiTiet != null && chiTiet.Any())
+            {
+                <div class="edit-section">
+                    <h4 class="section-subtitle">Dịch vụ đã order</h4>
+                    <div class="service-list-edit">
+                        @foreach (var item in chiTiet)
+                        {
+                            <div class="service-item-edit" data-id="@item.ID">
+                                <div class="service-info">
+                                    <div class="service-name">@item.DichVu?.TenDV</div>
+                                    <div class="service-details">
+                                        <span class="service-price">@item.DichVu?.Gia.ToString("N0") đ</span>
+                                    </div>
+                                </div>
+                                <div class="service-controls">
+                                    <div class="quantity-control">
+                                        <button class="qty-btn" onclick="decreaseServiceQty(@item.ID, @Model.MaBan)">-</button>
+                                        <input type="number" class="qty-input" id="qty-@item.ID"
+                                               value="@item.SoLuong" min="1" max="99" readonly>
+                                        <button class="qty-btn" onclick="increaseServiceQty(@item.ID, @Model.MaBan)">+</button>
+                                    </div>
+                                    <button class="btn-delete-service" onclick="TableManager.removeService(@item.ID, @Model.MaBan)" title="Xóa">
+                                        🗑️
+                                    </button>
+                                </div>
+                                <div class="service-total">
+                                    Tổng: <strong id="total-@item.ID">@item.ThanhTien?.ToString("N0") đ</strong>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <button class="btn btn-success btn-block" onclick="TableManager.addService(@Model.MaBan)">
+                        ➕ Thêm dịch vụ mới
+                    </button>
+                </div>
+            }
+
+            <!-- Tổng tiền hiện tại -->
+            <div class="bill-summary">
+                <div class="summary-row">
+                    <span>Tiền bàn (ước tính):</span>
+                    <span id="tienBanUocTinh">Đang tính...</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tiền dịch vụ:</span>
+                    <span>@hoaDon.TienDichVu.ToString("N0") đ</span>
+                </div>
+                <div class="summary-row total">
+                    <span>TỔNG CỘNG:</span>
+                    <span id="tongTienUocTinh">Đang tính...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <p>Bàn chưa có hóa đơn để chỉnh sửa</p>
+            </div>
+        }
+
+        <div class="action-section">
+            <button class="btn btn-secondary btn-block" onclick="TableManager.closeModal()">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+<script src="~/asset/js/qlBan/chinhSuaBan.js"></script>

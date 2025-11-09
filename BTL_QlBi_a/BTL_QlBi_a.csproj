@@ -31,6 +31,9 @@
     <Folder Include="resources\" />
     <Folder Include="wwwroot\asset\css\" />
     <Folder Include="wwwroot\asset\js\" />
+    <Folder Include="wwwroot\asset\img\tables\" />
+    <Folder Include="wwwroot\asset\js\qlHoaDon\" />
+    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
 </Project>

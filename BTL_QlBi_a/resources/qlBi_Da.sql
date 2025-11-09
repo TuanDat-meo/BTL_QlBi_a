@@ -1,22 +1,23 @@
-﻿IF EXISTS (SELECT name FROM sys.databases WHERE name = N'QL_Bi_a')
+﻿IF EXISTS (SELECT name FROM sys.databases WHERE name = N'QL_QuanBi_a')
 BEGIN
     use master
-    ALTER DATABASE QL_Bi_a SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE QL_Bi_a;
+    ALTER DATABASE QL_QuanBi_a SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE QL_QuanBi_a;
 END
 GO
 
--- Tạo database mới
-CREATE DATABASE QL_Bi_a;
+CREATE DATABASE QL_QuanBi_a;
 GO
 
-USE QL_Bi_a;
+USE QL_QuanBi_a;
 GO
 
+-- Bảng khách hàng
 CREATE TABLE khach_hang (
     ma_kh INT IDENTITY(1,1) PRIMARY KEY,
     ten_kh NVARCHAR(100) NOT NULL,
     sdt VARCHAR(15) UNIQUE CHECK (sdt LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]%' AND LEN(sdt) BETWEEN 9 AND 11),
+    mat_khau VARCHAR(255) NULL, 
     email NVARCHAR(100),
     ngay_sinh DATE,
     hang_tv NVARCHAR(20) DEFAULT N'Đồng' CHECK (hang_tv IN (N'Đồng', N'Bạc', N'Vàng', N'Bạch kim')),
@@ -27,6 +28,7 @@ CREATE TABLE khach_hang (
 );
 GO
 
+-- Bảng loại bàn
 CREATE TABLE loai_ban (
     ma_loai INT IDENTITY(1,1) PRIMARY KEY,
     ten_loai NVARCHAR(50) NOT NULL UNIQUE,
@@ -36,21 +38,35 @@ CREATE TABLE loai_ban (
 );
 GO
 
+-- Bảng khu vực
+CREATE TABLE khu_vuc (
+    ma_khu_vuc INT IDENTITY(1,1) PRIMARY KEY,
+    ten_khu_vuc NVARCHAR(50) NOT NULL UNIQUE,
+    mo_ta NVARCHAR(255)
+);
+GO
+
+-- Bảng bàn bi-a
 CREATE TABLE ban_bia (
     ma_ban INT IDENTITY(1,1) PRIMARY KEY,
     ten_ban NVARCHAR(50) NOT NULL UNIQUE,
     ma_loai INT NOT NULL,
-    khu_vuc NVARCHAR(20) DEFAULT N'Tầng 1' CHECK (khu_vuc IN (N'Tầng 1', N'Tầng 2', N'VIP')),
+    ma_khu_vuc INT NOT NULL, 
     trang_thai NVARCHAR(20) DEFAULT N'Trống' CHECK (trang_thai IN (N'Trống', N'Đang chơi', N'Đã đặt', N'Bảo trì')),
     gio_bat_dau DATETIME NULL,
     ma_kh INT NULL,
+    vi_tri_x INT DEFAULT 0,
+    vi_tri_y INT DEFAULT 0,
     ghi_chu NVARCHAR(255),
     ngay_tao DATETIME DEFAULT GETDATE(),
+    hinh_anh NVARCHAR(255) NULL,
     FOREIGN KEY (ma_loai) REFERENCES loai_ban(ma_loai),
-    FOREIGN KEY (ma_kh) REFERENCES khach_hang(ma_kh)
+    FOREIGN KEY (ma_kh) REFERENCES khach_hang(ma_kh),
+    FOREIGN KEY (ma_khu_vuc) REFERENCES khu_vuc(ma_khu_vuc)
 );
 GO
 
+-- Bảng đặt bàn
 CREATE TABLE dat_ban (
     ma_dat INT IDENTITY(1,1) PRIMARY KEY,
     ma_ban INT,
@@ -67,33 +83,68 @@ CREATE TABLE dat_ban (
 );
 GO
 
--- Bảng mặt hàng: CHỈ CÓ GIÁ NHẬP
+-- Bảng nhà cung cấp
+CREATE TABLE nha_cung_cap (
+    ma_ncc INT IDENTITY(1,1) PRIMARY KEY,
+    ten_ncc NVARCHAR(100) NOT NULL,
+    sdt VARCHAR(15),
+    dia_chi NVARCHAR(255),
+    email NVARCHAR(100)
+);
+GO
+
+-- Bảng mặt hàng
 CREATE TABLE mat_hang (
     ma_hang INT IDENTITY(1,1) PRIMARY KEY,
     ten_hang NVARCHAR(100) NOT NULL,
     loai NVARCHAR(20) DEFAULT N'Khác' CHECK (loai IN (N'Đồ uống', N'Đồ ăn', N'Dụng cụ bi-a', N'Khác')),
     don_vi NVARCHAR(50) DEFAULT N'cái',
-    gia DECIMAL(10,0) NOT NULL, -- CHỈ CÓ GIÁ NHẬP
+    gia DECIMAL(10,0) NOT NULL,
     so_luong_ton INT DEFAULT 0,
-    nha_cung_cap NVARCHAR(100),
+    nguong_canh_bao INT DEFAULT 10,
+    ma_ncc_default INT NULL, 
     ngay_nhap_gan_nhat DATE,
     trang_thai NVARCHAR(20) DEFAULT N'Còn hàng' CHECK (trang_thai IN (N'Còn hàng', N'Hết hàng', N'Ngừng kinh doanh')),
     mo_ta NVARCHAR(255),
     hinh_anh NVARCHAR(255),
-    ngay_tao DATETIME DEFAULT GETDATE()
+    ngay_tao DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (ma_ncc_default) REFERENCES nha_cung_cap(ma_ncc)
 );
 GO
 
--- Bảng dịch vụ: CÓ GIÁ BÁN
+-- Bảng phiếu nhập
+CREATE TABLE phieu_nhap (
+    ma_pn INT IDENTITY(1,1) PRIMARY KEY,
+    ma_nv INT NOT NULL, 
+    ma_ncc INT NOT NULL,
+    ngay_nhap DATETIME DEFAULT GETDATE(),
+    tong_tien DECIMAL(12,0) DEFAULT 0,
+    ghi_chu NVARCHAR(255),
+    FOREIGN KEY (ma_ncc) REFERENCES nha_cung_cap(ma_ncc)
+);
+GO
+
+-- Bảng chi tiết phiếu nhập
+CREATE TABLE chi_tiet_phieu_nhap (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    ma_pn INT NOT NULL,
+    ma_hang INT NOT NULL,
+    so_luong_nhap INT NOT NULL,
+    don_gia_nhap DECIMAL(10,0) NOT NULL,
+    thanh_tien AS (so_luong_nhap * don_gia_nhap) PERSISTED,
+    FOREIGN KEY (ma_pn) REFERENCES phieu_nhap(ma_pn),
+    FOREIGN KEY (ma_hang) REFERENCES mat_hang(ma_hang)
+);
+GO
+
+-- Bảng dịch vụ
 CREATE TABLE dich_vu (
     ma_dv INT IDENTITY(1,1) PRIMARY KEY,
     ten_dv NVARCHAR(100) NOT NULL,
     loai NVARCHAR(20) DEFAULT N'Khác' CHECK (loai IN (N'Đồ uống', N'Đồ ăn', N'Khác')),
-    gia DECIMAL(10,0) NOT NULL, -- GIÁ BÁN (sẽ được trigger tự động tính từ giá nhập)
+    gia DECIMAL(10,0) NOT NULL, 
     don_vi NVARCHAR(50) DEFAULT N'phần',
-    so_luong_ton INT DEFAULT 0,
-    ma_hang INT NULL,
-    ti_le_loi_nhuan DECIMAL(5,2) DEFAULT 30.00, -- Tỷ lệ % lợi nhuận (mặc định 30%)
+    ma_hang INT NULL, 
     trang_thai NVARCHAR(20) DEFAULT N'Còn hàng' CHECK (trang_thai IN (N'Còn hàng', N'Hết hàng', N'Ngừng bán')),
     mo_ta NVARCHAR(255),
     hinh_anh NVARCHAR(255),
@@ -102,22 +153,55 @@ CREATE TABLE dich_vu (
 );
 GO
 
+-- Bảng nhóm quyền
+CREATE TABLE nhom_quyen (
+    ma_nhom INT IDENTITY(1,1) PRIMARY KEY,
+    ten_nhom NVARCHAR(50) NOT NULL UNIQUE
+);
+GO
+
+-- Bảng nhân viên
 CREATE TABLE nhan_vien (
     ma_nv INT IDENTITY(1,1) PRIMARY KEY,
     ten_nv NVARCHAR(100) NOT NULL,
     ma_van_tay VARCHAR(50) UNIQUE,
     faceid_hash VARCHAR(255) UNIQUE,
     faceid_anh NVARCHAR(255),
-    chuc_vu NVARCHAR(20) DEFAULT N'Phục vụ' CHECK (chuc_vu IN (N'Quản lý', N'Thu ngân', N'Phục vụ')),
+    ma_nhom INT NOT NULL,
     sdt VARCHAR(15),
     luong_co_ban DECIMAL(12,0) DEFAULT 0,
     phu_cap DECIMAL(12,0) DEFAULT 0,
     ca_mac_dinh NVARCHAR(10) DEFAULT N'Sáng' CHECK (ca_mac_dinh IN (N'Sáng', N'Chiều', N'Tối')),
     trang_thai NVARCHAR(20) DEFAULT N'Đang làm' CHECK (trang_thai IN (N'Đang làm', N'Nghỉ')),
-    mat_khau VARCHAR(255) NOT NULL
+    mat_khau VARCHAR(255) NOT NULL,
+    FOREIGN KEY (ma_nhom) REFERENCES nhom_quyen(ma_nhom)
 );
 GO
 
+-- Thêm foreign key cho phieu_nhap
+ALTER TABLE phieu_nhap
+ADD FOREIGN KEY (ma_nv) REFERENCES nhan_vien(ma_nv);
+GO
+
+-- Bảng chức năng
+CREATE TABLE chuc_nang (
+    ma_cn VARCHAR(50) PRIMARY KEY, 
+    ten_cn NVARCHAR(100) NOT NULL,
+    mo_ta NVARCHAR(255)
+);
+GO
+
+-- Bảng phân quyền
+CREATE TABLE phan_quyen (
+    ma_nhom INT NOT NULL,
+    ma_cn VARCHAR(50) NOT NULL,
+    PRIMARY KEY (ma_nhom, ma_cn),
+    FOREIGN KEY (ma_nhom) REFERENCES nhom_quyen(ma_nhom),
+    FOREIGN KEY (ma_cn) REFERENCES chuc_nang(ma_cn)
+);
+GO
+
+-- Bảng chấm công
 CREATE TABLE cham_cong (
     id INT IDENTITY(1,1) PRIMARY KEY,
     ma_nv INT NOT NULL,
@@ -140,6 +224,7 @@ CREATE TABLE cham_cong (
 );
 GO
 
+-- Bảng bảng lương
 CREATE TABLE bang_luong (
     ma_luong INT IDENTITY(1,1) PRIMARY KEY,
     ma_nv INT NOT NULL,
@@ -156,6 +241,7 @@ CREATE TABLE bang_luong (
 );
 GO
 
+-- Bảng hóa đơn
 CREATE TABLE hoa_don (
     ma_hd INT IDENTITY(1,1) PRIMARY KEY,
     ma_ban INT,
@@ -163,13 +249,26 @@ CREATE TABLE hoa_don (
     ma_nv INT,
     thoi_gian_bat_dau DATETIME,
     thoi_gian_ket_thuc DATETIME NULL,
-    thoi_luong_phut INT,
+    thoi_luong_phut AS (
+        CASE 
+            WHEN thoi_gian_ket_thuc IS NOT NULL 
+            THEN DATEDIFF(MINUTE, thoi_gian_bat_dau, thoi_gian_ket_thuc)
+            ELSE 0
+        END
+    ) PERSISTED,
     tien_ban DECIMAL(12,0) DEFAULT 0,
     tien_dich_vu DECIMAL(12,0) DEFAULT 0,
     giam_gia DECIMAL(12,0) DEFAULT 0,
+    ghi_chu_giam_gia NVARCHAR(255) NULL, 
     tong_tien DECIMAL(12,0) DEFAULT 0,
-    phuong_thuc_thanh_toan NVARCHAR(20) DEFAULT N'Tiền mặt' CHECK (phuong_thuc_thanh_toan IN (N'Tiền mặt', N'Chuyển khoản', N'Thẻ', N'Ví điện tử')),
-    trang_thai NVARCHAR(20) DEFAULT N'Đang chơi' CHECK (trang_thai IN (N'Đang chơi', N'Đã thanh toán', N'Đã hủy')),
+    phuong_thuc_thanh_toan NVARCHAR(20) DEFAULT N'Tiền mặt' 
+        CHECK (phuong_thuc_thanh_toan IN (
+            N'Tiền mặt', N'Chuyển khoản', N'Thẻ', N'Ví điện tử', N'QR Tự động'
+        )),
+    trang_thai NVARCHAR(20) DEFAULT N'Đang chơi' 
+        CHECK (trang_thai IN (N'Đang chơi', N'Đã thanh toán', N'Đã hủy')),
+    ma_giao_dich_qr VARCHAR(100) NULL,
+    qr_code_url VARCHAR(500) NULL,
     ghi_chu NVARCHAR(MAX),
     FOREIGN KEY (ma_ban) REFERENCES ban_bia(ma_ban),
     FOREIGN KEY (ma_kh) REFERENCES khach_hang(ma_kh),
@@ -177,6 +276,7 @@ CREATE TABLE hoa_don (
 );
 GO
 
+-- Bảng chi tiết hóa đơn
 CREATE TABLE chi_tiet_hoa_don (
     id INT IDENTITY(1,1) PRIMARY KEY,
     ma_hd INT,
@@ -188,6 +288,21 @@ CREATE TABLE chi_tiet_hoa_don (
 );
 GO
 
+-- Bảng sổ quỹ
+CREATE TABLE so_quy (
+    ma_phieu INT IDENTITY(1,1) PRIMARY KEY,
+    ma_nv INT NOT NULL,
+    ngay_lap DATETIME DEFAULT GETDATE(),
+    loai_phieu NVARCHAR(10) NOT NULL CHECK (loai_phieu IN (N'Thu', N'Chi')),
+    so_tien DECIMAL(12,0) NOT NULL,
+    ly_do NVARCHAR(500) NOT NULL,
+    ma_hd_lien_quan INT NULL, 
+    FOREIGN KEY (ma_nv) REFERENCES nhan_vien(ma_nv),
+    FOREIGN KEY (ma_hd_lien_quan) REFERENCES hoa_don(ma_hd)
+);
+GO
+
+-- Bảng giá giờ chơi
 CREATE TABLE gia_gio_choi (
     id INT IDENTITY(1,1) PRIMARY KEY,
     khung_gio NVARCHAR(50) NOT NULL,
@@ -201,6 +316,7 @@ CREATE TABLE gia_gio_choi (
 );
 GO
 
+-- Bảng lịch sử hoạt động
 CREATE TABLE lich_su_hoat_dong (
     id INT IDENTITY(1,1) PRIMARY KEY,
     thoi_gian DATETIME DEFAULT GETDATE(),
@@ -211,101 +327,55 @@ CREATE TABLE lich_su_hoat_dong (
 );
 GO
 
--- =============================================
--- TRIGGER: Tự động tính giá bán khi INSERT dịch vụ
--- =============================================
-CREATE TRIGGER trg_DichVu_TinhGiaBan_Insert
-ON dich_vu
+
+-- Trigger: Cộng số lượng tồn khi nhập kho
+CREATE TRIGGER trg_CongSoLuongTon_NhapKho
+ON chi_tiet_phieu_nhap
 AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    UPDATE dv
-    SET dv.gia = CEILING(mh.gia * (1 + ISNULL(i.ti_le_loi_nhuan, 30.00) / 100.0))
-    FROM dich_vu dv
+    UPDATE mh
+    SET 
+        mh.so_luong_ton = mh.so_luong_ton + i.so_luong_nhap,
+        mh.gia = i.don_gia_nhap, 
+        mh.ngay_nhap_gan_nhat = GETDATE()
+    FROM mat_hang mh
+    INNER JOIN inserted i ON mh.ma_hang = i.ma_hang;
+END;
+GO
+
+-- Trigger: Trừ số lượng tồn khi bán hàng
+CREATE TRIGGER trg_TruSoLuongTon_BanHang
+ON chi_tiet_hoa_don
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE mh
+    SET mh.so_luong_ton = mh.so_luong_ton - i.so_luong
+    FROM mat_hang mh
+    INNER JOIN dich_vu dv ON mh.ma_hang = dv.ma_hang
     INNER JOIN inserted i ON dv.ma_dv = i.ma_dv
-    INNER JOIN mat_hang mh ON i.ma_hang = mh.ma_hang
-    WHERE i.ma_hang IS NOT NULL;
+    WHERE dv.ma_hang IS NOT NULL; 
 END;
 GO
 
--- =============================================
--- TRIGGER: Tự động tính lại giá bán khi UPDATE dịch vụ
--- =============================================
-CREATE TRIGGER trg_DichVu_TinhGiaBan_Update
-ON dich_vu
-AFTER UPDATE
+-- Trigger: Cộng lại số lượng tồn khi hủy món
+CREATE TRIGGER trg_CongLaiSoLuongTon_HuyMon
+ON chi_tiet_hoa_don
+AFTER DELETE 
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    -- Chỉ tính lại giá khi ma_hang hoặc ti_le_loi_nhuan thay đổi
-    IF UPDATE(ma_hang) OR UPDATE(ti_le_loi_nhuan)
-    BEGIN
-        UPDATE dv
-        SET dv.gia = CEILING(mh.gia * (1 + ISNULL(i.ti_le_loi_nhuan, 30.00) / 100.0))
-        FROM dich_vu dv
-        INNER JOIN inserted i ON dv.ma_dv = i.ma_dv
-        INNER JOIN mat_hang mh ON i.ma_hang = mh.ma_hang
-        WHERE i.ma_hang IS NOT NULL;
-    END
+    UPDATE mh
+    SET mh.so_luong_ton = mh.so_luong_ton + d.so_luong
+    FROM mat_hang mh
+    INNER JOIN dich_vu dv ON mh.ma_hang = dv.ma_hang
+    INNER JOIN deleted d ON dv.ma_dv = d.ma_dv
+    WHERE dv.ma_hang IS NOT NULL;
 END;
 GO
 
--- =============================================
--- TRIGGER: Tự động cập nhật giá bán dịch vụ khi giá nhập mặt hàng thay đổi
--- =============================================
-CREATE TRIGGER trg_MatHang_CapNhatGiaBan
-ON mat_hang
-AFTER UPDATE
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Chỉ cập nhật khi giá thay đổi
-    IF UPDATE(gia)
-    BEGIN
-        UPDATE dv
-        SET dv.gia = CEILING(i.gia * (1 + ISNULL(dv.ti_le_loi_nhuan, 30.00) / 100.0))
-        FROM dich_vu dv
-        INNER JOIN inserted i ON dv.ma_hang = i.ma_hang;
-    END
-END;
-GO
-
--- =============================================
--- DATA MẪU
--- =============================================
-
--- Thêm mặt hàng (CHỈ GIÁ NHẬP)
-INSERT INTO mat_hang (ten_hang, loai, don_vi, gia, so_luong_ton, nha_cung_cap)
-VALUES 
-    (N'Bia Tiger', N'Đồ uống', N'chai', 15000, 100, N'Công ty TNHH Heineken VN'),
-    (N'Bia Heineken', N'Đồ uống', N'chai', 20000, 80, N'Công ty TNHH Heineken VN'),
-    (N'Nước ngọt Coca', N'Đồ uống', N'chai', 8000, 150, N'Công ty Coca-Cola VN'),
-    (N'Khô bò', N'Đồ ăn', N'đĩa', 30000, 50, N'Nhà cung cấp ABC'),
-    (N'Đậu phộng', N'Đồ ăn', N'đĩa', 10000, 200, N'Nhà cung cấp XYZ');
-GO
-
--- Thêm dịch vụ (GIÁ BÁN sẽ tự động tính từ trigger)
--- Giá ban đầu có thể để bất kỳ, trigger sẽ tự động cập nhật
-INSERT INTO dich_vu (ten_dv, loai, don_vi, ma_hang, ti_le_loi_nhuan, gia)
-VALUES 
-    (N'Bia Tiger', N'Đồ uống', N'chai', 1, 40.00, 0), -- Giá sẽ = 15000 * 1.4 = 21000
-    (N'Bia Heineken', N'Đồ uống', N'chai', 2, 35.00, 0), -- Giá sẽ = 20000 * 1.35 = 27000
-    (N'Coca Cola', N'Đồ uống', N'chai', 3, 50.00, 0), -- Giá sẽ = 8000 * 1.5 = 12000
-    (N'Khô bò rang muối', N'Đồ ăn', N'đĩa', 4, 60.00, 0), -- Giá sẽ = 30000 * 1.6 = 48000
-    (N'Đậu phộng tỏi', N'Đồ ăn', N'đĩa', 5, 80.00, 0); -- Giá sẽ = 10000 * 1.8 = 18000
-GO
-
--- Kiểm tra giá bán đã được tính tự động
-SELECT 
-    dv.ma_dv,
-    dv.ten_dv,
-    mh.gia AS gia_nhap,
-    dv.ti_le_loi_nhuan,
-    dv.gia AS gia_ban
-FROM dich_vu dv
-INNER JOIN mat_hang mh ON dv.ma_hang = mh.ma_hang;
+PRINT N'=== TẠO DATABASE VÀ CÁC BẢNG THÀNH CÔNG ==='
 GO

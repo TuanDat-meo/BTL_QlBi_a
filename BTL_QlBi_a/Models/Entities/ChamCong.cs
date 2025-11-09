@@ -5,10 +5,13 @@ namespace BTL_QlBi_a.Models.Entities
     public class ChamCong
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
+        [Required]
         public int MaNV { get; set; }
 
+        [Required]
         public DateTime Ngay { get; set; }
 
         public DateTime? GioVao { get; set; }
@@ -16,25 +19,24 @@ namespace BTL_QlBi_a.Models.Entities
         public DateTime? GioRa { get; set; }
 
         [MaxLength(255)]
-        public string HinhAnhVao { get; set; }
+        public string? HinhAnhVao { get; set; }
 
         [MaxLength(255)]
-        public string HinhAnhRa { get; set; }
+        public string? HinhAnhRa { get; set; }
 
-        [MaxLength(20)]
-        public string XacThucBang { get; set; } = "Thủ Công";
+        public PhuongThucXacThuc XacThucBang { get; set; } = PhuongThucXacThuc.ThuCong;
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [Column(TypeName = "decimal(5,2)")]
         public decimal? SoGioLam { get; set; }
 
-        // Đã thay thế TrangThaiChamCong bằng string
-        [MaxLength(20)]
-        public string TrangThai { get; set; } = "Đúng Giờ"; 
+        public TrangThaiChamCong TrangThai { get; set; } = TrangThaiChamCong.DungGio;
 
         [MaxLength(255)]
-        public string GhiChu { get; set; }
+        public string? GhiChu { get; set; }
 
+        // Navigation properties
         [ForeignKey("MaNV")]
-        public NhanVien NhanVien { get; set; }
+        public virtual NhanVien NhanVien { get; set; }
     }
 }
