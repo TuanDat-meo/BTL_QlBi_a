@@ -1,0 +1,209 @@
+﻿@model BTL_QlBi_a.Models.Entities.HoaDon
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hóa đơn HD@(Model.MaHD.ToString("D4"))</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            color: #333;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* KHU VỰC NÚT BẤM (SẼ ẨN KHI IN) */
+        .print-controls {
+            width: 140mm;
+            margin: 20px auto 10px auto;
+            padding: 10px;
+            background: #eee;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: right;
+        }
+
+            .print-controls button {
+                padding: 8px 15px;
+                font-size: 14px;
+                font-weight: 600;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-left: 10px;
+            }
+
+        .btn-print { background-color: #28a745; color: white; }
+        .btn-close { background-color: #6c757d; color: white; }
+
+        .receipt-container {
+            width: 140mm;
+            min-height: 180mm; /* Chiều cao tối thiểu cho A5 */
+            background: #fff;
+            padding: 25px 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 0 auto 20px auto; /* Căn giữa */
+        }
+
+        .receipt-header { text-align: center; margin-bottom: 25px; }
+        .receipt-header h1 { margin: 0; font-size: 20px; font-weight: bold; color: #000; }
+        .receipt-header p { margin: 4px 0; font-size: 13px; }
+
+        .receipt-title { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; text-transform: uppercase; }
+
+        .info-section { border-top: 2px dashed #ccc; border-bottom: 2px dashed #ccc; padding: 15px 0; margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .info-row span { font-size: 14px; }
+        .info-row .label { font-weight: 500; color: #555; }
+        .info-row .value { font-weight: bold; }
+
+        .bill-table table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .bill-table th, .bill-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .bill-table th { background: #f9f9f9; font-weight: bold; }
+        .bill-table .text-right { text-align: right; }
+        .bill-table .text-center { text-align: center; }
+
+        .summary-section { margin-top: 25px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 16px; }
+        .summary-row.total { font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 10px; margin-top: 5px; }
+
+        .receipt-footer { text-align: center; margin-top: 30px; font-style: italic; color: #777; }
+
+        /* CSS KHI IN */
+        @@media print {
+            body {
+                background: #fff;
+            }
+            .print-controls {
+                display: none; /* Ẩn nút bấm khi in */
+            }
+            .receipt-container {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="print-controls">
+        <button class="btn-print" onclick="window.print()">🖨️ In Hóa Đơn</button>
+        <button class="btn-close" onclick="window.close()">Đóng</button>
+    </div>
+
+    <div class="receipt-container">
+
+        <div class="receipt-header">
+            <h1>CLB BI-A PRO</h1>
+            <p>Địa chỉ: 123 Đường ABC, Phường XYZ, Quận 1, TP. HCM</p>
+            <p>Hotline: 0987.654.321</p>
+        </div>
+
+        <h2 class="receipt-title">Hóa đơn thanh toán</h2>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span class="label">Mã HĐ:</span>
+                <span class="value">HD@(Model.MaHD.ToString("D4"))</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Bàn:</span>
+                <span class="value">@Model.BanBia?.TenBan</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Khách hàng:</span>
+                <span class="value">@(Model.KhachHang?.TenKH ?? "Khách lẻ")</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Giờ vào:</span>
+                <span class="value">@(Model.ThoiGianBatDau?.ToString("HH:mm, dd/MM/yyyy"))</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Giờ ra:</span>
+                <span class="value">@(Model.ThoiGianKetThuc?.ToString("HH:mm, dd/MM/yyyy"))</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Thu ngân:</span>
+                <span class="value">@Model.NhanVien?.TenNV</span>
+            </div>
+        </div>
+
+        <div class="bill-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên dịch vụ</th>
+                        <th class="text-center">SL</th>
+                        <th class="text-right">Đơn giá</th>
+                        <th class="text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tiền giờ (@Model.BanBia?.LoaiBan?.TenLoai)</td>
+                        <td class="text-center">-</td>
+                        <td class="text-right">
+                            @(Model.BanBia?.LoaiBan?.GiaGio.ToString("N0") ?? "0") đ/h
+                        </td>
+                        <td class="text-right">@Model.TienBan.ToString("N0") đ</td>
+                    </tr>
+
+                    @if (Model.ChiTietHoaDons != null && Model.ChiTietHoaDons.Any())
+                    {
+                        @foreach (var item in Model.ChiTietHoaDons)
+                        {
+                            // Tính đơn giá = Thành Tiền / Số Lượng
+                            var donGia = item.SoLuong > 0 ? ((item.ThanhTien ?? 0) / item.SoLuong) : 0;
+
+                                    <tr>
+                                        <td>@item.DichVu?.TenDV</td>
+                                        <td class="text-center">@item.SoLuong</td>
+                                        <td class="text-right">@donGia.ToString("N0") đ</td>
+                                        <td class="text-right">@item.ThanhTien?.ToString("N0") đ</td>
+                                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-section">
+            <div class="summary-row">
+                <span>Tổng tiền hàng (dịch vụ):</span>
+                <span>@Model.TienDichVu.ToString("N0") đ</span>
+            </div>
+            <div class="summary-row">
+                <span>Tổng tiền giờ:</span>
+                <span>@Model.TienBan.ToString("N0") đ</span>
+            </div>
+            @if (Model.GiamGia > 0)
+            {
+                    <div class="summary-row">
+                        <span>Giảm giá:</span>
+                        <span>-@Model.GiamGia.ToString("N0") đ</span>
+                    </div>
+            }
+            <div class="summary-row total">
+                <span>Khách phải trả:</span>
+                <span>@Model.TongTien.ToString("N0") đ</span>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <p>Cảm ơn quý khách và hẹn gặp lại!</p>
+        </div>
+
+    </div>
+
+    </body>
+</html>

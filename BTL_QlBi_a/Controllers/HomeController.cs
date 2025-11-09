@@ -3,6 +3,7 @@ using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BTL_QlBi_a.Controllers
 {
@@ -43,28 +44,7 @@ namespace BTL_QlBi_a.Controllers
             return View(danhSachDV);
         }
 
-        public async Task<IActionResult> HoaDon()
-        {
-            await LoadHeaderStats();
-            var danhSachHD = await _context.HoaDon
-                .Include(h => h.BanBia)
-                .Include(h => h.KhachHang)
-                .Include(h => h.NhanVien)
-                .OrderByDescending(h => h.ThoiGianBatDau)
-                .ToListAsync();
-
-            return View(danhSachHD);
-        }
-
-        public async Task<IActionResult> KhachHang()
-        {
-            await LoadHeaderStats();
-            var danhSachKH = await _context.KhachHang
-                .OrderByDescending(k => k.TongChiTieu)
-                .ToListAsync();
-
-            return View(danhSachKH);
-        }
+  
 
         public async Task<IActionResult> ThongKe()
         {

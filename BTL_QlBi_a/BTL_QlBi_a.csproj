@@ -20,8 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="resources\" />
     <Folder Include="wwwroot\asset\img\tables\" />
+    <Folder Include="wwwroot\asset\js\qlHoaDon\" />
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 

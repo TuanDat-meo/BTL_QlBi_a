@@ -1,0 +1,91 @@
+﻿@model BTL_QlBi_a.Models.Entities.KhachHang
+@{
+    string rankIcon = Model.HangTV switch
+    {
+        BTL_QlBi_a.Models.Entities.HangThanhVien.BachKim => "💎",
+        BTL_QlBi_a.Models.Entities.HangThanhVien.Vang => "🥇",
+        BTL_QlBi_a.Models.Entities.HangThanhVien.Bac => "🥈",
+        _ => "🥉"
+    };
+
+    string rankClass = Model.HangTV switch
+    {
+        BTL_QlBi_a.Models.Entities.HangThanhVien.BachKim => "status-badge reserved", // Lấy tạm style
+        BTL_QlBi_a.Models.Entities.HangThanhVien.Vang => "status-badge reserved",
+        BTL_QlBi_a.Models.Entities.HangThanhVien.Bac => "status-badge",
+        _ => "status-badge"
+    };
+}
+
+<div class="detail-header">
+    <h3 class="detail-title">@Model.TenKH</h3>
+    <span class="@rankClass">@rankIcon @Model.HangTV</span>
+</div>
+
+<div class="detail-body">
+    <div class="info-section">
+        <div class="info-row">
+            <span class="info-label">SĐT:</span>
+            <span class="info-value">@Model.SDT</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">@(Model.Email ?? "Chưa có")</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Ngày tham gia:</span>
+            <span class="info-value">@Model.NgayDangKy.ToString("dd/MM/yyyy")</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Lần đến cuối:</span>
+            <span class="info-value">@(Model.LanDenCuoi?.ToString("dd/MM/yyyy") ?? "Chưa có")</span>
+        </div>
+    </div>
+
+    <div class="bill-section">
+        <div class="bill-row">
+            <span class="info-label">Điểm tích lũy:</span>
+            <span class="info-value" style="color: #e74c3c; font-weight: 700;">@Model.DiemTichLuy điểm</span>
+        </div>
+        <div class="bill-row total">
+            <span class="info-label">Tổng chi tiêu:</span>
+            <span>@Model.TongChiTieu.ToString("N0") đ</span>
+        </div>
+    </div>
+
+    @if (Model.HoaDons != null && Model.HoaDons.Any())
+    {
+            <div class="service-section">
+                <h4 class="section-subtitle">Lịch sử chơi:</h4>
+            @foreach (var hd in Model.HoaDons)
+            {
+                        <div class="service-item" style="cursor: pointer; flex-wrap: wrap;" onclick="viewInvoice(@hd.MaHD)">
+                            <div class="service-name" style="width: 100%;">
+                                <strong>HD@(hd.MaHD.ToString("D4"))</strong> (@hd.BanBia?.TenBan)
+                            </div>
+                            <div class="service-price" style="color: #28a745;">
+                        @hd.TongTien.ToString("N0") đ
+                            </div>
+                            <div style="font-size: 13px; color: #6c757d;">
+                        @hd.ThoiGianKetThuc?.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+            }
+            </div>
+    }
+    else
+    {
+            <div class="empty-state" style="padding: 20px 0;">
+                 <p class="empty-text">Khách hàng chưa có lịch sử chơi.</p>
+            </div>
+    }
+
+    <div class="action-section">
+        <button class="btn btn-primary" onclick="editCustomer(@Model.MaKH)">
+            ✏️ Sửa thông tin
+        </button>
+         <button class="btn btn-secondary" onclick="closeRightPanel()">
+            Đóng
+        </button>
+    </div>
+</div>
