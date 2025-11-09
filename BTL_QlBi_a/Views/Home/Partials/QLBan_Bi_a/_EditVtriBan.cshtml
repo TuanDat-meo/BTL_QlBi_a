@@ -1,5 +1,5 @@
 ﻿@model BTL_QlBi_a.Models.Entities.BanBia
-<link rel="stylesheet" href="~/asset/css/qlBan/editBan.css" />
+<link rel="stylesheet" href="~/asset/css/qlBan/editBan.css?v=@DateTime.Now.Ticks"  />
 <div class="ban-form-wrapper">
     <div class="form-header">
         <h3 class="form-title">✏️ Chỉnh sửa bàn: @Model.TenBan</h3>
@@ -11,7 +11,28 @@
 
         <div class="form-body-scroll">
             <div class="form-section">
-                <h4 class="section-subtitle">📋 Thông tin cơ bản</h4>
+                <h4 class="section-subtitle">
+                    Thông tin cơ bản <label class="form-label">
+                        @{
+                            var statusClass = Model.TrangThai switch
+                            {
+                                BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "status-available",
+                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "status-occupied",
+                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "status-reserved",
+                                _ => ""
+                            };
+
+                            var statusText = Model.TrangThai switch
+                            {
+                                BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trống",
+                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "Đang chơi",
+                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "Đã đặt",
+                                _ => Model.TrangThai.ToString()
+                            };
+                        }
+                        <span class="status-badge-large @statusClass">@statusText</span>
+                    </label>
+                </h4>
 
                 <div class="form-group">
                     <label class="form-label">Tên bàn <span class="required">*</span></label>
@@ -50,31 +71,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Trạng thái</label>
-                    <div class="status-display">
-                        @{
-                            var statusClass = Model.TrangThai switch
-                            {
-                                BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "status-available",
-                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "status-occupied",
-                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "status-reserved",
-                                _ => ""
-                            };
-
-                            var statusText = Model.TrangThai switch
-                            {
-                                BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong => "Trống",
-                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DangChoi => "Đang chơi",
-                                BTL_QlBi_a.Models.Entities.TrangThaiBan.DaDat => "Đã đặt",
-                                _ => Model.TrangThai.ToString()
-                            };
-                        }
-                        <span class="status-badge-large @statusClass">@statusText</span>
-                    </div>
-                    <p class="form-help">Trạng thái bàn được cập nhật tự động khi sử dụng</p>
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">Ghi chú</label>
                     <textarea class="form-control"
                               id="ghiChu"
@@ -84,7 +80,7 @@
             </div>
 
             <div class="form-section">
-                <h4 class="section-subtitle">🖼️ Hình ảnh bàn</h4>
+                <h4 class="section-subtitle">Hình ảnh bàn</h4>
 
                 @if (!string.IsNullOrEmpty(Model.HinhAnh))
                 {
@@ -123,7 +119,7 @@
                     <h4 class="section-subtitle">⚠️ Vùng nguy hiểm</h4>
                     <p class="danger-text">Xóa bàn này sẽ không thể khôi phục. Chỉ xóa khi bàn chưa có lịch sử sử dụng.</p>
                     <button type="button" class="btn btn-danger" onclick="BanBiaManager.deleteBan(@Model.MaBan)">
-                        🗑️ Xóa bàn này
+                        Xóa bàn này
                     </button>
                 </div>
             }
@@ -131,10 +127,10 @@
 
         <div class="form-footer">
             <button type="button" class="btn btn-secondary" onclick="BanBiaManager.closeModal()">
-                ❌ Hủy
+                Hủy
             </button>
             <button type="submit" class="btn btn-success">
-                ✅ Lưu thay đổi
+                Lưu thay đổi
             </button>
         </div>
     </form>

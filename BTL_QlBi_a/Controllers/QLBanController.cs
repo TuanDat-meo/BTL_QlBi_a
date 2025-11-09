@@ -20,7 +20,10 @@ namespace BTL_QlBi_a.Controllers
 
         private async Task LoadHeaderStats()
         {
-            var danhSachBan = await _context.BanBia.ToListAsync();
+            // Chỉ lấy bàn KHÔNG bị ẩn
+            var danhSachBan = await _context.BanBia
+                .Where(b => b.TrangThai != TrangThaiBan.BaoTri)
+                .ToListAsync();
 
             // Sử dụng client-side evaluation để tránh lỗi LINQ
             ViewBag.BanTrong = danhSachBan.Count(b => b.TrangThai == TrangThaiBan.Trong);
@@ -40,7 +43,76 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.DoanhThuHomNay = doanhThuHomNay.ToString("N0") + "đ";
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
         }
+        [HttpGet]
+        public async Task<IActionResult> DanhSachBanDaAn()
+        {
+            var tenNhom = HttpContext.Session.GetString("TenNhom");
+            if (tenNhom != "Admin" && tenNhom != "Quản lý")
+            {
+                return Forbid();
+            }
 
+            var banDaAn = await _context.BanBia
+                .Include(b => b.LoaiBan)
+                .Include(b => b.KhuVuc)
+                .Where(b => b.TrangThai == TrangThaiBan.BaoTri)
+                .OrderBy(b => b.MaBan)
+                .ToListAsync();
+
+            return View("~/Views/Home/DanhSachBanDaAn.cshtml", banDaAn);
+        }
+        [HttpPost]
+        public async Task<IActionResult> KhoiPhucBan([FromBody] XoaBanRequest request)
+        {
+            try
+            {
+                var tenNhom = HttpContext.Session.GetString("TenNhom");
+                if (tenNhom != "Admin" && tenNhom != "Quản lý")
+                {
+                    return Json(new { success = false, message = "Không có quyền thực hiện" });
+                }
+
+                var ban = await _context.BanBia.FindAsync(request.MaBan);
+                if (ban == null)
+                    return Json(new { success = false, message = "Không tìm thấy bàn" });
+
+                if (ban.TrangThai != TrangThaiBan.BaoTri)
+                    return Json(new { success = false, message = "Bàn này không ở trạng thái ẩn" });
+
+                // Khôi phục bàn về trạng thái trống
+                ban.TrangThai = TrangThaiBan.Trong;
+
+                // Xóa prefix [ẨN] trong ghi chú
+                if (!string.IsNullOrEmpty(ban.GhiChu))
+                {
+                    ban.GhiChu = ban.GhiChu.Replace("[ẨN]", "").Trim();
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Ghi log
+                int? maNV = HttpContext.Session.GetInt32("MaNV");
+                if (maNV.HasValue)
+                {
+                    var lichSu = new LichSuHoatDong
+                    {
+                        MaNV = maNV.Value,
+                        ThoiGian = DateTime.Now,
+                        HanhDong = "Khôi phục bàn",
+                        ChiTiet = $"Khôi phục bàn {ban.TenBan} (ID: {ban.MaBan})"
+                    };
+                    _context.LichSuHoatDong.Add(lichSu);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Json(new { success = true, message = "Khôi phục bàn thành công" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in KhoiPhucBan: {ex.Message}");
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
         private async Task<string> SaveImageAsync(IFormFile file)
         {
             try
@@ -101,12 +173,15 @@ namespace BTL_QlBi_a.Controllers
 
             await LoadHeaderStats();
 
+            // Lọc bỏ bàn có trạng thái BaoTri (đã ẩn)
             var danhSachBan = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhachHang)
                 .Include(b => b.KhuVuc)
+                .Where(b => b.TrangThai != TrangThaiBan.BaoTri) // Không hiển thị bàn đã ẩn
                 .OrderBy(b => b.MaBan)
                 .ToListAsync();
+
             return View("~/Views/Home/BanBia.cshtml", danhSachBan);
         }
 
@@ -156,16 +231,15 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                // Lấy tất cả bàn trước (không filter trong query)
+                // Lấy tất cả bàn KHÔNG bao gồm bàn bảo trì (đã ẩn)
                 var allBan = await _context.BanBia
                     .Include(b => b.LoaiBan)
                     .Include(b => b.KhuVuc)
                     .Include(b => b.KhachHang)
+                    .Where(b => b.TrangThai != TrangThaiBan.BaoTri) // Lọc bỏ bàn đã ẩn
                     .ToListAsync();
 
-                // Filter ở client-side để tránh lỗi LINQ
                 var danhSachBan = allBan
-                    .Where(b => b.TrangThai != TrangThaiBan.BaoTri)
                     .Select(b => new
                     {
                         maBan = b.MaBan,
@@ -336,24 +410,38 @@ namespace BTL_QlBi_a.Controllers
                 if (ban == null)
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
 
-                if (ban.TrangThai != TrangThaiBan.Trong)
-                    return Json(new { success = false, message = "Không thể xóa bàn đang sử dụng hoặc đã đặt" });
+                // Kiểm tra trạng thái bàn
+                if (ban.TrangThai == TrangThaiBan.DangChoi)
+                    return Json(new { success = false, message = "Không thể ẩn bàn đang được sử dụng" });
 
-                var coHoaDon = await _context.HoaDon
-                    .AnyAsync(h => h.MaBan == request.MaBan);
+                if (ban.TrangThai == TrangThaiBan.DaDat)
+                    return Json(new { success = false, message = "Không thể ẩn bàn đã được đặt. Vui lòng hủy đặt bàn trước." });
 
-                if (coHoaDon)
-                    return Json(new { success = false, message = "Không thể xóa bàn đã có lịch sử hóa đơn" });
+                // Thay vì xóa, chuyển sang trạng thái BaoTri (ngừng phục vụ)
+                ban.TrangThai = TrangThaiBan.BaoTri;
+                ban.GhiChu = $"[ẨN] {ban.GhiChu ?? ""}".Trim();
 
-                if (!string.IsNullOrEmpty(ban.HinhAnh))
-                {
-                    DeleteImage(ban.HinhAnh);
-                }
+                // Cập nhật thời gian để lưu lại khi nào bàn bị ẩn
+                // Nếu có field NgayCapNhat thì dùng, không thì dùng GhiChu
 
-                _context.BanBia.Remove(ban);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Xóa bàn thành công" });
+                // Ghi log lịch sử
+                int? maNV = HttpContext.Session.GetInt32("MaNV");
+                if (maNV.HasValue)
+                {
+                    var lichSu = new LichSuHoatDong
+                    {
+                        MaNV = maNV.Value,
+                        ThoiGian = DateTime.Now,
+                        HanhDong = "Ẩn bàn",
+                        ChiTiet = $"Ẩn bàn {ban.TenBan} (ID: {ban.MaBan})"
+                    };
+                    _context.LichSuHoatDong.Add(lichSu);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Json(new { success = true, message = "Đã ẩn bàn thành công. Bàn sẽ không hiển thị nữa." });
             }
             catch (Exception ex)
             {
