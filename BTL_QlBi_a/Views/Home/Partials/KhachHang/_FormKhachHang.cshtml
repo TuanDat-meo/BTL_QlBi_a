@@ -1,0 +1,41 @@
+﻿@model BTL_QlBi_a.Models.Entities.KhachHang
+
+<form id="customerForm" onsubmit="saveCustomerForm(event)">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="MaKH" />
+
+    <input type="hidden" asp-for="NgayDangKy" />
+    <input type="hidden" asp-for="DiemTichLuy" />
+    <input type="hidden" asp-for="TongChiTieu" />
+
+    <div class="form-group">
+        <label asp-for="TenKH">Tên khách hàng</label>
+        <input type="text" class="form-control" asp-for="TenKH" placeholder="Nhập tên khách hàng" required>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SDT">Số điện thoại</label>
+        <input type="tel" class="form-control" asp-for="SDT" placeholder="Nhập SĐT" required>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email">Email</label>
+        <input type="email" class="form-control" asp-for="Email" placeholder="Nhập email (không bắt buộc)">
+    </div>
+
+    @if (Model.MaKH > 0)
+    {
+            <div class="form-group">
+                <label asp-for="HangTV">Hạng thành viên</label>
+                <input type="text" class="form-control" asp-for="HangTV" readonly>
+            </div>
+    }
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    </div>
+</form>
+

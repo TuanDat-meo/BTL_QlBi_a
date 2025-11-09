@@ -1,5 +1,171 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.KhachHang>
+
 @{
+    ViewData["Tittle"] = "Quản lý khách hàng";
+}
+
+@await Html.PartialAsync("~/Views/Home/Partials/KhachHang/_KhachHang.cshtml", Model);
+
+
+@section Scripts {
+            <script>
+                // Test debug
+                console.log('✅ Page loaded');
+                console.log('Detail Panel:', document.getElementById('detailPanel'));
+                console.log('Table Cards:', document.querySelectorAll('.table-card').length);
+
+                // Adjust container layout when detail is shown
+                const detailPanel = document.getElementById('detailPanel');
+                const container = document.querySelector('.container');
+
+                if (detailPanel && container) {
+                    // Watch for changes in detail panel
+                    const observer = new MutationObserver(function(mutations) {
+                        if (detailPanel.innerHTML.trim() !== '') {
+                            container.classList.add('with-detail');
+                        } else {
+                            container.classList.remove('with-detail');
+                        }
+                    });
+
+                    observer.observe(detailPanel, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+
+        async function saveCustomerForm(event) {
+        event.preventDefault(); // Ngăn form submit theo cách cũ
+
+        const form = document.getElementById('customerForm');
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/KhachHang/LuuKhachHang', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Lưu thành công!');
+                closeModal(); // Đóng modal
+                location.reload(); // TẢI LẠI TRANG để cập nhật danh sách
+            } else {
+                alert('Đã xảy ra lỗi: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Lỗi khi submit form:', error);
+            alert('Lỗi kết nối. Không thể lưu.');
+        }
+    }
+      function filterCustomers(rank) {
+            const cards = document.querySelectorAll('#customersGrid .table-card');
+            const buttons = document.querySelectorAll('.filter-btn[data-filter]');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="' + rank + '"]')?.classList.add('active');
+
+            const searchValue = document.getElementById('searchCustomers').value.toLowerCase();
+
+            cards.forEach(card => {
+                const cardRank = card.dataset.rank;
+                const customerInfo = card.textContent.toLowerCase();
+
+                const rankMatch = (rank === 'all' || cardRank === rank);
+                const searchMatch = (searchValue === '' || customerInfo.includes(searchValue));
+
+                card.style.display = (rankMatch && searchMatch) ? 'block' : 'none';
+            });
+        }
+
+        function searchCustomers() {
+            filterCustomers(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
+        }
+
+        async function viewCustomer(maKH) {
+            const detailPanel = document.getElementById('detailPanel');
+            if (!detailPanel) {
+                console.error('Không tìm thấy #detailPanel');
+                return;
+            }
+
+            detailPanel.innerHTML = '<div class="empty-text">Đang tải chi tiết khách hàng...</div>';
+
+            const rightPanel = document.querySelector('.right-panel');
+            if (rightPanel) {
+                rightPanel.classList.add('active');
+            }
+
+            try {
+                const response = await fetch('/KhachHang/ChiTietKhachHang?maKH=' + maKH);
+
+                if (!response.ok) {
+                    detailPanel.innerHTML = '<div class="empty-state">Lỗi khi tải dữ liệu khách hàng.</div>';
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Đưa HTML vào panel
+                const html = await response.text();
+                detailPanel.innerHTML = html;
+
+            } catch (error) {
+                console.error('Lỗi fetch ChiTietKhachHang:', error);
+                detailPanel.innerHTML = '<div class="empty-state">Không thể tải chi tiết.</div>';
+            }
+        }
+
+        function openAddCustomerModal() {
+            // alert('Mở form thêm khách hàng mới');
+            openCustomerModal(0);
+
+        }
+
+        function editCustomer(maKH) {
+            // alert('Sửa thông tin khách hàng: ' + maKH);
+            openCustomerModal(maKH);
+        }
+
+           async function openCustomerModal(maKH) {
+            let url = '/KhachHang/FormKhachHang';
+            let title = '';
+
+            if (maKH > 0) {
+                url += '?maKH=' + maKH;
+                title = 'Sửa thông tin khách hàng';
+            } else {
+                title = 'Thêm khách hàng mới';
+            }
+
+            try {
+                // Hiển thị loading (tạm thời)
+                // (Chúng ta gọi hàm 'openModal' có sẵn của bạn)
+                openModal(title, '<div class="empty-text">Đang tải...</div>');
+
+                // 1. Gọi Controller để lấy HTML của form
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Tải form thất bại');
+                }
+                const formHtml = await response.text();
+
+                // 2. Lấy được HTML rồi, gọi lại hàm openModal
+                //    với nội dung là cái form
+                openModal(title, formHtml);
+
+            } catch (error) {
+                console.error('Lỗi khi mở modal:', error);
+                // Báo lỗi cũng dùng hàm openModal
+                openModal('Lỗi', '<div class="empty-state">Không thể tải form.</div>');
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            filterCustomers('all');
+        });        
+
+
+            </script>
 }
