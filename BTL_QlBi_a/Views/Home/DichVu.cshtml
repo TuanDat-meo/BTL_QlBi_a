@@ -5,6 +5,32 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/asset/css/dichvu/dichvu-modal.css" />
+
+    <style>
+        .service-image-container {
+            width: 100%;
+            height: 120px;
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .service-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .service-icon-fallback {
+            font-size: 48px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+    </style>
 }
 
 <div class="section-header">
@@ -30,22 +56,38 @@
         <input type="text" class="search-input" placeholder="🔍 Tìm kiếm dịch vụ..." id="searchServices" onkeyup="searchServices()">
     </div>
 </div>
-
 @if (Model != null && Model.Any())
 {
     <div class="tables-grid" id="servicesGrid">
+
         @foreach (var dichVu in Model)
         {
             string loaiDV = dichVu.Loai.ToString();
-            string iconDV = loaiDV switch
-            {
-                "DoUong" => "🍹",
-                "DoAn" => "🍔",
-                _ => "📦"
-            };
 
             <div class="table-card available" data-category="@loaiDV">
-                <div class="service-icon">@iconDV</div>
+
+                <div class="service-image-container">
+                    @if (!string.IsNullOrEmpty(dichVu.HinhAnh))
+                    {
+                        string imagePath = dichVu.HinhAnh.TrimStart('/');
+                        if (imagePath.StartsWith("img/"))
+                        {
+                            imagePath = imagePath.Substring(4);
+                        }
+                        <img src="~/asset/img/@imagePath" alt="@dichVu.TenDV" class="service-image" />
+                    }
+                    else
+                    {
+                        string iconDV = loaiDV switch
+                        {
+                            "DoUong" => "🍹",
+                            "DoAn" => "🍔",
+                            _ => "📦"
+                        };
+                        <div class="service-icon-fallback">@iconDV</div>
+                    }
+                </div>
+
                 <div class="table-name">@dichVu.TenDV</div>
                 <div class="table-info">Mã: @dichVu.MaDV</div>
                 <div class="table-price">@dichVu.Gia.ToString("N0") đ</div>

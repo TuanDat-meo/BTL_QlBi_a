@@ -247,7 +247,7 @@ namespace BTL_QlBi_a.Controllers
             {
                 var extension = Path.GetExtension(file.FileName);
                 var fileName = $"service_{Guid.NewGuid()}{extension}";
-                var uploadsFolder = Path.Combine(_environment.WebRootPath, "asset", "img", "services");
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "asset", "img");
 
                 if (!Directory.Exists(uploadsFolder))
                 {
@@ -261,7 +261,7 @@ namespace BTL_QlBi_a.Controllers
                     await file.CopyToAsync(stream);
                 }
 
-                return $"services/{fileName}";
+                return fileName;
             }
             catch (Exception ex)
             {
@@ -276,6 +276,8 @@ namespace BTL_QlBi_a.Controllers
             {
                 if (!string.IsNullOrEmpty(imagePath))
                 {
+                    // --- SỬA ĐỔI ---
+                    // imagePath giờ chỉ là tên file, trỏ trực tiếp
                     var fullPath = Path.Combine(_environment.WebRootPath, "asset", "img", imagePath);
                     if (System.IO.File.Exists(fullPath))
                     {
