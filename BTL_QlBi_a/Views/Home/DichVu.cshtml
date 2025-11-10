@@ -4,117 +4,90 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/asset/css/dichvu/dichvu-page.css" />
     <link rel="stylesheet" href="~/asset/css/dichvu/dichvu-modal.css" />
-
-    <style>
-        .service-image-container {
-            width: 100%;
-            height: 120px;
-            background-color: #f8f9fa;
-            border-radius: 8px 8px 0 0;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .service-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .service-icon-fallback {
-            font-size: 48px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6c757d;
-        }
-    </style>
 }
 
-<div class="section-header">
-    <h2 class="section-title">Dịch vụ & Menu</h2>
-    <div class="action-buttons">
-        <button class="btn btn-primary" onclick="DichVuManager.openAddModal()">➕ Thêm dịch vụ mới</button>
-    </div>
-</div>
-
-<div class="filter-bar">
-    <div class="filter-row">
-        <div class="filter-group">
-            <span class="filter-label">Loại dịch vụ:</span>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all" onclick="filterServices('all')">Tất cả</button>
-                <button class="filter-btn" data-filter="DoUong" onclick="filterServices('DoUong')">Đồ uống</button>
-                <button class="filter-btn" data-filter="DoAn" onclick="filterServices('DoAn')">Đồ ăn</button>
-                <button class="filter-btn" data-filter="Khac" onclick="filterServices('Khac')">Khác</button>
-            </div>
+<div class="dichvu-page">
+    <div class="section-header">
+        <h2 class="section-title">Dịch vụ & Menu</h2>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="DichVuManager.openAddModal()">➕ Thêm dịch vụ mới</button>
         </div>
     </div>
-    <div class="filter-row">
-        <input type="text" class="search-input" placeholder="🔍 Tìm kiếm dịch vụ..." id="searchServices" onkeyup="searchServices()">
-    </div>
-</div>
-@if (Model != null && Model.Any())
-{
-    <div class="tables-grid" id="servicesGrid">
 
-        @foreach (var dichVu in Model)
-        {
-            string loaiDV = dichVu.Loai.ToString();
-
-            <div class="table-card available" data-category="@loaiDV">
-
-                <div class="service-image-container">
-                    @if (!string.IsNullOrEmpty(dichVu.HinhAnh))
-                    {
-                        string imagePath = dichVu.HinhAnh.TrimStart('/');
-                        if (imagePath.StartsWith("img/"))
-                        {
-                            imagePath = imagePath.Substring(4);
-                        }
-                        <img src="~/asset/img/@imagePath" alt="@dichVu.TenDV" class="service-image" />
-                    }
-                    else
-                    {
-                        string iconDV = loaiDV switch
-                        {
-                            "DoUong" => "🍹",
-                            "DoAn" => "🍔",
-                            _ => "📦"
-                        };
-                        <div class="service-icon-fallback">@iconDV</div>
-                    }
-                </div>
-
-                <div class="table-name">@dichVu.TenDV</div>
-                <div class="table-info">Mã: @dichVu.MaDV</div>
-                <div class="table-price">@dichVu.Gia.ToString("N0") đ</div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="DichVuManager.openEditModal(@dichVu.MaDV)">
-                        ✏️ Sửa
-                    </button>
-                    <button class="btn btn-danger" onclick="DichVuManager.deleteService(@dichVu.MaDV, '@dichVu.TenDV')">
-                        🗑️ Xóa
-                    </button>
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">Loại dịch vụ:</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all" onclick="filterServices('all')">Tất cả</button>
+                    <button class="filter-btn" data-filter="DoUong" onclick="filterServices('DoUong')">Đồ uống</button>
+                    <button class="filter-btn" data-filter="DoAn" onclick="filterServices('DoAn')">Đồ ăn</button>
+                    <button class="filter-btn" data-filter="Khac" onclick="filterServices('Khac')">Khác</button>
                 </div>
             </div>
-        }
+        </div>
+        <div class="filter-row">
+            <input type="text" class="search-input" placeholder="🔍 Tìm kiếm dịch vụ..." id="searchServices" onkeyup="searchServices()">
+        </div>
     </div>
-}
-else
-{
-    <div class="empty-state">
-        <div class="empty-icon">📦</div>
-        <h3>Chưa có dịch vụ</h3>
-        <p class="empty-text">Thêm dịch vụ đầu tiên vào menu</p>
-    </div>
-}
 
-@* Include Modal - Đường dẫn tuyệt đối *@
-@await Html.PartialAsync("~/Views/Home/Partials/DichVu/_AddDichVuModal.cshtml")
+    @if (Model != null && Model.Any())
+    {
+        <div class="tables-grid" id="servicesGrid">
+            @foreach (var dichVu in Model)
+            {
+                string loaiDV = dichVu.Loai.ToString();
+
+                <div class="table-card available" data-category="@loaiDV">
+                    <div class="service-image-container">
+                        @if (!string.IsNullOrEmpty(dichVu.HinhAnh))
+                        {
+                            string imagePath = dichVu.HinhAnh.TrimStart('/');
+                            if (imagePath.StartsWith("img/"))
+                            {
+                                imagePath = imagePath.Substring(4);
+                            }
+                            <img src="~/asset/img/@imagePath" alt="@dichVu.TenDV" class="service-image" />
+                        }
+                        else
+                        {
+                            string iconDV = loaiDV switch
+                            {
+                                "DoUong" => "🍹",
+                                "DoAn" => "🍔",
+                                _ => "📦"
+                            };
+                            <div class="service-icon-fallback">@iconDV</div>
+                        }
+                    </div>
+
+                    <div class="table-name">@dichVu.TenDV</div>
+                    <div class="table-info">Mã: @dichVu.MaDV</div>
+                    <div class="table-price">@dichVu.Gia.ToString("N0") đ</div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="DichVuManager.openEditModal(@dichVu.MaDV)">
+                            ✏️ Sửa
+                        </button>
+                        <button class="btn btn-danger" onclick="DichVuManager.deleteService(@dichVu.MaDV, '@dichVu.TenDV')">
+                            🗑️ Xóa
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>Chưa có dịch vụ</h3>
+            <p class="empty-text">Thêm dịch vụ đầu tiên vào menu</p>
+        </div>
+    }
+</div>
 
 @section Scripts {
     <script src="~/asset/js/DichVu/dichvu.js"></script>
@@ -146,4 +119,9 @@ else
             filterServices('all');
         });
     </script>
+}
+
+@section Modals
+{
+    @await Html.PartialAsync("~/Views/Home/Partials/DichVu/_AddDichVuModal.cshtml")
 }
