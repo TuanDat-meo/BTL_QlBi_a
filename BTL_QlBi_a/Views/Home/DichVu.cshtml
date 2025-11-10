@@ -4,11 +4,104 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/asset/css/service.css" />
+    <link rel="stylesheet" href="~/asset/css/dichvu/dichvu-modal.css" />
 }
 
-@await Html.PartialAsync("Partials/_DichVu", Model)
+<div class="section-header">
+    <h2 class="section-title">Dịch vụ & Menu</h2>
+    <div class="action-buttons">
+        <button class="btn btn-primary" onclick="DichVuManager.openAddModal()">➕ Thêm dịch vụ mới</button>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-row">
+        <div class="filter-group">
+            <span class="filter-label">Loại dịch vụ:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all" onclick="filterServices('all')">Tất cả</button>
+                <button class="filter-btn" data-filter="DoUong" onclick="filterServices('DoUong')">Đồ uống</button>
+                <button class="filter-btn" data-filter="DoAn" onclick="filterServices('DoAn')">Đồ ăn</button>
+                <button class="filter-btn" data-filter="Khac" onclick="filterServices('Khac')">Khác</button>
+            </div>
+        </div>
+    </div>
+    <div class="filter-row">
+        <input type="text" class="search-input" placeholder="🔍 Tìm kiếm dịch vụ..." id="searchServices" onkeyup="searchServices()">
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="tables-grid" id="servicesGrid">
+        @foreach (var dichVu in Model)
+        {
+            string loaiDV = dichVu.Loai.ToString();
+            string iconDV = loaiDV switch
+            {
+                "DoUong" => "🍹",
+                "DoAn" => "🍔",
+                _ => "📦"
+            };
+
+            <div class="table-card available" data-category="@loaiDV">
+                <div class="service-icon">@iconDV</div>
+                <div class="table-name">@dichVu.TenDV</div>
+                <div class="table-info">Mã: @dichVu.MaDV</div>
+                <div class="table-price">@dichVu.Gia.ToString("N0") đ</div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="DichVuManager.openEditModal(@dichVu.MaDV)">
+                        ✏️ Sửa
+                    </button>
+                    <button class="btn btn-danger" onclick="DichVuManager.deleteService(@dichVu.MaDV, '@dichVu.TenDV')">
+                        🗑️ Xóa
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>Chưa có dịch vụ</h3>
+        <p class="empty-text">Thêm dịch vụ đầu tiên vào menu</p>
+    </div>
+}
+
+@* Include Modal - Đường dẫn tuyệt đối *@
+@await Html.PartialAsync("~/Views/Home/Partials/DichVu/_AddDichVuModal.cshtml")
 
 @section Scripts {
-    <script src="~/asset/js/dichvu.js" asp-append-version="true"></script>
+    <script src="~/asset/js/DichVu/dichvu.js"></script>
+    <script>
+        function filterServices(category) {
+            const cards = document.querySelectorAll('#servicesGrid .table-card');
+            const buttons = document.querySelectorAll('.filter-btn[data-filter]');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="' + category + '"]')?.classList.add('active');
+
+            const searchValue = document.getElementById('searchServices').value.toLowerCase();
+            cards.forEach(card => {
+                const cardCategory = card.dataset.category;
+                const serviceName = card.querySelector('.table-name')?.textContent.toLowerCase() || '';
+
+                const categoryMatch = (category === 'all' || cardCategory === category);
+                const searchMatch = (searchValue === '' || serviceName.includes(searchValue));
+
+                card.style.display = (categoryMatch && searchMatch) ? 'block' : 'none';
+            });
+        }
+
+        function searchServices() {
+            filterServices(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            filterServices('all');
+        });
+    </script>
 }
