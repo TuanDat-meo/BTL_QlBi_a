@@ -1,5 +1,4 @@
-﻿
-USE QL_QuanBi_a;
+﻿USE QL_QuanBi_a;
 GO
 
 
@@ -176,9 +175,8 @@ INSERT INTO dich_vu (ten_dv, loai, gia, don_vi, ma_hang, trang_thai, mo_ta, hinh
 (N'Tôm chiên giòn', N'Đồ ăn', 70000, N'đĩa', 16, N'Còn hàng', N'Tôm tươi chiên bột', N'tomchiengion.jpg'),
 -- Dịch vụ khác (không liên kết mặt hàng)
 (N'Thuê cơ VIP', N'Khác', 50000, N'lần', NULL, N'Còn hàng', N'Thuê cơ cao cấp', N'cobiaaoccap.jpg'),
-(N'Thuê cơ thường', N'Khác', 20000, N'lần', NULL, N'Còn hàng', N'Thuê cơ phổ thông', N'cobia.jpg'),
-(N'Thuê phấn', N'Khác', 10000, N'lần', NULL, N'Còn hàng', N'Thuê phấn bi-a', N'img/phanbia.jpg'),
-(N'Phục vụ riêng VIP', N'Khác', 100000, N'giờ', NULL, N'Còn hàng', N'Phục vụ riêng phòng VIP', NULL);
+(N'Thuê cơ thường', N'Khác', 20000, N'lần', NULL, N'Còn hàng', N'Thuê cơ phổ thông', N'cothuong.png'),
+(N'Thuê phấn', N'Khác', 10000, N'lần', NULL, N'Còn hàng', N'Thuê phấn bi-a', N'img/phanbia.jpg');
 GO
 -- ====
 
