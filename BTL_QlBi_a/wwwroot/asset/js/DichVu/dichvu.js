@@ -1,4 +1,4 @@
-﻿// DichVuManager - Quản lý dịch vụ
+﻿// DichVuManager - Quản lý dịch vụ (Isolated version)
 const DichVuManager = {
     isEditMode: false,
     currentMaDV: null,
@@ -14,7 +14,13 @@ const DichVuManager = {
         document.getElementById('maDV').value = '';
 
         this.removeImage();
-        document.getElementById('addServiceModal').style.display = 'flex';
+
+        const modal = document.getElementById('addServiceModal');
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+
+        // Ngăn scroll body
+        document.body.style.overflow = 'hidden';
     },
 
     // Mở modal chỉnh sửa
@@ -46,12 +52,27 @@ const DichVuManager = {
                 // Hiển thị ảnh nếu có
                 if (data.hinhAnh) {
                     const previewImg = document.getElementById('previewImg');
-                    previewImg.src = `/asset/img/${data.hinhAnh}`;
+                    let imagePath = data.hinhAnh;
+
+                    // Xử lý đường dẫn ảnh
+                    if (imagePath.startsWith('/')) {
+                        imagePath = imagePath.substring(1);
+                    }
+                    if (imagePath.startsWith('img/')) {
+                        imagePath = imagePath.substring(4);
+                    }
+
+                    previewImg.src = `/asset/img/${imagePath}`;
                     document.getElementById('uploadPlaceholder').style.display = 'none';
                     document.getElementById('imagePreview').style.display = 'block';
                 }
 
-                document.getElementById('addServiceModal').style.display = 'flex';
+                const modal = document.getElementById('addServiceModal');
+                modal.classList.add('show');
+                modal.style.display = 'flex';
+
+                // Ngăn scroll body
+                document.body.style.overflow = 'hidden';
             } else {
                 alert(result.message);
             }
@@ -63,9 +84,18 @@ const DichVuManager = {
 
     // Đóng modal
     closeModal() {
-        document.getElementById('addServiceModal').style.display = 'none';
-        document.getElementById('formDichVu').reset();
-        this.removeImage();
+        const modal = document.getElementById('addServiceModal');
+        modal.classList.remove('show');
+
+        // Animation đóng
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.getElementById('formDichVu').reset();
+            this.removeImage();
+
+            // Cho phép scroll body lại
+            document.body.style.overflow = '';
+        }, 300);
     },
 
     // Preview ảnh
@@ -119,24 +149,27 @@ const DichVuManager = {
 
         if (!tenDV) {
             alert('Vui lòng nhập tên dịch vụ!');
+            document.getElementById('tenDV').focus();
             return;
         }
 
         if (!loai) {
             alert('Vui lòng chọn loại dịch vụ!');
+            document.getElementById('loai').focus();
             return;
         }
 
         if (!gia || gia <= 0) {
             alert('Vui lòng nhập giá hợp lệ!');
+            document.getElementById('gia').focus();
             return;
         }
 
         if (!trangThai) {
             alert('Vui lòng chọn trạng thái!');
+            document.getElementById('trangThai').focus();
             return;
         }
-
 
         const url = this.isEditMode ? '/DichVu/SuaDichVu' : '/DichVu/ThemDichVu';
         const btnSubmit = document.getElementById('btnSubmit');
@@ -176,7 +209,11 @@ const DichVuManager = {
             if (result.success) {
                 alert(result.message);
                 this.closeModal();
-                location.reload();
+
+                // Reload sau khi animation đóng modal hoàn tất
+                setTimeout(() => {
+                    location.reload();
+                }, 350);
             } else {
                 alert(result.message);
             }
@@ -223,6 +260,19 @@ const DichVuManager = {
 // Đóng modal khi click ESC
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-        DichVuManager.closeModal();
+        const modal = document.getElementById('addServiceModal');
+        if (modal && modal.classList.contains('show')) {
+            DichVuManager.closeModal();
+        }
+    }
+});
+
+// Ngăn modal đóng khi click vào content
+document.addEventListener('DOMContentLoaded', function () {
+    const modalContent = document.querySelector('.dichvu-modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
     }
 });
