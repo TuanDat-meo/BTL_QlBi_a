@@ -50,8 +50,11 @@
         </aside>
     </div>
 
-    @* Modal Overlay *@
+    @* Modal Overlay (Modal chung của bạn) *@
     @await Html.PartialAsync("_Modal")
+
+    @await RenderSectionAsync("Modals", required: false)
+
 
     <script src="~/asset/js/sidebar.js" asp-append-version="true"></script>
     <script src="~/asset/js/common.js" asp-append-version="true"></script>

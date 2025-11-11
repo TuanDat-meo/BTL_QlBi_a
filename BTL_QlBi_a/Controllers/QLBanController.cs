@@ -874,7 +874,7 @@ namespace BTL_QlBi_a.Controllers
                 var tenNhom = HttpContext.Session.GetString("TenNhom") ?? "Nhân viên";
                 ViewBag.TenNhom = tenNhom;
 
-                var allDichVu = await _context.DichVu.ToListAsync();
+                var allDichVu = await _context.DichVus.ToListAsync();
 
                 // Filter ở client-side
                 var danhSachDV = allDichVu
@@ -905,7 +905,7 @@ namespace BTL_QlBi_a.Controllers
                 if (hoaDon == null)
                     return Json(new { success = false, message = "Không tìm thấy hóa đơn đang chơi" });
 
-                var dichVu = await _context.DichVu.FindAsync(request.MaDV);
+                var dichVu = await _context.DichVus.FindAsync(request.MaDV);
                 if (dichVu == null)
                     return Json(new { success = false, message = "Không tìm thấy dịch vụ" });
 

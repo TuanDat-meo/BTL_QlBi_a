@@ -1,0 +1,370 @@
+﻿/* Modal Styles - Tách riêng, không ảnh hưởng layout chung */
+.dichvu-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+    .dichvu-modal .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 1;
+    }
+
+    .dichvu-modal .modal-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 700px;
+        max-height: 90vh;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease-out;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+    }
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dichvu-modal .dichvu-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.dichvu-modal .form-header {
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+    flex-shrink: 0;
+}
+
+.dichvu-modal .form-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.dichvu-modal .btn-close-form {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+    .dichvu-modal .btn-close-form:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+.dichvu-modal .form-body-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 25px;
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #667eea #f1f1f1;
+}
+
+    /* Webkit browsers scrollbar */
+    .dichvu-modal .form-body-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .dichvu-modal .form-body-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .dichvu-modal .form-body-scroll::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 10px;
+    }
+
+        .dichvu-modal .form-body-scroll::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+.dichvu-modal .form-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+    .dichvu-modal .form-section:last-child {
+        margin-bottom: 0;
+    }
+
+.dichvu-modal .section-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+}
+
+.dichvu-modal .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.dichvu-modal .form-group {
+    margin-bottom: 15px;
+}
+
+    .dichvu-modal .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+.dichvu-modal .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.dichvu-modal .required {
+    color: #dc3545;
+}
+
+.dichvu-modal .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+    .dichvu-modal .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+.dichvu-modal textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Image Upload */
+.dichvu-modal .image-upload-area {
+    position: relative;
+}
+
+.dichvu-modal .upload-placeholder {
+    border: 3px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+    .dichvu-modal .upload-placeholder:hover {
+        border-color: #667eea;
+        background: #f5f3ff;
+    }
+
+.dichvu-modal .upload-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.dichvu-modal .upload-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+}
+
+.dichvu-modal .upload-hint {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0;
+}
+
+.dichvu-modal .image-preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .dichvu-modal .image-preview img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        display: block;
+    }
+
+.dichvu-modal .btn-remove-image {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+    .dichvu-modal .btn-remove-image:hover {
+        background: #dc3545;
+    }
+
+.dichvu-modal .form-footer {
+    padding: 20px 25px;
+    border-top: 2px solid #e9ecef;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    background: white;
+    border-radius: 0 0 16px 16px;
+}
+
+.dichvu-modal .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+    .dichvu-modal .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+.dichvu-modal .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+    .dichvu-modal .btn-secondary:hover:not(:disabled) {
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+    }
+
+.dichvu-modal .btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+    .dichvu-modal .btn-success:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dichvu-modal {
+        padding: 10px;
+    }
+
+        .dichvu-modal .modal-content {
+            max-height: 95vh;
+            border-radius: 12px;
+        }
+
+        .dichvu-modal .form-header {
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .dichvu-modal .form-title {
+            font-size: 18px;
+        }
+
+        .dichvu-modal .form-body-scroll {
+            padding: 20px;
+        }
+
+        .dichvu-modal .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .dichvu-modal .image-preview img {
+            height: 200px;
+        }
+
+        .dichvu-modal .form-footer {
+            padding: 15px 20px;
+            flex-direction: column-reverse;
+        }
+
+        .dichvu-modal .btn {
+            width: 100%;
+            padding: 12px;
+        }
+}
+
+@media (max-width: 480px) {
+    .dichvu-modal .upload-placeholder {
+        padding: 30px 15px;
+    }
+
+    .dichvu-modal .upload-icon {
+        font-size: 36px;
+    }
+
+    .dichvu-modal .upload-text {
+        font-size: 14px;
+    }
+}
