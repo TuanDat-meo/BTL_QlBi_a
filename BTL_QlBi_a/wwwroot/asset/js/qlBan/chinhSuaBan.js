@@ -1,8 +1,11 @@
 ﻿/**
- * Module quản lý chỉnh sửa bàn
+ * Module quản lý chỉnh sửa bàn - FIXED VERSION
+ * Sửa lỗi: Cập nhật số lượng và xóa dịch vụ hoạt động chính xác
  */
 const EditTableManager = {
     currentTableId: null,
+    timerInterval: null,
+    giaGio: 0,
 
     /**
      * Hiển thị panel chỉnh sửa
@@ -40,6 +43,13 @@ const EditTableManager = {
                 </div>
             `;
 
+            // Lấy giá giờ từ data attribute
+            const editSection = document.querySelector('.edit-section');
+            if (editSection) {
+                this.giaGio = parseFloat(editSection.getAttribute('data-gia-gio')) || 0;
+                console.log('💰 Giá giờ:', this.giaGio);
+            }
+
             // Initialize timer update
             this.startTimerUpdate();
 
@@ -65,9 +75,12 @@ const EditTableManager = {
     },
 
     /**
-     * Tự động cập nhật thời gian
+     * Tự động cập nhật thời gian và tiền
      */
     startTimerUpdate: function () {
+        // Dừng timer cũ nếu có
+        this.stopTimerUpdate();
+
         const updateDuration = () => {
             const gioBatDauInput = document.getElementById('gioBatDau');
             if (!gioBatDauInput || !gioBatDauInput.value) return;
@@ -85,37 +98,17 @@ const EditTableManager = {
                 currentDurationEl.textContent = `${hours} giờ ${minutes} phút`;
             }
 
-            // Lấy giá giờ từ data attribute
-            const editSection = document.querySelector('.edit-section');
-            const giaGio = editSection ? parseFloat(editSection.getAttribute('data-gia-gio')) || 0 : 0;
-
-            // LOGIC TÍNH TIỀN GIỐNG _ChiTietBan:
-            // Tính theo thời gian thực tế (không làm tròn)
+            // Tính tiền bàn (thời gian thực, không làm tròn)
             const soGioThucTe = durationMinutes / 60;
-            const tienBanThucTe = giaGio * soGioThucTe;
+            const tienBanThucTe = this.giaGio * soGioThucTe;
 
             const tienBanUocTinhEl = document.getElementById('tienBanUocTinh');
             if (tienBanUocTinhEl) {
                 tienBanUocTinhEl.textContent = Math.round(tienBanThucTe).toLocaleString('vi-VN') + ' đ';
             }
 
-            // Lấy tiền dịch vụ và giảm giá
-            const tienDichVuEl = document.getElementById('tienDichVu');
-            const tienDichVu = tienDichVuEl ? parseFloat(tienDichVuEl.value) || 0 : 0;
-
-            const giamGiaEl = document.getElementById('giamGia');
-            const giamGia = giamGiaEl ? parseFloat(giamGiaEl.value) || 0 : 0;
-
-            // Tính tổng tiền trước làm tròn
-            const tongTienTruocLamTron = tienBanThucTe + tienDichVu - giamGia;
-
-            // Làm tròn tổng tiền lên nghìn
-            const tongTien = Math.ceil(tongTienTruocLamTron / 1000) * 1000;
-
-            const tongTienUocTinhEl = document.getElementById('tongTienUocTinh');
-            if (tongTienUocTinhEl) {
-                tongTienUocTinhEl.textContent = tongTien.toLocaleString('vi-VN') + ' đ';
-            }
+            // Tính tổng tiền
+            this.updateTotalAmount();
         };
 
         // Update immediately
@@ -123,8 +116,100 @@ const EditTableManager = {
 
         // Update every second
         this.timerInterval = setInterval(updateDuration, 1000);
+        console.log('✅ Timer started');
     },
 
+    updateTotalAmount: function () {
+        const tienBanEl = document.getElementById('tienBanUocTinh');
+        const tongTienEl = document.getElementById('tongTienUocTinh');
+
+        // Lấy tiền dịch vụ và giảm giá bằng ID (đã được reloadServiceList cập nhật HTML)
+        const tienDichVuEl = document.getElementById('tienDichVuHienThi');
+        const giamGiaEl = document.getElementById('giamGiaHienThi');
+
+        if (!tienBanEl || !tongTienEl || !tienDichVuEl || !giamGiaEl) {
+            console.warn('⚠️ Missing required elements for total calculation. Aborting updateTotalAmount.');
+            return;
+        }
+
+        // Parse tiền bàn (lấy từ giá trị hiển thị hiện tại của timer)
+        const tienBanText = tienBanEl.textContent.replace(/[^0-9]/g, '');
+        const tienBan = parseFloat(tienBanText) || 0;
+
+        // Parse tiền dịch vụ từ ID mới
+        // Giá trị của tienDichVuEl đã được cập nhật từ newBillSummary trong reloadServiceList
+        const tienDichVuText = tienDichVuEl.textContent.replace(/[^0-9]/g, '');
+        const tienDichVu = parseFloat(tienDichVuText) || 0;
+
+        // Parse giảm giá từ ID mới (Bỏ qua dấu trừ)
+        // Giá trị của giamGiaEl đã được cập nhật từ newBillSummary trong reloadServiceList
+        const giamGiaText = giamGiaEl.textContent.replace(/[^0-9]/g, '');
+        const giamGia = parseFloat(giamGiaText) || 0;
+
+        // Tính tổng và làm tròn lên nghìn
+        const tongTienTruocLamTron = tienBan + tienDichVu - giamGia;
+        const tongTien = Math.ceil(tongTienTruocLamTron / 1000) * 1000;
+
+        console.log(`Calc: Bàn=${tienBan.toLocaleString()}, DV=${tienDichVu.toLocaleString()}, GG=${giamGia.toLocaleString()}, Tổng=${tongTien.toLocaleString()}`);
+
+        tongTienEl.textContent = tongTien.toLocaleString('vi-VN') + ' đ';
+    },
+
+    // ...
+    /**
+     * Reload danh sách dịch vụ (không reload toàn bộ panel)
+     */
+    // THAY ĐỔI: Thêm tham số maBan
+    reloadServiceList: async function (maBan) {
+        try {
+            console.log('🔄 Reloading service list only for table:', maBan);
+
+            // THAY ĐỔI: Sử dụng maBan truyền vào hoặc this.currentTableId
+            const tableId = maBan || this.currentTableId;
+
+            if (!tableId) {
+                throw new Error('Mã bàn không xác định (tableId is null)');
+            }
+
+            // GỌI API VỚI tableId đã xác định
+            const response = await fetch(`/QLBan/PanelChinhSuaBan?maBan=${tableId}`);
+
+            if (!response.ok) {
+                // Ghi log chi tiết lỗi 404
+                console.error('Lỗi tải panel:', response.status, response.statusText);
+                throw new Error('Không thể tải dịch vụ. Lỗi HTTP: ' + response.status);
+            }
+
+            const html = await response.text();
+
+            // ... (Phần parse HTML và cập nhật DOM giữ nguyên) ...
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            const newServiceList = tempDiv.querySelector('.service-list-edit');
+            const newBillSummary = tempDiv.querySelector('.bill-summary');
+
+            const currentServiceList = document.querySelector('.service-list-edit');
+            const currentBillSummary = document.querySelector('.bill-summary');
+
+            if (newServiceList && currentServiceList) {
+                currentServiceList.innerHTML = newServiceList.innerHTML;
+                console.log('✅ Service list updated');
+            }
+
+            if (newBillSummary && currentBillSummary) {
+                currentBillSummary.innerHTML = newBillSummary.innerHTML;
+                console.log('✅ Bill summary updated');
+            }
+
+            // Cập nhật lại tổng tiền (sẽ đọc giá trị mới từ bill summary)
+            this.updateTotalAmount();
+
+        } catch (error) {
+            console.error('❌ Error reloading service list:', error);
+            if (window.Toast) Toast.error('Không thể cập nhật danh sách dịch vụ');
+        }
+    },
     /**
      * Dừng timer update
      */
@@ -132,6 +217,7 @@ const EditTableManager = {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
+            console.log('⏹️ Timer stopped');
         }
     },
 
@@ -139,43 +225,65 @@ const EditTableManager = {
      * Tăng số lượng dịch vụ
      */
     increaseQuantity: async function (chiTietId, maBan) {
-        const input = document.getElementById(`qty-${chiTietId}`);
-        if (!input) return;
+        console.log('➕ Increase quantity called:', chiTietId, maBan);
 
-        const currentQty = parseInt(input.value);
-        if (currentQty >= 99) return;
+        const input = document.getElementById(`qty-${chiTietId}`);
+        if (!input) {
+            console.error('❌ Input not found for chiTietId:', chiTietId);
+            return;
+        }
+
+        let currentValue = parseInt(input.value) || 1;
+        const maxValue = parseInt(input.max) || 99;
+
+        if (currentValue >= maxValue) {
+            if (window.Toast) Toast.warning('Đã đạt số lượng tối đa');
+            return;
+        }
+
+        const newValue = currentValue + 1;
 
         try {
+            if (window.Loading) window.Loading.show();
+
             const response = await fetch('/QLBan/CapNhatSoLuongDichVu', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     id: chiTietId,
-                    soLuong: currentQty + 1
+                    soLuong: newValue
                 })
             });
 
             const result = await response.json();
-            if (result.success) {
-                input.value = currentQty + 1;
 
+            if (window.Loading) window.Loading.hide();
+
+            if (result.success) {
+                console.log(`✅ Increased quantity for detail ${chiTietId}: ${newValue}`);
+
+                // Cập nhật input
+                input.value = newValue;
+
+                // Cập nhật thành tiền của item này
                 const totalEl = document.getElementById(`total-${chiTietId}`);
-                if (totalEl) {
+                if (totalEl && result.thanhTien) {
                     totalEl.textContent = result.thanhTien.toLocaleString('vi-VN') + ' đ';
                 }
+                
+                await this.reloadServiceList(maBan);
 
-                if (window.Toast) Toast.success('Đã cập nhật số lượng');
-
-                // Reload modal to update totals
-                setTimeout(() => {
-                    this.show(maBan);
-                }, 500);
+                if (window.Toast) Toast.success('Đã tăng số lượng');
             } else {
-                if (window.Toast) Toast.error(result.message);
+                console.error('❌ Failed to increase:', result.message);
+                if (window.Toast) Toast.error(result.message || 'Không thể cập nhật số lượng');
             }
         } catch (error) {
-            console.error('Error:', error);
-            if (window.Toast) Toast.error('Có lỗi xảy ra');
+            if (window.Loading) window.Loading.hide();
+            console.error('❌ Error updating quantity:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi cập nhật');
         }
     },
 
@@ -183,43 +291,66 @@ const EditTableManager = {
      * Giảm số lượng dịch vụ
      */
     decreaseQuantity: async function (chiTietId, maBan) {
-        const input = document.getElementById(`qty-${chiTietId}`);
-        if (!input) return;
+        console.log('➖ Decrease quantity called:', chiTietId, maBan);
 
-        const currentQty = parseInt(input.value);
-        if (currentQty <= 1) return;
+        const input = document.getElementById(`qty-${chiTietId}`);
+        if (!input) {
+            console.error('❌ Input not found for chiTietId:', chiTietId);
+            return;
+        }
+
+        let currentValue = parseInt(input.value) || 1;
+        const minValue = parseInt(input.min) || 1;
+
+        if (currentValue <= minValue) {
+            if (window.Toast) Toast.warning('Số lượng tối thiểu là 1');
+            return;
+        }
+
+        const newValue = currentValue - 1;
 
         try {
+            if (window.Loading) window.Loading.show();
+
             const response = await fetch('/QLBan/CapNhatSoLuongDichVu', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     id: chiTietId,
-                    soLuong: currentQty - 1
+                    soLuong: newValue
                 })
             });
 
             const result = await response.json();
-            if (result.success) {
-                input.value = currentQty - 1;
 
+            if (window.Loading) window.Loading.hide();
+
+            if (result.success) {
+                console.log(`✅ Decreased quantity for detail ${chiTietId}: ${newValue}`);
+
+                // Cập nhật input
+                input.value = newValue;
+
+                // Cập nhật thành tiền của item này
                 const totalEl = document.getElementById(`total-${chiTietId}`);
-                if (totalEl) {
+                if (totalEl && result.thanhTien) {
                     totalEl.textContent = result.thanhTien.toLocaleString('vi-VN') + ' đ';
                 }
 
-                if (window.Toast) Toast.success('Đã cập nhật số lượng');
+                // Reload danh sách dịch vụ để cập nhật tổng tiền
+                await this.reloadServiceList(maBan);
 
-                // Reload modal to update totals
-                setTimeout(() => {
-                    this.show(maBan);
-                }, 500);
+                if (window.Toast) Toast.success('Đã giảm số lượng');
             } else {
-                if (window.Toast) Toast.error(result.message);
+                console.error('❌ Failed to decrease:', result.message);
+                if (window.Toast) Toast.error(result.message || 'Không thể cập nhật số lượng');
             }
         } catch (error) {
-            console.error('Error:', error);
-            if (window.Toast) Toast.error('Có lỗi xảy ra');
+            if (window.Loading) window.Loading.hide();
+            console.error('❌ Error updating quantity:', error);
+            if (window.Toast) Toast.error('Có lỗi xảy ra khi cập nhật');
         }
     },
 
@@ -227,11 +358,15 @@ const EditTableManager = {
      * Xóa dịch vụ
      */
     removeService: async function (chiTietId, maBan) {
+        console.log('🗑️ Remove service called:', chiTietId, maBan);
+
         if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) {
             return;
         }
 
         try {
+            if (window.Loading) window.Loading.show();
+
             const response = await fetch('/QLBan/XoaDichVu', {
                 method: 'POST',
                 headers: {
@@ -242,17 +377,21 @@ const EditTableManager = {
 
             const result = await response.json();
 
+            if (window.Loading) window.Loading.hide();
+
             if (result.success) {
-                if (window.Toast) Toast.success(result.message);
-                // Reload the edit panel
-                setTimeout(() => {
-                    this.show(maBan);
-                }, 300);
+                console.log('✅ Service removed successfully');
+                if (window.Toast) Toast.success(result.message || 'Xóa dịch vụ thành công');
+
+                // Reload danh sách dịch vụ
+                await this.reloadServiceList(maBan);
             } else {
-                if (window.Toast) Toast.error(result.message);
+                console.error('❌ Failed to remove:', result.message);
+                if (window.Toast) Toast.error(result.message || 'Không thể xóa dịch vụ');
             }
         } catch (error) {
-            console.error('Error:', error);
+            if (window.Loading) window.Loading.hide();
+            console.error('❌ Error removing service:', error);
             if (window.Toast) Toast.error('Có lỗi xảy ra khi xóa');
         }
     },
@@ -269,6 +408,10 @@ const EditTableManager = {
                 return;
             }
 
+            console.log('💾 Saving start time:', gioBatDau);
+
+            if (window.Loading) window.Loading.show();
+
             const response = await fetch('/QLBan/LuuChinhSuaBan', {
                 method: 'POST',
                 headers: {
@@ -282,21 +425,21 @@ const EditTableManager = {
 
             const result = await response.json();
 
-            if (result.success) {
-                if (window.Toast) Toast.success(result.message);
-                this.close();
+            if (window.Loading) window.Loading.hide();
 
-                // Reload table detail if available
-                if (window.TableManager && window.TableManager.showDetail) {
-                    setTimeout(() => {
-                        window.TableManager.showDetail(maBan);
-                    }, 300);
-                }
+            if (result.success) {
+                console.log('✅ Start time saved successfully');
+                if (window.Toast) Toast.success(result.message || 'Lưu thành công');
+
+                // Chỉ cập nhật lại timer, không reload panel
+                this.startTimerUpdate();
             } else {
-                if (window.Toast) Toast.error(result.message);
+                console.error('❌ Failed to save:', result.message);
+                if (window.Toast) Toast.error(result.message || 'Không thể lưu');
             }
         } catch (error) {
-            console.error('Error:', error);
+            if (window.Loading) window.Loading.hide();
+            console.error('❌ Error saving:', error);
             if (window.Toast) Toast.error('Có lỗi xảy ra khi lưu');
         }
     },
@@ -305,6 +448,7 @@ const EditTableManager = {
      * Đóng panel
      */
     close: function () {
+        console.log('🔒 Closing edit panel');
         this.stopTimerUpdate();
 
         const modalOverlay = document.getElementById('modalOverlay');
@@ -316,18 +460,22 @@ const EditTableManager = {
         }
 
         this.currentTableId = null;
+        this.giaGio = 0;
     }
 };
 
 // Export global functions for HTML onclick handlers
 window.EditTableManager = EditTableManager;
 
+// Compatibility functions (nếu view sử dụng tên khác)
 window.increaseServiceQty = function (chiTietId, maBan) {
+    console.log('🔗 increaseServiceQty called (legacy)');
     EditTableManager.increaseQuantity(chiTietId, maBan);
 };
 
 window.decreaseServiceQty = function (chiTietId, maBan) {
+    console.log('🔗 decreaseServiceQty called (legacy)');
     EditTableManager.decreaseQuantity(chiTietId, maBan);
 };
 
-console.log('✅ EditTableManager loaded');
+console.log('✅ EditTableManager loaded and ready (FIXED VERSION - v2)');

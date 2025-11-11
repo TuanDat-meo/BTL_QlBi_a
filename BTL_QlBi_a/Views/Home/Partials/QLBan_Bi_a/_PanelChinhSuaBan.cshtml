@@ -9,7 +9,7 @@
 <div class="edit-panel-wrapper">
     <div class="panel-header">
         <h3 class="panel-title">✏️ Chỉnh sửa bàn @Model.TenBan</h3>
-        <button class="btn-close-menu" onclick="EditTableManager.close()">✕</button>
+        <button class="btn-close-menu" onclick="TableManager.closeModal()">✕</button>
     </div>
 
     <div class="panel-body-scroll">
@@ -51,7 +51,7 @@
             </div>
 
             <!-- Danh sách dịch vụ đã order -->
-            if (chiTiet != null && chiTiet.Any())
+            @if (chiTiet != null && chiTiet.Any())
             {
                 <div class="edit-section">
                     <h4 class="section-subtitle">Dịch vụ đã order</h4>
@@ -62,7 +62,7 @@
                                 <div class="service-info">
                                     <div class="service-name">@item.DichVu?.TenDV</div>
                                     <div class="service-details">
-                                        <span class="service-price">@item.DichVu?.Gia.ToString("N0") đ × @item.SoLuong</span>
+                                        <span class="service-price">@item.DichVu?.Gia.ToString("N0") đ</span>
                                     </div>
                                 </div>
                                 <div class="service-controls">
@@ -87,25 +87,12 @@
                     </button>
                 </div>
             }
-            else
-            {
-                <div class="edit-section">
-                    <h4 class="section-subtitle">Dịch vụ đã order</h4>
-                    <div class="empty-state">
-                        <p style="text-align: center; color: #999; padding: 20px;">Chưa có dịch vụ nào</p>
-                    </div>
-                    <button class="btn btn-success btn-block" onclick="TableManager.addService(@Model.MaBan)">
-                        ➕ Thêm dịch vụ mới
-                    </button>
-                </div>
-            }
 
             // Tính tổng tiền
             var tongDichVu = chiTiet?.Sum(ct => ct.ThanhTien ?? 0) ?? 0;
             var tongTienTruocLamTron = tienBanThucTe + tongDichVu - hoaDon.GiamGia;
             var tongTienSauLamTron = Math.Ceiling(tongTienTruocLamTron / 1000) * 1000;
 
-            <!-- Tổng tiền hiện tại -->
             <div class="bill-summary">
                 <div class="summary-row">
                     <span>Tiền bàn:</span>
@@ -113,21 +100,15 @@
                 </div>
                 <div class="summary-row">
                     <span>Tiền dịch vụ:</span>
-                    <input type="hidden" id="tienDichVu" value="@hoaDon.TienDichVu">
-                    <span>@hoaDon.TienDichVu.ToString("N0") đ</span>
+                    <span id="tienDichVuHienThi">@hoaDon.TienDichVu.ToString("N0") đ</span>
                 </div>
                 <div class="summary-row">
                     <span>Giảm giá:</span>
-                    <input type="hidden" id="giamGia" value="@hoaDon.GiamGia">
-                    <span>-@hoaDon.GiamGia.ToString("N0") đ</span>
+                    <span id="giamGiaHienThi">-@hoaDon.GiamGia.ToString("N0") đ</span>
                 </div>
                 <div class="summary-row total">
                     <span>TỔNG CỘNG:</span>
                     <span id="tongTienUocTinh">@tongTienSauLamTron.ToString("N0") đ</span>
-                </div>
-                <div class="summary-note">
-                    <small style="color: #999;">* Tiền bàn tính theo thời gian thực tế</small><br>
-                    <small style="color: #999;">* Tổng tiền làm tròn lên nghìn</small>
                 </div>
             </div>
         }
@@ -139,11 +120,10 @@
         }
 
         <div class="action-section">
-            <button class="btn btn-secondary btn-block" onclick="EditTableManager.close()">
+            <button class="btn btn-secondary btn-block" onclick="TableManager.closeModal()">
                 Đóng
             </button>
         </div>
     </div>
 </div>
-
 <script src="~/asset/js/qlBan/chinhSuaBan.js"></script>
