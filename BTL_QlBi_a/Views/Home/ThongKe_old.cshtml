@@ -1,8 +1,20 @@
 ﻿@{
-    var doanhThuThang = ViewBag.DoanhThuThang ?? 0m;
-    var doanhThuHom = ViewBag.DoanhThuHomNay ?? 0m;
-    var soHoaDon = ViewBag.SoHoaDon ?? 0;
-    var khachMoi = ViewBag.KhachMoi ?? 0;
+    decimal doanhThuThang = 0m;
+    decimal doanhThuHom = 0m;
+    int soHoaDon = 0;
+    int khachMoi = 0;
+
+    if (ViewBag.DoanhThuThang != null)
+        decimal.TryParse(ViewBag.DoanhThuThang.ToString(), out doanhThuThang);
+
+    if (ViewBag.DoanhThuHomNay != null)
+        decimal.TryParse(ViewBag.DoanhThuHomNay.ToString(), out doanhThuHom);
+
+    if (ViewBag.SoHoaDon != null)
+        int.TryParse(ViewBag.SoHoaDon.ToString(), out soHoaDon);
+
+    if (ViewBag.KhachMoi != null)
+        int.TryParse(ViewBag.KhachMoi.ToString(), out khachMoi);
 }
 
 <div class="section-header">

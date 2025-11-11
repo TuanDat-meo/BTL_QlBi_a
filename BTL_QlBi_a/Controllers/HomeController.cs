@@ -40,7 +40,7 @@ namespace BTL_QlBi_a.Controllers
         public async Task<IActionResult> DichVu()
         {
             await LoadHeaderStats();
-            var danhSachDV = await _context.DichVu.ToListAsync();
+            var danhSachDV = await _context.DichVus.ToListAsync();
             return View(danhSachDV);
         }
 
@@ -59,7 +59,7 @@ namespace BTL_QlBi_a.Controllers
                            h.TrangThai == TrangThaiHoaDon.DaThanhToan)
                 .SumAsync(h => h.TongTien);
 
-            return View();
+            return View("~/Views/Home/Partials/ThongKe/ThongKe.cshtml");
         }
 
         public async Task<IActionResult> BangGia()

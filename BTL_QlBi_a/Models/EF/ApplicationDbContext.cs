@@ -21,7 +21,7 @@ namespace BTL_QlBi_a.Models.EF
         public DbSet<MatHang> MatHang { get; set; }
         public DbSet<PhieuNhap> PhieuNhap { get; set; }
         public DbSet<ChiTietPhieuNhap> ChiTietPhieuNhap { get; set; }
-        public DbSet<DichVu> DichVu { get; set; }
+        public DbSet<DichVu> DichVus { get; set; }
         public DbSet<NhomQuyen> NhomQuyen { get; set; }
         public DbSet<NhanVien> NhanVien { get; set; }
         public DbSet<ChucNang> ChucNang { get; set; }
