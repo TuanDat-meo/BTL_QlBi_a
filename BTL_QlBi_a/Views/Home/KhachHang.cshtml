@@ -78,6 +78,7 @@
 
                 card.style.display = (rankMatch && searchMatch) ? 'block' : 'none';
             });
+            updateCustomerSummary();
         }
 
         function searchCustomers() {
@@ -166,6 +167,25 @@
             filterCustomers('all');
         });        
 
+            function updateCustomerSummary() {
+                const cards = document.querySelectorAll('#customersGrid .table-card');
 
-            </script>
+                let visibleCount = 0;
+                let totalDiem = 0;
+                let totalChiTieu = 0;
+
+                cards.forEach(card => {
+                    if (card.style.display !== 'none') {
+                        visibleCount++;
+                        totalDiem += parseFloat(card.dataset.diem || 0);
+                        totalChiTieu += parseFloat(card.dataset.chitieu || 0);
+                    }
+                });
+
+                // Cập nhật HTML
+                document.getElementById('summaryTongKhachHang').innerText = visibleCount + ' khách';
+                document.getElementById('summaryTongDiem').innerText = totalDiem.toLocaleString('vi-VN') + ' điểm';
+                document.getElementById('summaryTongChiTieu').innerText = totalChiTieu.toLocaleString('vi-VN') + ' đ';
+            }
+         </script>
 }

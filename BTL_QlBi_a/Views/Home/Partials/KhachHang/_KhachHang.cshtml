@@ -46,7 +46,12 @@
                 _ => "#ffe4cc"
             };
 
-                    <div class="table-card available" data-rank="@kh.HangTV" style="background: linear-gradient(135deg, white, @rankColor);">
+                    <div class="table-card available clickable-card" 
+                        data-rank="@kh.HangTV"
+                        data-diem ="@kh.DiemTichLuy "
+                        data-chitieu ="@kh.TongChiTieu"
+                        onclick = "viewCustomer(@kh.MaKH)"
+                        style="background: linear-gradient(135deg, white, @rankColor);">
                         <span class="vip-badge" style="background: @rankColor; color: #000;">@rankIcon @kh.HangTV</span>
 
                         <div class="user-avatar" style="width: 60px; height: 60px; margin: 15px auto; font-size: 24px;">
@@ -74,33 +79,24 @@
 
                 @if (kh.LanDenCuoi.HasValue)
                 {
-                                <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
+                <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
                 }
-
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" onclick="viewCustomer(@kh.MaKH)">
-                                👁️ Chi tiết
-                            </button>
-                            <button class="btn btn-secondary" onclick="editCustomer(@kh.MaKH)">
-                                ✏️ Sửa
-                            </button>
-                        </div>
-                    </div>
+            </div>
         }
         </div>
 
         <div class="info-card" style="margin-top: 20px;">
             <div class="info-row">
                 <span class="info-label">Tổng khách hàng:</span>
-                <span class="info-value">@Model.Count() khách</span>
+                <span class="info-value" id="summaryTongKhachHang"id="summaryTongKhachHang">@Model.Count() khách</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Tổng điểm tích lũy:</span>
-                <span class="info-value">@Model.Sum(k => k.DiemTichLuy) điểm</span>
+                <span class="info-value"id="summaryTongDiem">@Model.Sum(k => k.DiemTichLuy) điểm</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Tổng chi tiêu:</span>
-                <span class="info-value">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
+                <span class="info-value" id="summaryTongChiTieu">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
             </div>
         </div>
 }
@@ -111,4 +107,18 @@ else
             <h3>Chưa có khách hàng</h3>
             <p class="empty-text">Thêm khách hàng đầu tiên vào hệ thống</p>
         </div>
+}
+
+@section Styles {
+        <style>
+            .clickable-card {
+                cursor: pointer;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .clickable-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            }
+        </style>
 }

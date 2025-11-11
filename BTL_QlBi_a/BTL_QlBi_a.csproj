@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\asset\index.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EPPlus" Version="8.2.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20">
@@ -23,6 +27,7 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="resources\" />
+    <Folder Include="wwwroot\asset\css\qlHoaDon\" />
     <Folder Include="wwwroot\asset\img\tables\" />
     <Folder Include="wwwroot\asset\js\qlHoaDon\" />
     <Folder Include="wwwroot\css\" />
