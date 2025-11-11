@@ -1,0 +1,223 @@
+﻿@{
+    ViewData["Title"] = "Thống kê & Báo cáo";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/thongke/thongke-page.css" />
+}
+
+<div class="thongke-page">
+    <!-- Header với bộ lọc -->
+    <div class="section-header">
+        <h2 class="section-title">📊 Thống kê & Báo cáo</h2>
+        <div class="filter-date-range">
+            <input type="datetime-local" id="tuNgay" class="date-input" />
+            <span>đến</span>
+            <input type="datetime-local" id="denNgay" class="date-input" />
+            <button class="btn btn-primary" onclick="ThongKeManager.applyFilter()">
+                🔍 Xem báo cáo
+            </button>
+            <button class="btn btn-secondary" onclick="ThongKeManager.resetFilter()">
+                🔄 Hôm nay
+            </button>
+        </div>
+    </div>
+
+    <!-- Cards tổng quan -->
+    <div class="overview-cards">
+        <div class="stat-card primary">
+            <div class="card-icon">💰</div>
+            <div class="card-content">
+                <h3 class="card-title">Tổng doanh thu</h3>
+                <p class="card-value" id="tongDoanhThu">0 đ</p>
+                <span class="card-change" id="doanhThuChange"></span>
+            </div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="card-icon">📝</div>
+            <div class="card-content">
+                <h3 class="card-title">Số hóa đơn</h3>
+                <p class="card-value" id="soHoaDon">0</p>
+                <span class="card-subtitle">hóa đơn đã thanh toán</span>
+            </div>
+        </div>
+
+        <div class="stat-card info">
+            <div class="card-icon">👥</div>
+            <div class="card-content">
+                <h3 class="card-title">Khách hàng</h3>
+                <p class="card-value" id="soKhachHang">0</p>
+                <span class="card-subtitle">khách hàng</span>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="card-icon">📈</div>
+            <div class="card-content">
+                <h3 class="card-title">Trung bình/HĐ</h3>
+                <p class="card-value" id="trungBinh">0 đ</p>
+                <span class="card-subtitle">doanh thu trung bình</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="ThongKeManager.switchTab('tongquan')">
+            📊 Tổng quan
+        </button>
+        <button class="tab-btn" onclick="ThongKeManager.switchTab('dichvu')">
+            🍽️ Dịch vụ
+        </button>
+        <button class="tab-btn" onclick="ThongKeManager.switchTab('khachhang')">
+            👥 Khách hàng
+        </button>
+        <button class="tab-btn" onclick="ThongKeManager.switchTab('khac')">
+            📋 Khác
+        </button>
+    </div>
+
+    <!-- Tab Tổng quan -->
+    <div id="tabTongQuan" class="tab-content active">
+        <div class="charts-grid">
+            <!-- Doanh thu 7 ngày -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3 class="chart-title">📈 Doanh thu 7 ngày gần nhất</h3>
+                    <div class="chart-legend">
+                        <span class="legend-item"><span class="dot primary"></span> Doanh thu</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartDoanhThu7Ngay"></canvas>
+                </div>
+            </div>
+
+            <!-- Doanh thu theo tháng -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3 class="chart-title">
+                        📅 Doanh thu theo tháng năm
+                        <select id="namThongKe" class="year-select" onchange="ThongKeManager.loadDoanhThuThang()">
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartDoanhThuThang"></canvas>
+                </div>
+            </div>
+
+            <!-- Doanh thu theo khung giờ -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">🕐 Doanh thu theo khung giờ</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartKhungGio"></canvas>
+                </div>
+            </div>
+
+            <!-- Phương thức thanh toán -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">💳 Phương thức thanh toán</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartPhuongThuc"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Dịch vụ -->
+    <div id="tabDichVu" class="tab-content" style="display: none;">
+        <div class="charts-grid">
+            <!-- Top dịch vụ bán chạy -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3 class="chart-title">🔥 Top 10 dịch vụ bán chạy nhất</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartTopDichVu"></canvas>
+                </div>
+            </div>
+
+            <!-- Doanh thu theo loại dịch vụ -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">🍽️ Doanh thu theo loại dịch vụ</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartLoaiDichVu"></canvas>
+                </div>
+            </div>
+
+            <!-- Doanh thu theo loại bàn -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">🎱 Doanh thu theo loại bàn</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartLoaiBan"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Khách hàng -->
+    <div id="tabKhachHang" class="tab-content" style="display: none;">
+        <div class="charts-grid">
+            <!-- Top khách hàng -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3 class="chart-title">👑 Top 10 khách hàng chi tiêu nhiều nhất</h3>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="tableTopKhachHang">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên khách hàng</th>
+                                <th>Số điện thoại</th>
+                                <th>Tổng chi tiêu</th>
+                                <th>Số lần đến</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Khác -->
+    <div id="tabKhac" class="tab-content" style="display: none;">
+        <div class="charts-grid">
+            <!-- So sánh theo kỳ -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3 class="chart-title">📊 So sánh doanh thu</h3>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="ThongKeManager.loadSoSanh('ngay')">Hôm nay</button>
+                        <button class="filter-btn" onclick="ThongKeManager.loadSoSanh('tuan')">Tuần này</button>
+                        <button class="filter-btn" onclick="ThongKeManager.loadSoSanh('thang')">Tháng này</button>
+                    </div>
+                </div>
+                <div class="comparison-container" id="comparisonContainer">
+                    <!-- Comparison cards will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/asset/js/ThongKe/thongke.js"></script>
+}

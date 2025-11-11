@@ -59,7 +59,7 @@ namespace BTL_QlBi_a.Controllers
                            h.TrangThai == TrangThaiHoaDon.DaThanhToan)
                 .SumAsync(h => h.TongTien);
 
-            return View();
+            return View("~/Views/Home/Partials/ThongKe/ThongKe.cshtml");
         }
 
         public async Task<IActionResult> BangGia()
