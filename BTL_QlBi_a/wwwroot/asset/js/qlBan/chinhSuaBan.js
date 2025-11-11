@@ -74,34 +74,44 @@ const EditTableManager = {
 
             const gioBatDau = new Date(gioBatDauInput.value);
             const now = new Date();
-            const duration = (now - gioBatDau) / 1000 / 60; // phút
+            const durationMinutes = (now - gioBatDau) / 1000 / 60; // phút
 
-            const hours = Math.floor(duration / 60);
-            const minutes = Math.floor(duration % 60);
+            // Hiển thị thời gian chơi
+            const hours = Math.floor(durationMinutes / 60);
+            const minutes = Math.floor(durationMinutes % 60);
 
             const currentDurationEl = document.getElementById('currentDuration');
             if (currentDurationEl) {
-                currentDurationEl.textContent = `${hours}h ${minutes}m`;
+                currentDurationEl.textContent = `${hours} giờ ${minutes} phút`;
             }
 
-            // Tính tiền bàn ước tính (lấy từ data attribute)
+            // Lấy giá giờ từ data attribute
             const editSection = document.querySelector('.edit-section');
             const giaGio = editSection ? parseFloat(editSection.getAttribute('data-gia-gio')) || 0 : 0;
 
-            const soPhutLamTron = Math.ceil(duration / 15) * 15;
-            const soGio = soPhutLamTron / 60;
-            const tienBan = giaGio * soGio;
+            // LOGIC TÍNH TIỀN GIỐNG _ChiTietBan:
+            // Tính theo thời gian thực tế (không làm tròn)
+            const soGioThucTe = durationMinutes / 60;
+            const tienBanThucTe = giaGio * soGioThucTe;
 
             const tienBanUocTinhEl = document.getElementById('tienBanUocTinh');
             if (tienBanUocTinhEl) {
-                tienBanUocTinhEl.textContent = Math.round(tienBan).toLocaleString('vi-VN') + ' đ';
+                tienBanUocTinhEl.textContent = Math.round(tienBanThucTe).toLocaleString('vi-VN') + ' đ';
             }
 
-            // Tính tổng tiền
+            // Lấy tiền dịch vụ và giảm giá
             const tienDichVuEl = document.getElementById('tienDichVu');
             const tienDichVu = tienDichVuEl ? parseFloat(tienDichVuEl.value) || 0 : 0;
 
-            const tongTien = Math.ceil((tienBan + tienDichVu) / 1000) * 1000;
+            const giamGiaEl = document.getElementById('giamGia');
+            const giamGia = giamGiaEl ? parseFloat(giamGiaEl.value) || 0 : 0;
+
+            // Tính tổng tiền trước làm tròn
+            const tongTienTruocLamTron = tienBanThucTe + tienDichVu - giamGia;
+
+            // Làm tròn tổng tiền lên nghìn
+            const tongTien = Math.ceil(tongTienTruocLamTron / 1000) * 1000;
+
             const tongTienUocTinhEl = document.getElementById('tongTienUocTinh');
             if (tongTienUocTinhEl) {
                 tongTienUocTinhEl.textContent = tongTien.toLocaleString('vi-VN') + ' đ';

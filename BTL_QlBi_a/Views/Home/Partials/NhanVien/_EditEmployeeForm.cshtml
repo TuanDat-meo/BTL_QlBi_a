@@ -1,0 +1,126 @@
+﻿@model BTL_QlBi_a.Models.Entities.NhanVien
+@{
+    var danhSachNhom = ViewBag.DanhSachNhom as List<BTL_QlBi_a.Models.Entities.NhomQuyen>;
+}
+
+<form id="editEmployeeForm" onsubmit="submitEditEmployee(event, @Model.MaNV)">
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Họ tên *</label>
+            <input type="text" class="form-control" name="TenNV" value="@Model.TenNV" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="tel" class="form-control" name="SDT" value="@Model.SDT" pattern="[0-9]{10}">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Chức vụ *</label>
+            <select class="form-control" name="MaNhom" required>
+                @foreach (var nhom in danhSachNhom)
+                {
+                    @if (nhom.MaNhom == Model.MaNhom)
+                    {
+                        <option value="@nhom.MaNhom" selected>@nhom.TenNhom</option>
+                    }
+                    else
+                    {
+                        <option value="@nhom.MaNhom">@nhom.TenNhom</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Ca làm việc *</label>
+            <select class="form-control" name="CaMacDinh" required>
+                @{
+                    var caMacDinh = Model.CaMacDinh.ToString();
+                }
+                @if (caMacDinh == "Sang")
+                {
+                    <option value="Sáng" selected>Sáng (7h - 15h)</option>
+                }
+                else
+                {
+                    <option value="Sáng">Sáng (7h - 15h)</option>
+                }
+
+                @if (caMacDinh == "Chieu")
+                {
+                    <option value="Chiều" selected>Chiều (15h - 23h)</option>
+                }
+                else
+                {
+                    <option value="Chiều">Chiều (15h - 23h)</option>
+                }
+
+                @if (caMacDinh == "Toi")
+                {
+                    <option value="Tối" selected>Tối (19h - 3h)</option>
+                }
+                else
+                {
+                    <option value="Tối">Tối (19h - 3h)</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Lương cơ bản *</label>
+            <input type="number" class="form-control" name="LuongCoBan" value="@Model.LuongCoBan" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Phụ cấp</label>
+            <input type="number" class="form-control" name="PhuCap" value="@Model.PhuCap">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Mật khẩu mới (để trống nếu không đổi)</label>
+        <input type="password" class="form-control" name="MatKhau" minlength="6">
+    </div>
+    <div class="action-buttons">
+        <button type="submit" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Cập nhật
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+    </div>
+</form>
+
+<script>
+    async function submitEditEmployee(event, maNV) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+        data.MaNV = maNV;
+
+        // Remove empty password
+        if (!data.MatKhau) {
+            delete data.MatKhau;
+        }
+
+        try {
+            const response = await fetch('/NhanVien/Update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error('Failed to update employee');
+
+            alert('Cập nhật nhân viên thành công!');
+            closeModal();
+            location.reload();
+        } catch (error) {
+            console.error('Error updating employee:', error);
+            alert('Không thể cập nhật nhân viên. Vui lòng thử lại.');
+        }
+    }
+</script>

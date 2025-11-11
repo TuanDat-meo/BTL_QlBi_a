@@ -285,20 +285,7 @@ const BanBiaManager = {
      */
     deleteBan: async function (maBan) {
         // Hiển thị confirm với thông tin chi tiết
-        const confirmMessage = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  ẨN BÀN KHỎI HỆ THỐNG  ⚠️
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Bạn có chắc muốn ẨN bàn này?
-
-📌 Điều gì sẽ xảy ra:
-   ✓ Bàn sẽ KHÔNG hiển thị trong danh sách
-   ✓ Không thể đặt hoặc sử dụng bàn này
-   ✓ Dữ liệu và lịch sử VẪN được lưu
-   ✓ Admin có thể khôi phục lại sau
-
-🔄 Đây KHÔNG phải xóa vĩnh viễn!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+        const confirmMessage = `Bạn có muốn xóa!`;
 
         if (!confirm(confirmMessage)) {
             console.log('ℹ️ User cancelled hide table action');

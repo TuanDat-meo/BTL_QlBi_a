@@ -22,7 +22,7 @@ namespace BTL_QlBi_a.Controllers
         {
             // Chỉ lấy bàn KHÔNG bị ẩn
             var danhSachBan = await _context.BanBia
-                .Where(b => b.TrangThai != TrangThaiBan.BaoTri)
+                .Where(b => b.TrangThai != TrangThaiBan.NgungHoatDong) // THAY ĐỔI Ở ĐÂY
                 .ToListAsync();
 
             // Sử dụng client-side evaluation để tránh lỗi LINQ
@@ -43,6 +43,7 @@ namespace BTL_QlBi_a.Controllers
             ViewBag.DoanhThuHomNay = doanhThuHomNay.ToString("N0") + "đ";
             ViewBag.TongKhachHang = await _context.KhachHang.CountAsync();
         }
+
         [HttpGet]
         public async Task<IActionResult> DanhSachBanDaAn()
         {
@@ -55,7 +56,7 @@ namespace BTL_QlBi_a.Controllers
             var banDaAn = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhuVuc)
-                .Where(b => b.TrangThai == TrangThaiBan.BaoTri)
+                .Where(b => b.TrangThai == TrangThaiBan.NgungHoatDong) // THAY ĐỔI Ở ĐÂY
                 .OrderBy(b => b.MaBan)
                 .ToListAsync();
 
@@ -76,16 +77,18 @@ namespace BTL_QlBi_a.Controllers
                 if (ban == null)
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
 
-                if (ban.TrangThai != TrangThaiBan.BaoTri)
-                    return Json(new { success = false, message = "Bàn này không ở trạng thái ẩn" });
+                if (ban.TrangThai != TrangThaiBan.NgungHoatDong) // THAY ĐỔI Ở ĐÂY
+                    return Json(new { success = false, message = "Bàn này không ở trạng thái ngưng hoạt động" });
 
                 // Khôi phục bàn về trạng thái trống
                 ban.TrangThai = TrangThaiBan.Trong;
 
-                // Xóa prefix [ẨN] trong ghi chú
+                // Xóa prefix [NGƯNG] trong ghi chú
                 if (!string.IsNullOrEmpty(ban.GhiChu))
                 {
-                    ban.GhiChu = ban.GhiChu.Replace("[ẨN]", "").Trim();
+                    ban.GhiChu = ban.GhiChu.Replace("[NGƯNG HOẠT ĐỘNG]", "")
+                                           .Replace("[NGƯNG]", "")
+                                           .Trim();
                 }
 
                 await _context.SaveChangesAsync();
@@ -99,7 +102,7 @@ namespace BTL_QlBi_a.Controllers
                         MaNV = maNV.Value,
                         ThoiGian = DateTime.Now,
                         HanhDong = "Khôi phục bàn",
-                        ChiTiet = $"Khôi phục bàn {ban.TenBan} (ID: {ban.MaBan})"
+                        ChiTiet = $"Khôi phục bàn {ban.TenBan} (ID: {ban.MaBan}) từ trạng thái ngưng hoạt động"
                     };
                     _context.LichSuHoatDong.Add(lichSu);
                     await _context.SaveChangesAsync();
@@ -113,6 +116,7 @@ namespace BTL_QlBi_a.Controllers
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+
         private async Task<string> SaveImageAsync(IFormFile file)
         {
             try
@@ -173,12 +177,12 @@ namespace BTL_QlBi_a.Controllers
 
             await LoadHeaderStats();
 
-            // Lọc bỏ bàn có trạng thái BaoTri (đã ẩn)
+            // Lọc bỏ bàn có trạng thái NgungHoatDong (đã ẩn)
             var danhSachBan = await _context.BanBia
                 .Include(b => b.LoaiBan)
                 .Include(b => b.KhachHang)
                 .Include(b => b.KhuVuc)
-                .Where(b => b.TrangThai != TrangThaiBan.BaoTri) // Không hiển thị bàn đã ẩn
+                .Where(b => b.TrangThai != TrangThaiBan.NgungHoatDong) // THAY ĐỔI Ở ĐÂY
                 .OrderBy(b => b.MaBan)
                 .ToListAsync();
 
@@ -231,12 +235,12 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                // Lấy tất cả bàn KHÔNG bao gồm bàn bảo trì (đã ẩn)
+                // Lấy tất cả bàn KHÔNG bao gồm bàn ngưng hoạt động
                 var allBan = await _context.BanBia
                     .Include(b => b.LoaiBan)
                     .Include(b => b.KhuVuc)
                     .Include(b => b.KhachHang)
-                    .Where(b => b.TrangThai != TrangThaiBan.BaoTri) // Lọc bỏ bàn đã ẩn
+                    .Where(b => b.TrangThai != TrangThaiBan.NgungHoatDong) // THAY ĐỔI Ở ĐÂY
                     .ToListAsync();
 
                 var danhSachBan = allBan
@@ -263,7 +267,6 @@ namespace BTL_QlBi_a.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
-
         #endregion
 
         #region CRUD Bàn
@@ -412,17 +415,14 @@ namespace BTL_QlBi_a.Controllers
 
                 // Kiểm tra trạng thái bàn
                 if (ban.TrangThai == TrangThaiBan.DangChoi)
-                    return Json(new { success = false, message = "Không thể ẩn bàn đang được sử dụng" });
+                    return Json(new { success = false, message = "Không thể ngưng hoạt động bàn đang được sử dụng" });
 
                 if (ban.TrangThai == TrangThaiBan.DaDat)
-                    return Json(new { success = false, message = "Không thể ẩn bàn đã được đặt. Vui lòng hủy đặt bàn trước." });
+                    return Json(new { success = false, message = "Không thể ngưng hoạt động bàn đã được đặt. Vui lòng hủy đặt bàn trước." });
 
-                // Thay vì xóa, chuyển sang trạng thái BaoTri (ngừng phục vụ)
-                ban.TrangThai = TrangThaiBan.BaoTri;
-                ban.GhiChu = $"[ẨN] {ban.GhiChu ?? ""}".Trim();
-
-                // Cập nhật thời gian để lưu lại khi nào bàn bị ẩn
-                // Nếu có field NgayCapNhat thì dùng, không thì dùng GhiChu
+                // Thay vì xóa, chuyển sang trạng thái NgungHoatDong
+                ban.TrangThai = TrangThaiBan.NgungHoatDong; // THAY ĐỔI Ở ĐÂY
+                ban.GhiChu = $"[NGƯNG HOẠT ĐỘNG] {ban.GhiChu ?? ""}".Trim();
 
                 await _context.SaveChangesAsync();
 
@@ -434,14 +434,14 @@ namespace BTL_QlBi_a.Controllers
                     {
                         MaNV = maNV.Value,
                         ThoiGian = DateTime.Now,
-                        HanhDong = "Ẩn bàn",
-                        ChiTiet = $"Ẩn bàn {ban.TenBan} (ID: {ban.MaBan})"
+                        HanhDong = "Ngưng hoạt động bàn",
+                        ChiTiet = $"Chuyển bàn {ban.TenBan} (ID: {ban.MaBan}) sang trạng thái ngưng hoạt động"
                     };
                     _context.LichSuHoatDong.Add(lichSu);
                     await _context.SaveChangesAsync();
                 }
 
-                return Json(new { success = true, message = "Đã ẩn bàn thành công. Bàn sẽ không hiển thị nữa." });
+                return Json(new { success = true, message = "Đã chuyển bàn sang trạng thái ngưng hoạt động. Bàn sẽ không hiển thị nữa." });
             }
             catch (Exception ex)
             {
@@ -460,39 +460,133 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                var ban = await _context.BanBia.FindAsync(request.MaBan);
+                var ban = await _context.BanBia
+                    .Include(b => b.LoaiBan)
+                    .FirstOrDefaultAsync(b => b.MaBan == request.MaBan);
+
                 if (ban == null)
+                {
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
+                }
 
                 if (ban.TrangThai != TrangThaiBan.Trong && ban.TrangThai != TrangThaiBan.DaDat)
-                    return Json(new { success = false, message = "Bàn đang được sử dụng" });
+                {
+                    return Json(new { success = false, message = "Bàn đang được sử dụng hoặc đã đặt trước" });
+                }
 
                 int? maNV = HttpContext.Session.GetInt32("MaNV");
                 if (!maNV.HasValue)
+                {
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                }
 
+                int? maKH = null;
+                string tenKhachHang = "Khách lẻ";
+
+                // Nếu có số điện thoại, tìm hoặc tạo khách hàng
+                if (!string.IsNullOrWhiteSpace(request.Sdt))
+                {
+                    var sdt = request.Sdt.Trim();
+
+                    // Validate số điện thoại
+                    if (sdt.Length < 10 || sdt.Length > 11 || !System.Text.RegularExpressions.Regex.IsMatch(sdt, @"^[0-9]+$"))
+                    {
+                        return Json(new { success = false, message = "Số điện thoại không hợp lệ (10-11 số)" });
+                    }
+
+                    // Tìm khách hàng hiện có
+                    var khachHang = await _context.KhachHang
+                        .FirstOrDefaultAsync(kh => kh.SDT == sdt);
+
+                    if (khachHang != null)
+                    {
+                        // Khách hàng đã tồn tại
+                        maKH = khachHang.MaKH;
+                        tenKhachHang = khachHang.TenKH;
+
+                        // Cập nhật lần đến cuối
+                        khachHang.LanDenCuoi = DateTime.Now;
+
+                        Console.WriteLine($"✅ Khách hàng tồn tại: {tenKhachHang} - SĐT: {sdt}");
+                    }
+                    else
+                    {
+                        // Tạo khách hàng mới với thông tin cơ bản
+                        var khachHangMoi = new KhachHang
+                        {
+                            TenKH = $"Khách {sdt.Substring(sdt.Length - 4)}", // Tên tạm: Khách 1234
+                            SDT = sdt,
+                            HangTV = HangThanhVien.Dong,
+                            DiemTichLuy = 0,
+                            TongChiTieu = 0,
+                            NgayDangKy = DateTime.Now,
+                            LanDenCuoi = DateTime.Now
+                        };
+
+                        _context.KhachHang.Add(khachHangMoi);
+                        await _context.SaveChangesAsync();
+
+                        maKH = khachHangMoi.MaKH;
+                        tenKhachHang = khachHangMoi.TenKH;
+
+                        Console.WriteLine($"✅ Tạo khách hàng mới: {tenKhachHang} - SĐT: {sdt}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"ℹ️ Khách vãng lai - không có SĐT");
+                }
+
+                // Cập nhật trạng thái bàn
                 ban.TrangThai = TrangThaiBan.DangChoi;
                 ban.GioBatDau = DateTime.Now;
-                ban.MaKH = request.MaKH;
+                ban.MaKH = maKH;
 
+                // Tạo hóa đơn mới
                 var hoaDon = new HoaDon
                 {
-                    MaBan = request.MaBan,
-                    MaKH = request.MaKH,
+                    MaBan = ban.MaBan,
+                    MaKH = maKH,
                     MaNV = maNV.Value,
                     ThoiGianBatDau = DateTime.Now,
-                    TrangThai = TrangThaiHoaDon.DangChoi
+                    TrangThai = TrangThaiHoaDon.DangChoi,
+                    TienBan = 0,
+                    TienDichVu = 0,
+                    GiamGia = 0,
+                    TongTien = 0
                 };
 
                 _context.HoaDon.Add(hoaDon);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Bắt đầu chơi thành công" });
+                // Log hoạt động
+                var lichSu = new LichSuHoatDong
+                {
+                    MaNV = maNV.Value,
+                    ThoiGian = DateTime.Now,
+                    HanhDong = "Bắt đầu chơi",
+                    ChiTiet = $"Bàn {ban.TenBan}" +
+                        (maKH.HasValue ? $" - Khách hàng: {tenKhachHang} (SĐT: {request.Sdt})" : " - Khách vãng lai")
+                };
+                _context.LichSuHoatDong.Add(lichSu);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ Bắt đầu chơi thành công - Bàn: {ban.TenBan}, Khách: {tenKhachHang}");
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Bắt đầu chơi thành công!" +
+                        (maKH.HasValue ? $"\nKhách hàng: {tenKhachHang}" : "\nKhách vãng lai"),
+                    hoaDonId = hoaDon.MaHD,
+                    khachHang = maKH.HasValue ? new { maKH, tenKH = tenKhachHang } : null
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in BatDauChoi: {ex.Message}");
-                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+                Console.WriteLine($"❌ Error in BatDauChoi: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
 
@@ -560,7 +654,53 @@ namespace BTL_QlBi_a.Controllers
         }
 
         #endregion
+        #region API kiểm tra khách hàng
 
+        /// <summary>
+        /// API: Kiểm tra khách hàng theo số điện thoại
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> KiemTraKhachHang(string sdt)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(sdt))
+                {
+                    return Json(new { success = false, message = "Số điện thoại không hợp lệ" });
+                }
+
+                // Tìm khách hàng theo số điện thoại
+                var khachHang = await _context.KhachHang
+                    .FirstOrDefaultAsync(kh => kh.SDT == sdt.Trim());
+
+                if (khachHang != null)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        khachHang = new
+                        {
+                            maKH = khachHang.MaKH,
+                            tenKH = khachHang.TenKH,
+                            sdt = khachHang.SDT,
+                            hangTV = khachHang.HangTV.ToString(),
+                            diemTichLuy = khachHang.DiemTichLuy
+                        }
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Khách hàng chưa đăng ký" });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in KiemTraKhachHang: {ex.Message}");
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+        #endregion
         #region Đặt bàn
 
         // GET: Panel đặt bàn
@@ -1007,7 +1147,14 @@ namespace BTL_QlBi_a.Controllers
         {
             try
             {
-                Console.WriteLine($"Received payment request: MaHD={request.MaHD}, Method={request.PhuongThucThanhToan}, Amount={request.TienKhachDua}");
+                // Kiểm tra request null
+                if (request == null)
+                {
+                    Console.WriteLine("❌ Request is null!");
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                }
+
+                Console.WriteLine($"✅ Received payment: MaHD={request.MaHD}, Method={request.PhuongThucThanhToan}, Amount={request.TienKhachDua}");
 
                 var hoaDon = await _context.HoaDon
                     .Include(h => h.BanBia)
@@ -1015,26 +1162,41 @@ namespace BTL_QlBi_a.Controllers
 
                 if (hoaDon == null)
                 {
-                    Console.WriteLine($"Invoice not found: {request.MaHD}");
                     return Json(new { success = false, message = "Không tìm thấy hóa đơn" });
                 }
 
-                Console.WriteLine($"Invoice found: MaHD={hoaDon.MaHD}, TongTien={hoaDon.TongTien}");
+                // Map string sang enum
+                PhuongThucThanhToan phuongThuc;
+                switch (request.PhuongThucThanhToan?.ToLower())
+                {
+                    case "tienmat":
+                        phuongThuc = PhuongThucThanhToan.TienMat;
+                        break;
+                    case "chuyenkhoan":
+                        phuongThuc = PhuongThucThanhToan.ChuyenKhoan;
+                        break;
+                    case "qrcode":
+                        phuongThuc = PhuongThucThanhToan.QRTuDong;
+                        break;
+                    default:
+                        phuongThuc = PhuongThucThanhToan.TienMat;
+                        break;
+                }
 
                 // Kiểm tra tiền khách đưa nếu là tiền mặt
-                if (request.PhuongThucThanhToan == PhuongThucThanhToan.TienMat)
+                if (phuongThuc == PhuongThucThanhToan.TienMat)
                 {
                     if (request.TienKhachDua < hoaDon.TongTien)
                     {
-                        Console.WriteLine($"Insufficient payment: Received={request.TienKhachDua}, Required={hoaDon.TongTien}");
                         return Json(new { success = false, message = "Số tiền khách đưa không đủ" });
                     }
                 }
 
                 hoaDon.TrangThai = TrangThaiHoaDon.DaThanhToan;
-                hoaDon.PhuongThucThanhToan = request.PhuongThucThanhToan;
+                hoaDon.PhuongThucThanhToan = phuongThuc;
+                hoaDon.MaGiaoDichQR = request.MaGiaoDichQR;
 
-                // Cập nhật trạng thái bàn về trống
+                // Cập nhật trạng thái bàn
                 if (hoaDon.BanBia != null)
                 {
                     hoaDon.BanBia.TrangThai = TrangThaiBan.Trong;
@@ -1052,7 +1214,7 @@ namespace BTL_QlBi_a.Controllers
                         NgayLap = DateTime.Now,
                         LoaiPhieu = LoaiPhieu.Thu,
                         SoTien = hoaDon.TongTien,
-                        LyDo = $"Thanh toán hóa đơn #{hoaDon.MaHD} - Bàn {hoaDon.BanBia?.TenBan}",
+                        LyDo = $"Thanh toán hóa đơn #{hoaDon.MaHD} - Bàn {hoaDon.BanBia?.TenBan} - {phuongThuc}",
                         MaHDLienQuan = hoaDon.MaHD
                     };
                     _context.SoQuy.Add(soQuy);
@@ -1060,7 +1222,7 @@ namespace BTL_QlBi_a.Controllers
 
                 await _context.SaveChangesAsync();
 
-                Console.WriteLine($"Payment completed successfully for invoice {hoaDon.MaHD}");
+                Console.WriteLine($"✅ Payment completed for invoice {hoaDon.MaHD}");
                 return Json(new { success = true, message = "Thanh toán thành công" });
             }
             catch (Exception ex)
@@ -1141,7 +1303,7 @@ namespace BTL_QlBi_a.Controllers
     public class BatDauChoiRequest
     {
         public int MaBan { get; set; }
-        public int? MaKH { get; set; }
+        public string? Sdt { get; set; }
     }
 
     public class KetThucChoiRequest
@@ -1175,7 +1337,7 @@ namespace BTL_QlBi_a.Controllers
     public class XacNhanThanhToanRequest
     {
         public int MaHD { get; set; }
-        public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
+        public string PhuongThucThanhToan { get; set; } = "TienMat"; 
         public decimal TienKhachDua { get; set; }
         public string? MaGiaoDichQR { get; set; }
     }

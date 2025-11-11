@@ -68,14 +68,21 @@ namespace BTL_QlBi_a.Controllers
                 HttpContext.Session.SetInt32("MaNV", nhanVien.MaNV);
                 HttpContext.Session.SetString("TenNV", nhanVien.TenNV);
                 HttpContext.Session.SetInt32("MaNhom", nhanVien.MaNhom);
-                HttpContext.Session.SetString("TenNhom", nhanVien.NhomQuyen?.TenNhom ?? "Nhân viên");
+
+                // Lưu role name - QUAN TRỌNG: Dùng TenNhom từ database
+                string roleName = nhanVien.NhomQuyen?.TenNhom ?? "Phục vụ";
+                HttpContext.Session.SetString("TenNhom", roleName);
+                HttpContext.Session.SetString("ChucVu", roleName);
+
+                // Debug log
+                Console.WriteLine($"Login: {nhanVien.TenNV}, Role: {roleName}, MaNhom: {nhanVien.MaNhom}");
 
                 // Ghi log hoạt động
                 var logHoatDong = new LichSuHoatDong
                 {
                     MaNV = nhanVien.MaNV,
                     HanhDong = "Đăng nhập",
-                    ChiTiet = $"Nhân viên {nhanVien.TenNV} đăng nhập vào hệ thống",
+                    ChiTiet = $"Nhân viên {nhanVien.TenNV} ({roleName}) đăng nhập vào hệ thống",
                     ThoiGian = DateTime.Now
                 };
                 _context.LichSuHoatDong.Add(logHoatDong);

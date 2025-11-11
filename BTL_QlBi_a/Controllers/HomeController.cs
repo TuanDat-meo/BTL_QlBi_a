@@ -72,12 +72,42 @@ namespace BTL_QlBi_a.Controllers
 
         public async Task<IActionResult> NhanVien()
         {
-            await LoadHeaderStats();
-            var danhSachNV = await _context.NhanVien
-                .Include(nv => nv.NhomQuyen)
+            if (HttpContext.Session.GetInt32("MaNV") == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get current user role
+            var currentRole = HttpContext.Session.GetString("ChucVu");
+
+            // Load employees based on role
+            IQueryable<NhanVien> query = _context.NhanVien
+                .Include(n => n.NhomQuyen);
+
+            // If not admin/manager, only show active employees
+            if (currentRole != "Admin" && currentRole != "Quản lý")
+            {
+                query = query.Where(n => n.TrangThai == TrangThaiNhanVien.DangLam);
+            }
+
+            var employees = await query
+                .OrderBy(n => n.TrangThai)
+                .ThenBy(n => n.MaNhom)
+                .ThenBy(n => n.TenNV)
                 .ToListAsync();
 
-            return View(danhSachNV);
+            // Calculate stats for header
+            ViewBag.TongNhanVien = employees.Count(n => n.TrangThai == TrangThaiNhanVien.DangLam);
+            ViewBag.NhanVienNghi = employees.Count(n => n.TrangThai == TrangThaiNhanVien.Nghi);
+
+            // Today's attendance
+            var today = DateTime.Today;
+            var todayAttendance = await _context.ChamCong
+                .Where(c => c.Ngay == today)
+                .CountAsync();
+            ViewBag.ChamCongHomNay = todayAttendance;
+
+            return View(employees);
         }
 
         public async Task<IActionResult> CaiDat()

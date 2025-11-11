@@ -1,5 +1,135 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.NhanVien>
 @{
+    ViewData["Title"] = "Quản lý nhân viên";
+    var currentRole = ViewBag.CurrentRole ?? "";
+    var canManage = currentRole == "Admin" || currentRole == "Quản lý";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/qlNhanVien/nhanVien.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/asset/css/qlNhanVien/index.css" asp-append-version="true">
+}
+<section class="page-section active" id="page-nhanVien">
+    <div class="section-header">
+        <h2 class="section-title">Quản lý nhân viên</h2>
+        <div class="action-buttons">
+            @if (canManage)
+            {
+                <button class="btn btn-primary" onclick="openAddEmployeeModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    Thêm nhân viên
+                </button>
+                <button class="btn btn-secondary" onclick="openPermissionModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    Phân quyền
+                </button>
+                <button class="btn btn-secondary" onclick="exportAttendanceReport()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    Xuất báo cáo
+                </button>
+            }
+        </div>
+    </div>
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label class="filter-label">Trạng thái:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">Tất cả</button>
+                    <button class="filter-btn" data-filter="DangLam">Đang làm</button>
+                    <button class="filter-btn" data-filter="Nghi">Nghỉ việc</button>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Chức vụ:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-role="all">Tất cả</button>
+                    <button class="filter-btn" data-role="Admin">Admin</button>
+                    <button class="filter-btn" data-role="Quản lý">Quản lý</button>
+                    <button class="filter-btn" data-role="Thu ngân">Thu ngân</button>
+                    <button class="filter-btn" data-role="Phục vụ">Phục vụ</button>
+                </div>
+            </div>
+            <div class="search-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="employeeSearch" placeholder="Tìm kiếm nhân viên...">
+            </div>
+        </div>
+    </div>
+    <div class="employee-grid">
+        @foreach (var nv in Model)
+        {
+            <div class="employee-card @(nv.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.Nghi ? "inactive" : "")"
+                 data-status="@nv.TrangThai"
+                 data-role="@nv.NhomQuyen.TenNhom"
+                 onclick="showEmployeeDetail(@nv.MaNV)">
+                <div class="employee-avatar">
+                    @if (!string.IsNullOrEmpty(nv.FaceIDAnh))
+                    {
+                        <img src="@nv.FaceIDAnh" alt="@nv.TenNV" />
+                    }
+                    else
+                    {
+                        @nv.TenNV.Substring(0, 1)
+                    }
+                    <div class="employee-status-badge @(nv.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.Nghi ? "inactive" : "")"></div>
+                </div>
+                <div class="employee-name">@nv.TenNV</div>
+                <div class="employee-role">@nv.NhomQuyen.TenNhom</div>
+                <div class="employee-info-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Ca @nv.CaMacDinh</span>
+                </div>
+                <div class="employee-info-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span>@nv.LuongCoBan.ToString("N0")đ</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">👤</div>
+        <div class="empty-text">Không tìm thấy nhân viên nào</div>
+    </div>
+</section>
+@section Scripts {
+    <script>
+        window.canManage = @(canManage ? "true" : "false");
+    </script>
+    <script src="~/asset/js/qlNhanVien/nhanVienManager.js" asp-append-version="true"></script>
+    <script src="~/asset/js/qlNhanVien/attendance.js" asp-append-version="true"></script>
+    <script src="~/asset/js/qlNhanVien/schedule.js" asp-append-version="true"></script>
+    <script src="~/asset/js/qlNhanVien/faceId.js" asp-append-version="true"></script>
+    <script src="~/asset/js/qlNhanVien/fingerprint.js" asp-append-version="true"></script>
+    <script src="~/asset/js/qlNhanVien/salary.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new NhanVienManager();
+        });
+    </script>
 }
