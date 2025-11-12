@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BTL_QlBi_a.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Init_Dabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,7 +39,8 @@ namespace BTL_QlBi_a.Migrations
                     diem_tich_luy = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     tong_chi_tieu = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
                     ngay_dang_ky = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    lan_den_cuoi = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    lan_den_cuoi = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    hoat_dong = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -117,8 +118,8 @@ namespace BTL_QlBi_a.Migrations
                     trang_thai = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Trống"),
                     gio_bat_dau = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ma_kh = table.Column<int>(type: "int", nullable: true),
-                    vi_tri_x = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    vi_tri_y = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    vi_tri_x = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
+                    vi_tri_y = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
                     ghi_chu = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     ngay_tao = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     hinh_anh = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)

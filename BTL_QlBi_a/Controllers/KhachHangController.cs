@@ -2,6 +2,9 @@
 using BTL_QlBi_a.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System.Drawing;
 
 namespace BTL_QlBi_a.Controllers
 {
@@ -37,14 +40,28 @@ namespace BTL_QlBi_a.Controllers
 
         #endregion
 
-        public async Task<IActionResult> KhachHang()
+        public async Task<IActionResult> KhachHang(bool showDeleted = false)
         {
             await LoadHeaderStats();
-            var danhSachKH = await _context.KhachHang
+
+            ViewBag.IsTrash = showDeleted;
+
+            var query = _context.KhachHang.AsQueryable();
+
+            if (showDeleted)
+            {
+                query = query.Where(k => k.HoatDong == false);
+            }
+            else
+            {
+                query = query.Where(k => k.HoatDong == true);
+            }
+
+            var danhSachKH = await query
                 .OrderByDescending(k => k.TongChiTieu)
                 .ToListAsync();
 
-            return View("~/Views/Home/KhachHang.cshtml",danhSachKH);
+            return View("~/Views/Home/KhachHang.cshtml", danhSachKH);
         }
         public async Task<IActionResult> ChiTietKhachHang(int maKH)
         {
@@ -72,15 +89,13 @@ namespace BTL_QlBi_a.Controllers
         {
             if (maKH == 0)
             {
-                // THÊM MỚI: Trả về 1 model KhachHang trống
                 var newCustomer = new KhachHang
                 {
-                    NgayDangKy = DateTime.Now // Có thể set giá trị mặc định
+                    NgayDangKy = DateTime.Now
                 };
                 return PartialView("~/Views/Home/Partials/KhachHang/_FormKhachHang.cshtml", newCustomer);
             }
 
-            // SỬA: Tìm khách hàng và trả về
             var khachHang = await _context.KhachHang.FindAsync(maKH);
             if (khachHang == null)
             {
@@ -142,6 +157,125 @@ namespace BTL_QlBi_a.Controllers
 
             // Nếu model không hợp lệ
             return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> XoaKhachHang(int maKH)
+        {
+            try
+            {
+                var kh = await _context.KhachHang.FindAsync(maKH);
+                if (kh == null)
+                {
+                    return Json(new { success = false, message = "Khong tim` thay khach hang`" });
+                }
+                kh.HoatDong = false;
+
+                _context.KhachHang.Update(kh);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+       
+        [HttpPost]
+        public async Task<IActionResult> KhoiPhucKhachHang(int maKH)
+        {
+            try
+            {
+                var kh = await _context.KhachHang.FindAsync(maKH);
+
+                if (kh == null)
+                    return Json(new { success = false, message = "Khong tim` thay" });
+
+                kh.HoatDong = true;
+
+                _context.KhachHang.Update(kh);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        public async Task<IActionResult> ExportKhachHangToExcel(string rank = "all", string search = null)
+        {
+            var query = _context.KhachHang.AsQueryable();
+
+            if (rank != null)
+            {
+                if (Enum.TryParse<HangThanhVien>(rank, out var rankEnum))
+                {
+                    query = query.Where(k => k.HangTV == rankEnum);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(k => k.TenKH.ToLower().Contains(searchLower) ||
+                                        k.SDT.Contains(searchLower));
+            }
+            var listKhachHang = await query.OrderByDescending(k => k.TongChiTieu).ToArrayAsync();
+
+            // Khai bao' ban? quyen`
+            ExcelPackage.License.SetNonCommercialPersonal("Duy Binh");
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("KhachHang");
+
+                // Header
+                worksheet.Cells[1, 1].Value = "Mã KH";
+                worksheet.Cells[1, 2].Value = "Họ Tên";
+                worksheet.Cells[1, 3].Value = "SĐT";
+                worksheet.Cells[1, 4].Value = "Email";
+                worksheet.Cells[1, 5].Value = "Hạng TV";
+                worksheet.Cells[1, 6].Value = "Điểm tích lũy";
+                worksheet.Cells[1, 7].Value = "Tổng chi tiêu";
+
+                // Style Header
+                using(var range = worksheet.Cells["A1:G1"])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(40, 167, 69)); // Màu xanh lá
+                    range.Style.Font.Color.SetColor(Color.White);
+                }
+
+                //Data
+                for (int i = 0; i < listKhachHang.Count() ; i++)
+                {
+                    var kh = listKhachHang[i];
+                    int row = i + 2;
+
+                    worksheet.Cells[row, 1].Value = kh.MaKH;
+                    worksheet.Cells[row, 2].Value = kh.TenKH;
+                    worksheet.Cells[row, 3].Value = kh.SDT;
+                    worksheet.Cells[row, 4].Value = kh.Email;
+                    worksheet.Cells[row, 5].Value = kh.HangTV.ToString();
+                    worksheet.Cells[row, 6].Value = kh.DiemTichLuy;
+                    worksheet.Cells[row, 7].Value = kh.TongChiTieu;
+
+                    // Format tien` 
+                    worksheet.Cells[row, 7].Style.Numberformat.Format = "#,##0";
+                }
+
+                worksheet.Cells.AutoFitColumns();
+
+                var fileBytes = package.GetAsByteArray();
+                string fileName = $"DanhSachKhachHang_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
         }
 
     }

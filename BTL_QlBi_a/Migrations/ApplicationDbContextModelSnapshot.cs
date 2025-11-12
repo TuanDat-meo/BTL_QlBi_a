@@ -652,6 +652,12 @@ namespace BTL_QlBi_a.Migrations
                         .HasDefaultValue("Đồng")
                         .HasColumnName("hang_tv");
 
+                    b.Property<bool>("HoatDong")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("hoat_dong");
+
                     b.Property<DateTime?>("LanDenCuoi")
                         .HasColumnType("datetime2")
                         .HasColumnName("lan_den_cuoi");

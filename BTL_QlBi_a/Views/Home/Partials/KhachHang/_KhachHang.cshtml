@@ -1,9 +1,34 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.KhachHang>
 
 <div class="section-header">
-    <h2 class="section-title">Quản lý khách hàng</h2>
+    <h2 class="section-title">
+        @if(ViewBag.IsTrash == true)
+        {
+            <span>🗑️ Thùng rác (Khách đã xóa)</span>
+        }
+        else
+        {
+            <span>Quản lý khách hàng</span> 
+        }
+    </h2>
     <div class="action-buttons">
-        <button class="btn btn-primary" onclick="openAddCustomerModal()">➕ Thêm khách hàng</button>
+        @if(ViewBag.IsTrash == true)
+        {
+            <a href="/KhachHang/KhachHang?showDeleted=false" class="btn btn-secondary">
+                ⬅️ Quay lại danh sách
+            </a>
+        }
+        else
+        {
+            <a href="/KhachHang/KhachHang?showDeleted=true" class="btn btn-secondary" style="background-color: #6c757d; margin-right: 10px;">
+                    🗑️ Thùng rác
+            </a>
+
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">➕ Thêm khách hàng</button>
+        }
+        <button class="btn btn-success" onclick="exportCustomers()" style="margin-left: 10px;">
+        📥 Xuất Excel
+        </button>
     </div>
 </div>
 
