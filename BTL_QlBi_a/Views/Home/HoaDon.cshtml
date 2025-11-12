@@ -6,164 +6,39 @@
 
 @await Html.PartialAsync("~/Views/Home/Partials/HoaDon/_HoaDon.cshtml",Model);
 
-
 @section Scripts {
-        <script>
-            // Test debug
-            console.log('✅ Page loaded');
-            console.log('Detail Panel:', document.getElementById('detailPanel'));
-            console.log('Table Cards:', document.querySelectorAll('.table-card').length);
+    <script src="~/asset/js/qlHoaDon/filterHoaDon.js"></script>
+    <script src="~/asset/js/qlHoaDon/chiTietHoaDon.js"></script>
+    <script src="~/asset/js/qlHoaDon/xuatBaoCaoHoaDon.js"></script>
 
-            // Adjust container layout when detail is shown
-            const detailPanel = document.getElementById('detailPanel');
-            const container = document.querySelector('.container');
+    <script>
+        // ===============================
+        // 🔍 DEBUG LOGS
+        // ===============================
+        console.log('✅ Page loaded');
+        console.log('Detail Panel:', document.getElementById('detailPanel'));
+        console.log('Table Cards:', document.querySelectorAll('.table-card').length);
 
-            if (detailPanel && container) {
-                // Watch for changes in detail panel
-                const observer = new MutationObserver(function(mutations) {
-                    if (detailPanel.innerHTML.trim() !== '') {
-                        container.classList.add('with-detail');
-                    } else {
-                        container.classList.remove('with-detail');
-                    }
-                });
+        // ===============================
+        // 📐 ADJUST LAYOUT WHEN DETAIL SHOWS
+        // ===============================
+        const detailPanel = document.getElementById('detailPanel');
+        const container = document.querySelector('.container');
 
-                observer.observe(detailPanel, {
-                    childList: true,
-                    subtree: true
-                });
-            }
-
-       function filterInvoices(status) {
-            const rows = document.querySelectorAll('#invoiceTableBody tr');
-            const buttons = document.querySelectorAll('.filter-btn[data-status]');
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.filter-btn[data-status="' + status + '"]')?.classList.add('active');
-
-            rows.forEach(row => {
-                const rowStatus = row.dataset.status;
-                row.style.display = (status === 'all' || rowStatus === status) ? '' : 'none';
-            });
-            updateSummaryCard();
-        }
-
-        function filterByDate() {
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-            const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-            if (!dateFrom && !dateTo) return;
-
-            rows.forEach(row => {
-                const rowDate = row.dataset.date;
-                let show = true;
-
-                if (dateFrom && rowDate < dateFrom) show = false;
-                if (dateTo && rowDate > dateTo) show = false;
-
-                row.style.display = show ? '' : 'none';
-            });
-
-            updateSummaryCard();
-
-        }
-
-        function searchInvoices() {
-            const searchValue = document.getElementById('searchInvoices').value.toLowerCase();
-            const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchValue) ? '' : 'none';
-            });
-            updateSummaryCard();
-
-        }
-
-          async function viewInvoice(maHD) {
-            const detailPanel = document.getElementById('detailPanel');
-            if (!detailPanel) {
-                console.error('Không tìm thấy #detailPanel');
-                return;
-            }
-
-            detailPanel.innerHTML = '<div class="empty-text">Đang tải chi tiết...</div>';
-
-            const rightPanel = document.querySelector('.right-panel');
-            if (rightPanel) {
-                rightPanel.classList.add('active');
-            }
-
-            try {
-                const response = await fetch('/HoaDon/ChiTietHoaDon?maHD=' + maHD); // <-- ĐÃ SỬA
-
-                if (!response.ok) {
-                    detailPanel.innerHTML = '<div class="empty-state">Lỗi khi tải dữ liệu.</div>';
-                    throw new Error(`HTTP error! status: ${response.status}`);
+        if (detailPanel && container) {
+            // Watch for changes in detail panel
+            const observer = new MutationObserver(function (mutations) {
+                if (detailPanel.innerHTML.trim() !== '') {
+                    container.classList.add('with-detail');
+                } else {
+                    container.classList.remove('with-detail');
                 }
+            });
 
-                const html = await response.text();
-                detailPanel.innerHTML = html;
-
-            } catch (error) {
-                console.error('Lỗi fetch ChiTietHoaDon:', error);
-                detailPanel.innerHTML = '<div class="empty-state">Không thể tải chi tiết.</div>';
-            }
+            observer.observe(detailPanel, {
+                childList: true,
+                subtree: true
+            });
         }
-
-        function printInvoice(maHD) {
-            window.open('/HoaDon/InHoaDon?maHD=' + maHD, '_blank');
-        }
-
-        function exportInvoices() {
-            alert('Xuất báo cáo hóa đơn');
-            // Lấy giá trị lọc hiện tại
-            const status = document.querySelector('.filter-btn[data-status].active')?.dataset.status || 'all';
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-            const search = document.getElementById('searchInvoices').value;
-            
-            const url = new URL('/HoaDon/ExportToExcel', window.location.origin);
-
-            url.searchParams.append('status', status);
-            if(dateFrom) url.searchParams.append('dateFrom', dateFrom);
-            if(dateTo) url.searchParams.append('dateTo', dateTo);
-            if(search) url.searchParams.append('search', search);
-        
-            window.location.href = url.toString();   
-        }
-
-        function updateSummaryCard() {
-                const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-                let visibleCount = 0;
-                let totalRevenue = 0;
-                let paidCount = 0;
-
-                // Lặp qua tất cả các hàng
-                rows.forEach(row => {
-                    // Chỉ tính toán nếu hàng đang hiển thị
-                    if (row.style.display !== 'none') {
-                        visibleCount++;
-
-                        // Đọc giá trị tiền từ 'data-tongtien'
-                        totalRevenue += parseFloat(row.dataset.tongtien || 0);
-
-                        // Đọc trạng thái từ 'data-status'
-                        if (row.dataset.status === 'DaThanhToan') {
-                            paidCount++;
-                        }
-                    }
-                });
-
-                // Cập nhật HTML
-                document.getElementById('summaryTongHoaDon').innerText = visibleCount + ' hóa đơn';
-                document.getElementById('summaryTongDoanhThu').innerText = totalRevenue.toLocaleString('vi-VN') + ' đ';
-                document.getElementById('summaryDaThanhToan').innerText = paidCount + ' hóa đơn';
-            }
-            document.addEventListener('DOMContentLoaded', function(){
-                updateSummaryCard();
-            })
-        </script>
+    </script>
 }

@@ -1,5 +1,7 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.HoaDon>
 
+<link href="~/asset/css/qlHoaDon/hoa-don.css" rel="stylesheet" />
+
 <div class="section-header">
     <h2 class="section-title">Quản lý hóa đơn</h2>
     <div class="action-buttons">
@@ -94,18 +96,3 @@ else
             </div>
 }
 
-
-
-@section Styles{
-        <style>
-            #invoiceTableBody .clickable-row {
-                cursor: pointer;
-            }
-
-            #invoiceTableBody .clickable-row:hover {
-                background-color: #f8f9fa; /* Màu hover nhẹ */
-                transform: scale(1.01); /* Hiệu ứng nổi lên 1 chút */
-                transition: background-color 0.2s ease, transform 0.2s ease;
-            }
-        </style>
-}

@@ -1,5 +1,7 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.KhachHang>
 
+<link rel="stylesheet" href="~/asset/css/qlKhachHang/khach-hang.css" />
+
 <div class="section-header">
     <h2 class="section-title">
         @if(ViewBag.IsTrash == true)
@@ -132,18 +134,4 @@ else
             <h3>Chưa có khách hàng</h3>
             <p class="empty-text">Thêm khách hàng đầu tiên vào hệ thống</p>
         </div>
-}
-
-@section Styles {
-        <style>
-            .clickable-card {
-                cursor: pointer;
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-            }
-
-            .clickable-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            }
-        </style>
 }

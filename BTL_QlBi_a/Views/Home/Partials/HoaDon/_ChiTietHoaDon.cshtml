@@ -1,5 +1,7 @@
 ﻿@model BTL_QlBi_a.Models.Entities.HoaDon
 <link href="~/asset/css/qlBan/chiTietBan.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
+<link href="~/asset/css/qlHoaDon/chiTietHoaDon.css" rel="stylesheet" />
+
 @{
     // Dữ liệu chung
     var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon> ?? new List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>();
@@ -222,55 +224,3 @@
             </div>
     }
 </div>
-
-<style>
-    .service-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        background: white;
-        border-radius: 6px;
-        margin-bottom: 8px;
-    }
-    .service-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .btn-icon-sm {
-        width: 28px;
-        height: 28px;
-        border: none;
-        background: transparent;
-        color: #dc3545;
-        font-size: 20px;
-        cursor: pointer;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-    .btn-icon-sm:hover {
-        background: #dc3545;
-        color: white;
-    }
-    .service-quantity {
-        font-size: 0.85em;
-        color: #666;
-        margin-top: 2px;
-    }
-    .time-highlight {
-        color: #0066cc;
-        font-weight: 600;
-    }
-    .service-name {
-        font-weight: 500;
-        color: #495057;
-    }
-    .service-price {
-        font-weight: 600;
-        color: #007bff;
-    }
-</style>

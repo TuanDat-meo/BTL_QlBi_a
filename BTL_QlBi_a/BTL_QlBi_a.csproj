@@ -26,9 +26,7 @@
 
   <ItemGroup>
     <Folder Include="resources\" />
-    <Folder Include="wwwroot\asset\css\qlHoaDon\" />
     <Folder Include="wwwroot\asset\img\tables\" />
-    <Folder Include="wwwroot\asset\js\qlHoaDon\" />
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 

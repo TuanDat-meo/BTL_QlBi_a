@@ -8,6 +8,13 @@
 
 
 @section Scripts {
+            <script src="~/asset/js/qlKhachHang/filterKhachHang.js"></script>
+            <script src="~/asset/js/qlKhachHang/FormKhachHang.js"></script>
+            <script src="~/asset/js/qlKhachHang/ChiTietKhachHang.js"></script>
+            <script src="~/asset/js/qlKhachHang/index.js"></script>
+
+
+
             <script>
                 // Test debug
                 console.log('✅ Page loaded');
@@ -32,235 +39,12 @@
                         childList: true,
                         subtree: true
                     });
-                }
+                }                
 
-        async function saveCustomerForm(event) {
-        event.preventDefault(); // Ngăn form submit theo cách cũ
-
-        const form = document.getElementById('customerForm');
-        const formData = new FormData(form);
-
-        try {
-            const response = await fetch('/KhachHang/LuuKhachHang', {
-                method: 'POST',
-                body: formData,
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('Lưu thành công!');
-                closeModal(); // Đóng modal
-                location.reload(); // TẢI LẠI TRANG để cập nhật danh sách
-            } else {
-                alert('Đã xảy ra lỗi: ' + result.message);
-            }
-        } catch (error) {
-            console.error('Lỗi khi submit form:', error);
-            alert('Lỗi kết nối. Không thể lưu.');
-        }
-    }
-      function filterCustomers(rank) {
-            const cards = document.querySelectorAll('#customersGrid .table-card');
-            const buttons = document.querySelectorAll('.filter-btn[data-filter]');
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.filter-btn[data-filter="' + rank + '"]')?.classList.add('active');
-
-            const searchValue = document.getElementById('searchCustomers').value.toLowerCase();
-
-            cards.forEach(card => {
-                const cardRank = card.dataset.rank;
-                const customerInfo = card.textContent.toLowerCase();
-
-                const rankMatch = (rank === 'all' || cardRank === rank);
-                const searchMatch = (searchValue === '' || customerInfo.includes(searchValue));
-
-                card.style.display = (rankMatch && searchMatch) ? 'block' : 'none';
-            });
-            updateCustomerSummary();
-        }
-
-        function searchCustomers() {
-            filterCustomers(document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all');
-        }
-
-        async function viewCustomer(maKH) {
-            const detailPanel = document.getElementById('detailPanel');
-            if (!detailPanel) {
-                console.error('Không tìm thấy #detailPanel');
-                return;
-            }
-
-            detailPanel.innerHTML = '<div class="empty-text">Đang tải chi tiết khách hàng...</div>';
-
-            const rightPanel = document.querySelector('.right-panel');
-            if (rightPanel) {
-                rightPanel.classList.add('active');
-            }
-
-            try {
-                const response = await fetch('/KhachHang/ChiTietKhachHang?maKH=' + maKH);
-
-                if (!response.ok) {
-                    detailPanel.innerHTML = '<div class="empty-state">Lỗi khi tải dữ liệu khách hàng.</div>';
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                // Đưa HTML vào panel
-                const html = await response.text();
-                detailPanel.innerHTML = html;
-
-            } catch (error) {
-                console.error('Lỗi fetch ChiTietKhachHang:', error);
-                detailPanel.innerHTML = '<div class="empty-state">Không thể tải chi tiết.</div>';
-            }
-        }
-
-        function openAddCustomerModal() {
-            // alert('Mở form thêm khách hàng mới');
-            openCustomerModal(0);
-
-        }
-
-        function editCustomer(maKH) {
-            // alert('Sửa thông tin khách hàng: ' + maKH);
-            openCustomerModal(maKH);
-        }
-
-           async function openCustomerModal(maKH) {
-            let url = '/KhachHang/FormKhachHang';
-            let title = '';
-
-            if (maKH > 0) {
-                url += '?maKH=' + maKH;
-                title = 'Sửa thông tin khách hàng';
-            } else {
-                title = 'Thêm khách hàng mới';
-            }
-
-            try {
-                // Hiển thị loading (tạm thời)
-                // (Chúng ta gọi hàm 'openModal' có sẵn của bạn)
-                openModal(title, '<div class="empty-text">Đang tải...</div>');
-
-                // 1. Gọi Controller để lấy HTML của form
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Tải form thất bại');
-                }
-                const formHtml = await response.text();
-
-                // 2. Lấy được HTML rồi, gọi lại hàm openModal
-                //    với nội dung là cái form
-                openModal(title, formHtml);
-
-            } catch (error) {
-                console.error('Lỗi khi mở modal:', error);
-                // Báo lỗi cũng dùng hàm openModal
-                openModal('Lỗi', '<div class="empty-state">Không thể tải form.</div>');
-            }
-        }
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            filterCustomers('all');
-        });        
-
-            function updateCustomerSummary() {
-                const cards = document.querySelectorAll('#customersGrid .table-card');
-
-                let visibleCount = 0;
-                let totalDiem = 0;
-                let totalChiTieu = 0;
-
-                cards.forEach(card => {
-                    if (card.style.display !== 'none') {
-                        visibleCount++;
-                        totalDiem += parseFloat(card.dataset.diem || 0);
-                        totalChiTieu += parseFloat(card.dataset.chitieu || 0);
-                    }
-                });
-
-                // Cập nhật HTML
-                document.getElementById('summaryTongKhachHang').innerText = visibleCount + ' khách';
-                document.getElementById('summaryTongDiem').innerText = totalDiem.toLocaleString('vi-VN') + ' điểm';
-                document.getElementById('summaryTongChiTieu').innerText = totalChiTieu.toLocaleString('vi-VN') + ' đ';
-            }
-
-
-            async function deleteCustomer(maKH){
-                if (!confirm('Bạn có chắc chắn muốn xóa khách hàng này không? Hành động này không thể hoàn tác.')) {
-                    return;
-                }
-
-                try{
-                    const formData = new FormData();
-                    formData.append('maKH',maKH);
-
-                    const response = await fetch('/KhachHang/XoaKhachHang',{
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if(result.success){
-                        alert('Đã xóa thành công!');
-                        // closeRightPanel();
-                        window.location.reload();
-                    }
-                    else{
-                        alert('Không thể xóa: ' + result.message);
-                    }
-                }
-                catch(error){
-                    console.error('Lỗi:', error);
-                    alert('Đã xảy ra lỗi khi xóa.');                
-                }
-
-            }
-
-    async function restoreCustomer(maKH) {
-        if (!confirm('Bạn có muốn khôi phục khách hàng này không?')) return;
-
-        try {
-            const formData = new FormData();
-            formData.append('maKH', maKH);
-
-            const response = await fetch('/KhachHang/KhoiPhucKhachHang', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('Khôi phục thành công!');
-                // closeRightPanel();
-                window.location.reload(); // Tải lại để thấy khách hàng quay về danh sách chính
-            } else {
-                alert('Lỗi: ' + result.message);
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Lỗi kết nối.');
-        }
-    }
-
-    // Xuat Bao Cao Excel
-    function exportCustomers(){
-
-        const rank = document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all';
-        const search = document.getElementById('searchCustomers').value;
-
-        const url = new URL('/KhachHang/ExportKhachHangToExcel', window.location.origin);
-
-        url.searchParams.append('rank',rank);
-        if(search)
-            url.searchParams.append('search',search);
-
-        window.location.href = url.toString();
-    }
-         </script>
+                   
+    document.addEventListener('DOMContentLoaded', function () {
+        filterCustomers('all');
+    });            
+          
+</script>
 }
