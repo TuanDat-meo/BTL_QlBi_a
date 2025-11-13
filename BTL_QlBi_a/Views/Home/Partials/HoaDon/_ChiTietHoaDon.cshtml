@@ -1,269 +1,226 @@
 ﻿@model BTL_QlBi_a.Models.Entities.HoaDon
+<link href="~/asset/css/qlBan/chiTietBan.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
+<link href="~/asset/css/qlHoaDon/chiTietHoaDon.css" rel="stylesheet" />
+
 @{
-    var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>;
+    // Dữ liệu chung
+    var chiTiet = ViewBag.ChiTietDichVu as List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon> ?? new List<BTL_QlBi_a.Models.Entities.ChiTietHoaDon>();
 
-    string statusBadgeClass = Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
-        ? "status-badge available"
-        : "status-badge occupied";
+    // 1. LẤY LOGIC QUYỀN (Từ _ChiTietBan)
+    var tenNhom = ViewBag.TenNhom as string ?? "Nhân viên";
+    bool isAdmin = tenNhom == "Admin";
+    bool isQuanLy = tenNhom == "Quản lý" || isAdmin;
+    bool isThuNgan = tenNhom == "Thu ngân" || isQuanLy;
+    bool isPhucVu = tenNhom == "Phục vụ";
 
-    string statusText = Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
-        ? "Đã thanh toán"
-        : "Đang chơi";
+    // 2. XÁC ĐỊNH TRẠNG THÁI
+    bool isDangChoi = Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DangChoi;
+
+    string statusBadgeClass = isDangChoi ? "status-badge occupied" : "status-badge available";
+    string statusText = isDangChoi ? "Đang chơi" : "Đã thanh toán";
+
+    // Giá trị mặc định cho các biến hiển thị
+    decimal giaGio = 0m;
+    decimal tienBanThucTe = 0m;
+    int hours = 0;
+    int minutes = 0;
+    double soGioThucTe = 0.0;
+    decimal tongDichVu = 0m;
+    decimal tongTienTruocLamTron = 0m;
+    decimal tongTienSauLamTron = 0m;
+    decimal chenhLech = 0m;
+    DateTime? thoiGianBatDau = Model.ThoiGianBatDau;
+
+    if (isDangChoi && thoiGianBatDau.HasValue)
+    {
+        var duration = DateTime.Now - thoiGianBatDau.Value;
+        var totalMinutes = duration.TotalMinutes;
+        soGioThucTe = totalMinutes / 60.0;
+
+        giaGio = Model.BanBia?.LoaiBan?.GiaGio ?? 0m;
+        tienBanThucTe = giaGio * (decimal)soGioThucTe;
+
+        hours = (int)duration.TotalHours;
+        minutes = duration.Minutes;
+
+        tongDichVu = chiTiet.Sum(ct => ct.ThanhTien ?? 0m);
+        tongTienTruocLamTron = tienBanThucTe + tongDichVu;
+        tongTienSauLamTron = Math.Ceiling(tongTienTruocLamTron / 1000m) * 1000m;
+        chenhLech = tongTienSauLamTron - tongTienTruocLamTron;
+    }
+    else
+    {
+        // Hóa đơn đã thanh toán: lấy giá trị từ model (trong trường hợp Model.* có null, xử lý an toàn)
+        tienBanThucTe = Model.TienBan;
+        tongDichVu = Model.TienDichVu;
+    }
 }
 
 <div class="detail-header">
-    <h3 class="detail-title">Hóa đơn HD@(Model.MaHD.ToString("D4"))</h3>
+    @if (isDangChoi)
+    {
+    <h3 class="detail-title">Tạm tính HD@(Model.MaHD.ToString("D4"))</h3>
+
+    }
+    else
+    {
+         <h3 class="detail-title">Hóa đơn HD@(Model.MaHD.ToString("D4"))</h3>
+    }
     <span class="@statusBadgeClass">@statusText</span>
 </div>
 
 <div class="detail-body">
-    <div class="info-section">
-        <div class="info-row">
-            <span class="info-label">Bàn:</span>
-            <span class="info-value">@(Model.BanBia?.TenBan ?? "N/A")</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Khách hàng:</span>
-            <span class="info-value">@(Model.KhachHang?.TenKH ?? "Khách lẻ")</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Nhân viên:</span>
-            <span class="info-value">@(Model.NhanVien?.TenNV ?? "N/A")</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Bắt đầu:</span>
-            <span class="info-value">@(Model.ThoiGianBatDau?.ToString("HH:mm dd/MM/yyyy") ?? "N/A")</span>
-        </div>
-        @if (Model.ThoiGianKetThuc != null)
-        {
-                <div class="info-row">
-                    <span class="info-label">Kết thúc:</span>
-                    <span class="info-value">@Model.ThoiGianKetThuc.Value.ToString("HH:mm dd/MM/yyyy")</span>
-                </div>
-        }
-    </div>
-
-    @if (chiTiet != null && chiTiet.Any())
+    @if (isDangChoi)
     {
-            <div class="service-section">
-                <h4 class="section-subtitle">Dịch vụ đã sử dụng:</h4>
-            @foreach (var item in chiTiet)
+            <div class="info-section">
+                <div class="info-row">
+                    <span class="info-label">Bàn:</span>
+                    <span class="info-value">@(Model.BanBia?.TenBan ?? "N/A")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Khách hàng:</span>
+                    <span class="info-value">@(Model.KhachHang?.TenKH ?? "Khách lẻ")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bắt đầu:</span>
+                    <span class="info-value">@((Model.ThoiGianBatDau.HasValue) ? Model.ThoiGianBatDau.Value.ToString("HH:mm dd/MM/yyyy") : "N/A")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Thời gian:</span>
+                    <span class="info-value time-highlight">@hours giờ @minutes phút</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Giá giờ:</span>
+                    <span class="info-value">@giaGio.ToString("N0") đ/giờ</span>
+                </div>
+            </div>
+
+            <div class="bill-section">
+                <div class="bill-row">
+                    <span>Tiền bàn:</span>
+                    <span>@tienBanThucTe.ToString("N0") đ</span>
+                </div>
+                <div class="bill-row">
+                    <span>Dịch vụ:</span>
+                    <span>@tongDichVu.ToString("N0") đ</span>
+                </div>
+            @if (chenhLech > 0)
             {
-                        <div class="service-item">
-                            <div class="service-name">@item.DichVu?.TenDV x @item.SoLuong</div>
-                            <div class="service-price">@item.ThanhTien?.ToString("N0") đ</div>
+                        <div class="bill-row" style="font-size: 0.9em; color: #666;">
+                            <span>Tạm tính:</span>
+                            <span>@tongTienSauLamTron.ToString("N0") đ</span>
                         </div>
+            }
+                <div class="bill-row total">
+                    <span>Tổng cộng:</span>
+                    <span>@tongTienSauLamTron.ToString("N0") đ</span>
+                </div>
+            </div>
+
+        @if (chiTiet.Any())
+        {
+                    <div class="service-section">
+                        <h4 class="section-subtitle">Dịch vụ đã order (@chiTiet.Count món):</h4>
+                        <div class="service-list">
+                    @foreach (var item in chiTiet)
+                    {
+                                    <div class="service-item">
+                                        <div class="service-info">
+                                            <div class="service-name">@item.DichVu?.TenDV</div>
+                                            <div class="service-quantity">@item.SoLuong x @(item.DichVu?.Gia.ToString("N0") ?? "0") đ</div>
+                                        </div>
+                                        <div class="service-actions">
+                                            <div class="service-price">@item.ThanhTien?.ToString("N0") đ</div>
+                                @if (isPhucVu || isThuNgan)
+                                {
+                                                    <button class="btn-icon-sm btn-danger-icon" onclick="TableManager.removeService(@item.ID)" title="Xóa">×</button>
+                                }
+                                        </div>
+                                    </div>
+                    }
+                        </div>
+                    </div>
+        }
+        else
+        {
+                    <div class="service-section">
+                        <p style="text-align: center; color: #999; padding: 20px;">Chưa có dịch vụ nào</p>
+                    </div>
+        }
+
+            <div class="action-section">
+            @if (isThuNgan)
+            {
+                <button class="btn btn-primary" onclick="printInvoice(@Model.MaHD)">🖨️ In hóa đơn tạm tính</button>
             }
             </div>
     }
-
-    <div class="bill-section">
-        <div class="bill-row">
-            <span>Tiền bàn:</span>
-            <span>@Model.TienBan.ToString("N0") đ</span>
-        </div>
-        <div class="bill-row">
-            <span>Tiền dịch vụ:</span>
-            <span>@Model.TienDichVu.ToString("N0") đ</span>
-        </div>
-        @if (Model.GiamGia > 0)
-        {
-                <div class="bill-row">
-                    <span>Giảm giá:</span>
-                    <span>-@Model.GiamGia.ToString("N0") đ</span>
+    else
+    {
+            <div class="info-section">
+                <div class="info-row">
+                    <span class="info-label">Bàn:</span>
+                    <span class="info-value">@(Model.BanBia?.TenBan ?? "N/A")</span>
                 </div>
-        }
-        <div class="bill-row total">
-            <span>Tổng cộng:</span>
-            <span>@Model.TongTien.ToString("N0") đ</span>
-        </div>
-    </div>
+                <div class="info-row">
+                    <span class="info-label">Khách hàng:</span>
+                    <span class="info-value">@(Model.KhachHang?.TenKH ?? "Khách lẻ")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nhân viên:</span>
+                    <span class="info-value">@(Model.NhanVien?.TenNV ?? "N/A")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bắt đầu:</span>
+                    <span class="info-value">@(Model.ThoiGianBatDau?.ToString("HH:mm dd/MM/yyyy") ?? "N/A")</span>
+                </div>
+            @if (Model.ThoiGianKetThuc != null)
+            {
+                        <div class="info-row">
+                            <span class="info-label">Kết thúc:</span>
+                            <span class="info-value">@Model.ThoiGianKetThuc.Value.ToString("HH:mm dd/MM/yyyy")</span>
+                        </div>
+            }
+            </div>
 
-    <div class="action-section">
-        <button class="btn btn-primary" onclick="printInvoice(@Model.MaHD)">
-            🖨️ In hóa đơn
-        </button>
-        @* <button class="btn btn-secondary" onclick="closeRightPanel()"> *@
-        @*     Đóng *@
-        @* </button> *@
-    </div>
+        @if (chiTiet.Any())
+        {
+                    <div class="service-section">
+                        <h4 class="section-subtitle">Dịch vụ đã sử dụng:</h4>
+                @foreach (var item in chiTiet)
+                {
+                                <div class="service-item">
+                                    <div class="service-name">@item.DichVu?.TenDV x @item.SoLuong</div>
+                                    <div class="service-price">@item.ThanhTien?.ToString("N0") đ</div>
+                                </div>
+                }
+                    </div>
+        }
+
+            <div class="bill-section">
+                <div class="bill-row">
+                    <span>Tiền bàn:</span>
+                    <span>@Model.TienBan.ToString("N0") đ</span>
+                </div>
+                <div class="bill-row">
+                    <span>Tiền dịch vụ:</span>
+                    <span>@Model.TienDichVu.ToString("N0") đ</span>
+                </div>
+            @if (Model.GiamGia > 0)
+            {
+                        <div class="bill-row">
+                            <span>Giảm giá:</span>
+                            <span>-@Model.GiamGia.ToString("N0") đ</span>
+                        </div>
+            }
+                <div class="bill-row total">
+                    <span>Tổng cộng:</span>
+                    <span>@Model.TongTien.ToString("N0") đ</span>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn btn-primary" onclick="printInvoice(@Model.MaHD)">🖨️ In hóa đơn</button>
+            </div>
+    }
 </div>
-
-<style>
-    .detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #e9ecef;
-        margin-bottom: 20px;
-    }
-
-    .detail-title {
-        font-size: 24px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0;
-    }
-
-    .detail-body {
-        padding: 10px 0;
-    }
-
-    .info-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-    .info-label {
-        font-weight: 500;
-        color: #6c757d;
-    }
-
-    .info-value {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .time-highlight {
-        color: #007bff;
-        font-size: 16px;
-    }
-
-    .price-highlight {
-        color: #28a745;
-        font-size: 18px;
-    }
-
-    .bill-section {
-        background: #fff;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .bill-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        font-size: 15px;
-    }
-
-        .bill-row.total {
-            border-top: 2px solid #2c3e50;
-            margin-top: 10px;
-            padding-top: 15px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-    .service-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .section-subtitle {
-        font-size: 16px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0 0 15px 0;
-    }
-
-    .service-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        background: white;
-        border-radius: 6px;
-        margin-bottom: 8px;
-    }
-
-    .service-name {
-        font-weight: 500;
-        color: #495057;
-    }
-
-    .service-price {
-        font-weight: 600;
-        color: #007bff;
-    }
-
-    .action-section {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-block {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .btn-primary {
-        background: #007bff;
-        color: white;
-    }
-
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
-        }
-
-    .btn-success {
-        background: #28a745;
-        color: white;
-    }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
-        }
-
-    .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-        .status-badge.available {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-badge.occupied {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-badge.reserved {
-            background: #fff3cd;
-            color: #856404;
-        }
-</style>

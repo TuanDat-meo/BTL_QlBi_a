@@ -1,4 +1,7 @@
 ﻿@model BTL_QlBi_a.Models.Entities.KhachHang
+
+<link rel="stylesheet" href="~/asset/css/qlKhachHang/chi-tiet-khach-hang.css" />
+
 @{
     string rankIcon = Model.HangTV switch
     {
@@ -55,37 +58,55 @@
 
     @if (Model.HoaDons != null && Model.HoaDons.Any())
     {
-            <div class="service-section">
-                <h4 class="section-subtitle">Lịch sử chơi:</h4>
+        <div class="service-section">
+            <h4 class="section-subtitle">Lịch sử chơi:</h4>
             @foreach (var hd in Model.HoaDons)
             {
-                        <div class="service-item" style="cursor: pointer; flex-wrap: wrap;" onclick="viewInvoice(@hd.MaHD)">
-                            <div class="service-name" style="width: 100%;">
-                                <strong>HD@(hd.MaHD.ToString("D4"))</strong> (@hd.BanBia?.TenBan)
-                            </div>
-                            <div class="service-price" style="color: #28a745;">
+                <div class="service-item" style="cursor: pointer; flex-wrap: wrap;" onclick="viewInvoice(@hd.MaHD)">
+                    <div class="service-name" style="width: 100%;">
+                        <strong>HD@(hd.MaHD.ToString("D4"))</strong> (@hd.BanBia?.TenBan)
+                    </div>
+                    <div class="service-price" style="color: #28a745;">
                         @hd.TongTien.ToString("N0") đ
-                            </div>
-                            <div style="font-size: 13px; color: #6c757d;">
+                    </div>
+                    <div style="font-size: 13px; color: #6c757d;">
                         @hd.ThoiGianKetThuc?.ToString("dd/MM/yyyy")
-                            </div>
-                        </div>
+                    </div>
+                </div>
             }
-            </div>
+        </div>
     }
     else
     {
-            <div class="empty-state" style="padding: 20px 0;">
-                 <p class="empty-text">Khách hàng chưa có lịch sử chơi.</p>
-            </div>
+        <div class="empty-state" style="padding: 20px 0;">
+            <p class="empty-text">Khách hàng chưa có lịch sử chơi.</p>
+        </div>
     }
 
     <div class="action-section">
-        <button class="btn btn-primary" onclick="editCustomer(@Model.MaKH)">
-            ✏️ Sửa thông tin
-        </button>
-         <button class="btn btn-secondary" onclick="closeRightPanel()">
-            Đóng
-        </button>
+
+        @if (Model.HoatDong)
+        {
+            <button class="btn btn-primary" onclick="editCustomer(@Model.MaKH)">
+                ✏️ Sửa thông tin
+            </button>
+
+            <button class="btn btn-danger" onclick="deleteCustomer(@Model.MaKH)" style="margin-top: 8px; background-color: #dc3545; color: white;">
+                🗑️ Xóa khách hàng
+            </button>
+        }
+        else
+        {
+            <div class="alert-box" style="background: #fff3cd; color: #856404; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
+                ⚠️ Khách hàng này đang bị vô hiệu hóa.
+            </div>
+
+            <button class="btn btn-success" onclick="restoreCustomer(@Model.MaKH)" style="width: 100%; background-color: #28a745; color: white;">
+                ♻️ Khôi phục khách hàng
+            </button>
+        }
+            <button class="btn btn-secondary" onclick="closeRightPanel()" style="margin-top: 8px;">
+                Đóng
+            </button>
     </div>
 </div>

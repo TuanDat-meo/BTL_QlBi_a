@@ -1,9 +1,36 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.KhachHang>
 
+<link rel="stylesheet" href="~/asset/css/qlKhachHang/khach-hang.css" />
+
 <div class="section-header">
-    <h2 class="section-title">Quản lý khách hàng</h2>
+    <h2 class="section-title">
+        @if(ViewBag.IsTrash == true)
+        {
+            <span>🗑️ Thùng rác (Khách đã xóa)</span>
+        }
+        else
+        {
+            <span>Quản lý khách hàng</span> 
+        }
+    </h2>
     <div class="action-buttons">
-        <button class="btn btn-primary" onclick="openAddCustomerModal()">➕ Thêm khách hàng</button>
+        @if(ViewBag.IsTrash == true)
+        {
+            <a href="/KhachHang/KhachHang?showDeleted=false" class="btn btn-secondary">
+                ⬅️ Quay lại danh sách
+            </a>
+        }
+        else
+        {
+            <a href="/KhachHang/KhachHang?showDeleted=true" class="btn btn-secondary" style="background-color: #6c757d; margin-right: 10px;">
+                    🗑️ Thùng rác
+            </a>
+
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">➕ Thêm khách hàng</button>
+        }
+        <button class="btn btn-success" onclick="exportCustomers()" style="margin-left: 10px;">
+        📥 Xuất Excel
+        </button>
     </div>
 </div>
 
@@ -46,11 +73,26 @@
                 _ => "#ffe4cc"
             };
 
-                    <div class="table-card available" data-rank="@kh.HangTV" style="background: linear-gradient(135deg, white, @rankColor);">
+                    <div class="table-card available clickable-card" 
+                        data-rank="@kh.HangTV"
+                        data-diem ="@kh.DiemTichLuy "
+                        data-chitieu ="@kh.TongChiTieu"
+                        onclick = "viewCustomer(@kh.MaKH)"
+                        style="background: linear-gradient(135deg, white, @rankColor);">
                         <span class="vip-badge" style="background: @rankColor; color: #000;">@rankIcon @kh.HangTV</span>
 
-                        <div class="user-avatar" style="width: 60px; height: 60px; margin: 15px auto; font-size: 24px;">
-                    @kh.TenKH.Substring(0, 1)
+                        <div class="user-avatar" style="width: 60px; height: 60px; margin: 15px auto; border-radius: 50%; overflow: hidden; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    @if (!string.IsNullOrEmpty(kh.Avatar))
+                                    {
+                                    <img src="@kh.Avatar" alt="@kh.TenKH" style="width: 100%; height: 100%; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        // Nếu không có ảnh, hiển thị chữ cái đầu như cũ
+                                    <div style="width: 100%; height: 100%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #555;">
+                                            @kh.TenKH.Substring(0, 1).ToUpper()
+                                    </div>
+                                    }
                         </div>
 
                         <div class="table-name">@kh.TenKH</div>
@@ -74,33 +116,24 @@
 
                 @if (kh.LanDenCuoi.HasValue)
                 {
-                                <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
+                <div class="table-info">🕐 @kh.LanDenCuoi.Value.ToString("dd/MM/yyyy")</div>
                 }
-
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" onclick="viewCustomer(@kh.MaKH)">
-                                👁️ Chi tiết
-                            </button>
-                            <button class="btn btn-secondary" onclick="editCustomer(@kh.MaKH)">
-                                ✏️ Sửa
-                            </button>
-                        </div>
-                    </div>
+            </div>
         }
         </div>
 
         <div class="info-card" style="margin-top: 20px;">
             <div class="info-row">
                 <span class="info-label">Tổng khách hàng:</span>
-                <span class="info-value">@Model.Count() khách</span>
+                <span class="info-value" id="summaryTongKhachHang"id="summaryTongKhachHang">@Model.Count() khách</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Tổng điểm tích lũy:</span>
-                <span class="info-value">@Model.Sum(k => k.DiemTichLuy) điểm</span>
+                <span class="info-value"id="summaryTongDiem">@Model.Sum(k => k.DiemTichLuy) điểm</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Tổng chi tiêu:</span>
-                <span class="info-value">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
+                <span class="info-value" id="summaryTongChiTieu">@Model.Sum(k => k.TongChiTieu).ToString("N0") đ</span>
             </div>
         </div>
 }

@@ -8,91 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Hóa đơn HD@(Model.MaHD.ToString("D4"))</title>
-
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            font-size: 14px;
-            color: #333;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* KHU VỰC NÚT BẤM (SẼ ẨN KHI IN) */
-        .print-controls {
-            width: 140mm;
-            margin: 20px auto 10px auto;
-            padding: 10px;
-            background: #eee;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-align: right;
-        }
-
-            .print-controls button {
-                padding: 8px 15px;
-                font-size: 14px;
-                font-weight: 600;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                margin-left: 10px;
-            }
-
-        .btn-print { background-color: #28a745; color: white; }
-        .btn-close { background-color: #6c757d; color: white; }
-
-        .receipt-container {
-            width: 140mm;
-            min-height: 180mm; /* Chiều cao tối thiểu cho A5 */
-            background: #fff;
-            padding: 25px 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin: 0 auto 20px auto; /* Căn giữa */
-        }
-
-        .receipt-header { text-align: center; margin-bottom: 25px; }
-        .receipt-header h1 { margin: 0; font-size: 20px; font-weight: bold; color: #000; }
-        .receipt-header p { margin: 4px 0; font-size: 13px; }
-
-        .receipt-title { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; text-transform: uppercase; }
-
-        .info-section { border-top: 2px dashed #ccc; border-bottom: 2px dashed #ccc; padding: 15px 0; margin-bottom: 20px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .info-row span { font-size: 14px; }
-        .info-row .label { font-weight: 500; color: #555; }
-        .info-row .value { font-weight: bold; }
-
-        .bill-table table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .bill-table th, .bill-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .bill-table th { background: #f9f9f9; font-weight: bold; }
-        .bill-table .text-right { text-align: right; }
-        .bill-table .text-center { text-align: center; }
-
-        .summary-section { margin-top: 25px; }
-        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 16px; }
-        .summary-row.total { font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 10px; margin-top: 5px; }
-
-        .receipt-footer { text-align: center; margin-top: 30px; font-style: italic; color: #777; }
-
-        /* CSS KHI IN */
-        @@media print {
-            body {
-                background: #fff;
-            }
-            .print-controls {
-                display: none; /* Ẩn nút bấm khi in */
-            }
-            .receipt-container {
-                width: 100%;
-                margin: 0;
-                padding: 0;
-                box-shadow: none;
-                min-height: auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="~/asset/css/qlHoaDon/in-hoa-don.css" />
 </head>
 <body>
 
@@ -108,8 +24,15 @@
             <p>Địa chỉ: 123 Đường ABC, Phường XYZ, Quận 1, TP. HCM</p>
             <p>Hotline: 0987.654.321</p>
         </div>
+        @if(Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DangChoi)
+        {
+            <h2 class="receipt-title">Hóa đơn tạm tính</h2>
 
-        <h2 class="receipt-title">Hóa đơn thanh toán</h2>
+        }
+        else
+        {
+            <h2 class="receipt-title">Hóa đơn thanh toán</h2>
+        }
 
         <div class="info-section">
             <div class="info-row">
@@ -130,7 +53,14 @@
             </div>
             <div class="info-row">
                 <span class="label">Giờ ra:</span>
-                <span class="value">@(Model.ThoiGianKetThuc?.ToString("HH:mm, dd/MM/yyyy"))</span>
+                @if(Model.ThoiGianKetThuc == null)
+                {
+                     <span class="value">@DateTime.Now.ToString("HH:mm, dd/MM/yyyy")</span>
+                }
+                else
+                {
+                     <span class="value">@(Model.ThoiGianKetThuc?.ToString("HH:mm, dd/MM/yyyy"))</span>
+                }
             </div>
             <div class="info-row">
                 <span class="label">Thu ngân:</span>

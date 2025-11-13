@@ -24,7 +24,8 @@ CREATE TABLE khach_hang (
     diem_tich_luy INT DEFAULT 0,
     tong_chi_tieu DECIMAL(12,0) DEFAULT 0,
     ngay_dang_ky DATETIME DEFAULT GETDATE(),
-    lan_den_cuoi DATETIME
+    lan_den_cuoi DATETIME,
+    hoat_dong BIT DEFAULT 0
 );
 GO
 

@@ -152,13 +152,10 @@ INSERT INTO khach_hang (ten_kh, sdt, mat_khau, email, ngay_sinh, hang_tv, diem_t
 (N'Phạm Thị Dung', '0934567890', 'hashed_pass_004', 'phamthidung@gmail.com', '1992-03-25', N'Đồng', 50, 500000, '2024-08-05', '2025-10-25'),
 (N'Hoàng Văn Em', '0945678901', 'hashed_pass_005', 'hoangvanem@gmail.com', '1998-07-18', N'Đồng', 30, 300000, '2024-09-12', '2025-10-24'),
 (N'Vũ Minh Khang', '0956789012', 'hashed_pass_006', 'vuminhkhang@gmail.com', '1991-11-30', N'Bạc', 180, 1800000, '2024-04-15', '2025-10-28'),
-(N'Đặng Thu Hà', '0967890123', 'dangthuha_pass_007', 'dangthuha@gmail.com', '1994-06-08', N'Vàng', 250, 2500000, '2024-02-20', '2025-10-27'),
-(N'Trịnh Quốc Dũng', '0978901234', 'trinhquocdung_pass_008', 'trinhquocdung@gmail.com', '1989-09-22', N'Bạch kim', 600, 6000000, '2023-12-10', '2025-10-28'),
-(N'Ngô Thị Mai', '0989012345', 'ngothimai_pass_009', 'ngothimai@gmail.com', '1996-04-15', N'Đồng', 80, 800000, '2024-07-18', '2025-10-23'),
-(N'Bùi Văn Tú', '0990123456', 'buivantu_pass_010', 'buivantu@gmail.com', '1993-02-28', N'Bạc', 120, 1200000, '2024-05-25', '2025-10-26'),
-(N'Cao Thị Phương', '0911111111', 'hash_pw_11', 'caothiphuong@gmail.com', '1997-01-12', N'Đồng', 0, 0, '2025-10-28', NULL),
-(N'Lý Văn Đạt', '0922222222', 'hash_pw_12', 'lyvandat@gmail.com', '1985-08-05', N'Đồng', 0, 0, '2025-10-28', NULL),
-(N'Mai Thị Lan', '0933333333', 'hash_pw_13', 'maithilan@gmail.com', '1999-11-20', N'Đồng', 0, 0, '2025-10-27', NULL);
+(N'Đặng Thu Hà', '0967890123', 'hashed_pass_007', 'dangthuha@gmail.com', '1994-06-08', N'Vàng', 250, 2500000, '2024-02-20', '2025-10-27'),
+(N'Trịnh Quốc Dũng', '0978901234', 'hashed_pass_008', 'trinhquocdung@gmail.com', '1989-09-22', N'Bạch kim', 600, 6000000, '2023-12-10', '2025-10-28'),
+(N'Ngô Thị Mai', '0989012345', 'hashed_pass_009', 'ngothimai@gmail.com', '1996-04-15', N'Đồng', 80, 800000, '2024-07-18', '2025-10-23'),
+(N'Bùi Văn Tú', '0990123456', 'hashed_pass_010', 'buivantu@gmail.com', '1993-02-28', N'Bạc', 120, 1200000, '2024-05-25', '2025-10-26');
 GO
 
 -- =============================================

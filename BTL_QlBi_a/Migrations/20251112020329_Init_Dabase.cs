@@ -5,7 +5,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BTL_QlBi_a.Migrations
 {
+    /// <inheritdoc />
+<<<<<<<< HEAD:BTL_QlBi_a/Migrations/20251111141802_updateDB.cs
+    public partial class updateDB : Migration
+========
     public partial class Init_Dabase : Migration
+>>>>>>>> master:BTL_QlBi_a/Migrations/20251112020329_Init_Dabase.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

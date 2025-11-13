@@ -37,6 +37,12 @@ namespace BTL_QlBi_a.Models.Entities
 
         public DateTime? LanDenCuoi { get; set; }
 
+        public bool HoatDong { get; set; } = true;
+
+        [StringLength(255)]
+        public string? Avatar { get; set; }
+
+
         // Navigation properties
         public virtual ICollection<BanBia> BanBias { get; set; }
         public virtual ICollection<DatBan> DatBans { get; set; }
