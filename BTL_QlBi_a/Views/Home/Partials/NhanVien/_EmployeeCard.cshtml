@@ -1,0 +1,155 @@
+﻿@model BTL_QlBi_a.Models.Entities.NhanVien
+@{
+    var tenNhom = Context.Session.GetString("TenNhom") ?? "Phục vụ";
+    var chucVu = Context.Session.GetString("ChucVu") ?? tenNhom;
+
+    bool isAdmin = tenNhom == "Admin" || chucVu == "Admin";
+    bool isQuanLy = tenNhom == "Quản lý" || chucVu == "Quản lý" || isAdmin;
+
+    string statusBadgeClass = Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.DangLam
+        ? "employee-status-badge active"
+        : "employee-status-badge inactive";
+
+    string statusText = Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.DangLam
+        ? "Đang làm"
+        : "Nghỉ việc";
+
+    string roleClass = Model.NhomQuyen?.TenNhom switch
+    {
+        "Admin" => "employee-role-badge role-admin",
+        "Quản lý" => "employee-role-badge role-quanly",
+        "Thu ngân" => "employee-role-badge role-thungan",
+        "Phục vụ" => "employee-role-badge role-phucvu",
+        _ => "employee-role-badge"
+    };
+
+    string roleIcon = Model.NhomQuyen?.TenNhom switch
+    {
+        "Admin" => "👑",
+        "Quản lý" => "⭐",
+        "Thu ngân" => "💰",
+        "Phục vụ" => "👨‍🍳",
+        _ => "👤"
+    };
+
+    var imagePath = !string.IsNullOrEmpty(Model.FaceIDAnh)
+        ? Url.Content($"~/asset/img/{Model.FaceIDAnh}")
+        : null;
+
+    var initials = Model.TenNV.Length > 0 ? Model.TenNV.Substring(0, 1).ToUpper() : "?";
+
+    string shiftIcon = Model.CaMacDinh switch
+    {
+        BTL_QlBi_a.Models.Entities.CaLamViec.Sang => "🌅",
+        BTL_QlBi_a.Models.Entities.CaLamViec.Chieu => "☀️",
+        BTL_QlBi_a.Models.Entities.CaLamViec.Toi => "🌙",
+        _ => "⏰"
+    };
+
+    string statusDataAttr = Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.DangLam
+        ? "DangLam"
+        : "Nghi";
+}
+
+<div class="employee-card"
+     data-status="@statusDataAttr"
+     data-role="@Model.NhomQuyen?.TenNhom"
+     data-shift="@Model.CaMacDinh"
+     data-search="@Model.TenNV @Model.SDT"
+     data-employee-id="@Model.MaNV"
+     onclick="NhanVienManager.viewDetail(@Model.MaNV)">
+
+    <div class="employee-image">
+        @if (!string.IsNullOrEmpty(imagePath))
+        {
+            <img src="@imagePath"
+                 alt="@Model.TenNV"
+                 class="employee-img"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        }
+
+        <div class="employee-avatar-placeholder" style="@(string.IsNullOrEmpty(imagePath) ? "" : "display: none;")">
+            <span class="avatar-initials">@initials</span>
+        </div>
+
+        <span class="@statusBadgeClass">@statusText</span>
+        <span class="@roleClass">@roleIcon @Model.NhomQuyen?.TenNhom</span>
+
+        @if (isQuanLy)
+        {
+            <div class="employee-card-actions" style="position: absolute; bottom: 10px; right: 10px; display: flex; gap: 6px; z-index: 100;">
+                <button class="btn-card-action btn-edit-card"
+                        onclick="event.stopPropagation(); NhanVienManager.openEditModal(@Model.MaNV)"
+                        title="Chỉnh sửa"
+                        style="width: 36px; height: 36px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.3s; background: rgba(255, 255, 255, 0.95); color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    ✏️
+                </button>
+                <button class="btn-card-action btn-attendance-card"
+                        onclick="event.stopPropagation(); openAttendanceModal(@Model.MaNV)"
+                        title="Chấm công"
+                        style="width: 36px; height: 36px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.3s; background: rgba(255, 255, 255, 0.95); color: #28a745; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    ⏰
+                </button>
+                <button class="btn-card-action btn-salary-card"
+                        onclick="event.stopPropagation(); openSalaryModal(@Model.MaNV, '@Model.TenNV')"
+                        title="Quản lý lương"
+                        style="width: 36px; height: 36px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.3s; background: rgba(255, 255, 255, 0.95); color: #ffc107; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    💰
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="employee-content">
+        <div class="employee-header">
+            <div>
+                <div class="employee-name">@Model.TenNV</div>
+                <div class="employee-id">#@Model.MaNV</div>
+            </div>
+        </div>
+
+        <div class="employee-phone">
+            📱 @Model.SDT
+        </div>
+
+        <div class="employee-info">
+            <span class="shift-badge">@shiftIcon @Model.CaMacDinh</span>
+        </div>
+
+        <div class="employee-salary">
+            💵 @((Model.LuongCoBan + Model.PhuCap).ToString("N0"))đ
+        </div>
+    </div>
+</div>
+
+<style>
+    .employee-card-actions {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+
+    .employee-card:hover .employee-card-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .btn-card-action:hover {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .btn-edit-card:hover {
+        background: #667eea !important;
+        color: white !important;
+    }
+
+    .btn-attendance-card:hover {
+        background: #28a745 !important;
+        color: white !important;
+    }
+
+    .btn-salary-card:hover {
+        background: #ffc107 !important;
+        color: #000 !important;
+    }
+</style>

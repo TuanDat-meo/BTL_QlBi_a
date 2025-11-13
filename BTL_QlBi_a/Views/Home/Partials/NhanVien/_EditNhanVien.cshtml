@@ -1,0 +1,262 @@
+﻿@model BTL_QlBi_a.Models.Entities.NhanVien
+
+<form id="formEditNhanVien" enctype="multipart/form-data">
+    <input type="hidden" name="MaNV" value="@Model.MaNV">
+
+    <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Họ tên <span style="color: red;">*</span></label>
+            <input type="text" 
+                   name="TenNV" 
+                   class="form-control" 
+                   value="@Model.TenNV"
+                   placeholder="Nhập họ tên nhân viên"
+                   required>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Số điện thoại <span style="color: red;">*</span></label>
+            <input type="tel" 
+                   name="SDT" 
+                   class="form-control" 
+                   value="@Model.SDT"
+                   placeholder="0123456789"
+                   pattern="[0-9]{10,11}"
+                   required>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Email</label>
+            <input type="email" 
+                   name="Email" 
+                   class="form-control" 
+                   value="@Model.Email"
+                   placeholder="email@example.com">
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Nhóm quyền <span style="color: red;">*</span></label>
+            <select name="MaNhom" class="form-control" required>
+                @foreach (var nhom in ViewBag.NhomQuyen)
+                {
+                    if (nhom.MaNhom == Model.MaNhom)
+                    {
+                        <option value="@nhom.MaNhom" selected>
+                            @nhom.TenNhom
+                        </option>
+                    }
+                    else
+                    {
+                        <option value="@nhom.MaNhom">
+                            @nhom.TenNhom
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Lương cơ bản (VNĐ) <span style="color: red;">*</span></label>
+            <input type="number" 
+                   name="LuongCoBan" 
+                   class="form-control" 
+                   value="@Model.LuongCoBan"
+                   placeholder="5000000"
+                   min="0"
+                   step="100000"
+                   required>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Phụ cấp (VNĐ)</label>
+            <input type="number" 
+                   name="PhuCap" 
+                   class="form-control" 
+                   value="@Model.PhuCap"
+                   placeholder="500000"
+                   min="0"
+                   step="100000">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Ca làm việc mặc định <span style="color: red;">*</span></label>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="CaMacDinh" value="0" @(Model.CaMacDinh == BTL_QlBi_a.Models.Entities.CaLamViec.Sang ? "checked" : "")>
+                <span>🌅 Sáng (6h-14h)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="CaMacDinh" value="1" @(Model.CaMacDinh == BTL_QlBi_a.Models.Entities.CaLamViec.Chieu ? "checked" : "")>
+                <span>☀️ Chiều (14h-22h)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="CaMacDinh" value="2" @(Model.CaMacDinh == BTL_QlBi_a.Models.Entities.CaLamViec.Toi ? "checked" : "")>
+                <span>🌙 Tối (18h-2h)</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Trạng thái</label>
+        <div style="display: flex; gap: 15px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="TrangThai" value="0" @(Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.DangLam ? "checked" : "")>
+                <span>✅ Đang làm việc</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="TrangThai" value="1" @(Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.Nghi ? "checked" : "")>
+                <span>❌ Nghỉ việc</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Đổi mật khẩu mới</label>
+        <div style="position: relative;">
+            <input type="password" 
+                   name="MatKhauMoi" 
+                   id="matKhauMoiInput"
+                   class="form-control" 
+                   placeholder="Để trống nếu không đổi mật khẩu"
+                   minlength="6">
+            <button type="button" 
+                    onclick="togglePassword('matKhauMoiInput')"
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px;">
+                👁️
+            </button>
+        </div>
+        <small style="color: #6c757d; font-size: 11px;">Để trống nếu không muốn thay đổi mật khẩu</small>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Ảnh nhân viên (Face ID)</label>
+        @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
+        {
+            <div style="margin-bottom: 10px; text-align: center;">
+                <img src="~/asset/img/@Model.FaceIDAnh" 
+                     alt="Current" 
+                     style="max-width: 150px; max-height: 150px; border-radius: 10px; border: 2px solid #dee2e6;">
+                <p style="font-size: 11px; color: #6c757d; margin-top: 5px;">Ảnh hiện tại</p>
+            </div>
+        }
+        <input type="file" 
+               name="FaceIDAnh" 
+               id="faceIdEditInput"
+               class="form-control" 
+               accept="image/*"
+               onchange="previewImage(this, 'faceIdEditPreview')">
+        <div id="faceIdEditPreview" style="margin-top: 10px; text-align: center;"></div>
+    </div>
+
+    <div class="form-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="flex: 1;">
+            ❌ Hủy
+        </button>
+        <button type="submit" class="btn btn-primary" style="flex: 2;">
+            💾 Lưu thay đổi
+        </button>
+    </div>
+</form>
+
+<script>
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}" 
+                         style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 2px solid #667eea;">
+                    <p style="font-size: 11px; color: #667eea; margin-top: 5px;">Ảnh mới</p>
+                `;
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.innerHTML = '';
+        }
+    }
+
+    document.getElementById('formEditNhanVien').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('/NhanVien/CapNhatNhanVien', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('✅ ' + result.message);
+                closeModal();
+                location.reload();
+            } else {
+                alert('❌ ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Có lỗi xảy ra: ' + error.message);
+        }
+    });
+</script>
+
+<style>
+    .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+        color: #495057;
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 13px;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+</style>

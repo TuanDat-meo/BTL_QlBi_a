@@ -1,313 +1,370 @@
-﻿// Quản lý nhân viên
-class NhanVienManager {
-    constructor() {
-        this.currentEmployeeId = null;
-        this.initializeFilters();
-        this.initializeSearch();
-    }
+﻿// NhanVienManager - Quản lý nhân viên hoàn chỉnh
+const NhanVienManager = {
+    currentFilters: {
+        status: 'all',
+        role: 'all',
+        shift: 'all',
+        search: ''
+    },
 
-    initializeFilters() {
-        // Filter by status
-        document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Update active state
-                e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-
-                this.filterEmployees();
+    // Filter theo trạng thái
+    filterByStatus(status, event) {
+        if (event) {
+            document.querySelectorAll('#page-nhanvien .filter-buttons button').forEach(btn => {
+                if (btn.getAttribute('onclick')?.includes('filterByStatus')) {
+                    btn.classList.remove('active');
+                }
             });
-        });
-
-        // Filter by role
-        document.querySelectorAll('.filter-btn[data-role]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-
-                this.filterEmployees();
-            });
-        });
-    }
-
-    initializeSearch() {
-        const searchInput = document.getElementById('employeeSearch');
-        if (searchInput) {
-            searchInput.addEventListener('input', () => this.filterEmployees());
+            event.target.classList.add('active');
         }
-    }
 
-    filterEmployees() {
-        const statusFilter = document.querySelector('.filter-btn[data-filter].active')?.dataset.filter || 'all';
-        const roleFilter = document.querySelector('.filter-btn[data-role].active')?.dataset.role || 'all';
-        const searchTerm = document.getElementById('employeeSearch')?.value.toLowerCase() || '';
+        this.currentFilters.status = status;
+        this.applyFilters();
+    },
 
+    // Filter theo nhóm quyền
+    filterByRole(role, event) {
+        if (event) {
+            document.querySelectorAll('#page-nhanvien .filter-buttons button').forEach(btn => {
+                if (btn.getAttribute('onclick')?.includes('filterByRole')) {
+                    btn.classList.remove('active');
+                }
+            });
+            event.target.classList.add('active');
+        }
+
+        this.currentFilters.role = role;
+        this.applyFilters();
+    },
+
+    // Filter theo ca làm việc
+    filterByShift(shift, event) {
+        if (event) {
+            document.querySelectorAll('#page-nhanvien .filter-buttons button').forEach(btn => {
+                if (btn.getAttribute('onclick')?.includes('filterByShift')) {
+                    btn.classList.remove('active');
+                }
+            });
+            event.target.classList.add('active');
+        }
+
+        this.currentFilters.shift = shift;
+        this.applyFilters();
+    },
+
+    // Tìm kiếm
+    search() {
+        const searchInput = document.getElementById('searchNhanVien');
+        this.currentFilters.search = searchInput.value.toLowerCase().trim();
+        this.applyFilters();
+    },
+
+    // Áp dụng tất cả filters
+    applyFilters() {
         const cards = document.querySelectorAll('.employee-card');
         let visibleCount = 0;
 
         cards.forEach(card => {
-            const status = card.dataset.status;
-            const role = card.dataset.role;
-            const name = card.querySelector('.employee-name')?.textContent.toLowerCase() || '';
+            const status = card.getAttribute('data-status');
+            const role = card.getAttribute('data-role');
+            const shift = card.getAttribute('data-shift');
+            const searchText = card.getAttribute('data-search').toLowerCase();
 
-            const matchesStatus = statusFilter === 'all' || status === statusFilter;
-            const matchesRole = roleFilter === 'all' || role === roleFilter;
-            const matchesSearch = name.includes(searchTerm);
+            let show = true;
 
-            if (matchesStatus && matchesRole && matchesSearch) {
-                card.style.display = '';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
+            // Filter status
+            if (this.currentFilters.status !== 'all') {
+                if (this.currentFilters.status === 'DangLam' && status !== 'DangLam') show = false;
+                if (this.currentFilters.status === 'Nghi' && status !== 'Nghi') show = false;
+            }
+
+            // Filter role
+            if (this.currentFilters.role !== 'all' && role !== this.currentFilters.role) {
+                show = false;
+            }
+
+            // Filter shift
+            if (this.currentFilters.shift !== 'all' && shift !== this.currentFilters.shift) {
+                show = false;
+            }
+
+            // Search
+            if (this.currentFilters.search && !searchText.includes(this.currentFilters.search)) {
+                show = false;
+            }
+
+            card.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        // Hiển thị thông báo nếu không có kết quả
+        this.showNoResultsMessage(visibleCount);
+    },
+
+    // Hiển thị thông báo không có kết quả
+    showNoResultsMessage(count) {
+        let messageDiv = document.getElementById('noResultsMessage');
+
+        if (count === 0) {
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'noResultsMessage';
+                messageDiv.className = 'empty-state';
+                messageDiv.innerHTML = `
+                    <div class="empty-icon">🔍</div>
+                    <h3>Không tìm thấy nhân viên</h3>
+                    <p class="empty-text">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                    <button class="btn btn-secondary" onclick="NhanVienManager.resetFilters()" style="margin-top: 15px;">
+                        🔄 Đặt lại bộ lọc
+                    </button>
+                `;
+                document.querySelector('.employees-grid')?.insertAdjacentElement('afterend', messageDiv);
+            }
+            messageDiv.style.display = 'block';
+        } else {
+            if (messageDiv) {
+                messageDiv.style.display = 'none';
+            }
+        }
+    },
+
+    // Reset filters
+    resetFilters() {
+        this.currentFilters = {
+            status: 'all',
+            role: 'all',
+            shift: 'all',
+            search: ''
+        };
+
+        // Reset UI
+        document.getElementById('searchNhanVien').value = '';
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.trim() === 'Tất cả') {
+                btn.classList.add('active');
             }
         });
 
-        // Show/hide empty state
-        const emptyState = document.getElementById('emptyState');
-        if (emptyState) {
-            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        this.applyFilters();
+    },
+
+    // Mở modal thêm nhân viên
+    async openAddModal() {
+        try {
+            const response = await fetch('/NhanVien/FormThemNhanVien');
+            if (!response.ok) throw new Error('Failed to load form');
+
+            const html = await response.text();
+            openModal('➕ Thêm nhân viên mới', html);
+        } catch (error) {
+            console.error('Error:', error);
+            this.showNotification('❌ Có lỗi khi tải form: ' + error.message, 'error');
         }
-    }
-}
+    },
 
-// Show employee detail
-async function showEmployeeDetail(maNV) {
-    try {
-        // Highlight selected card
-        document.querySelectorAll('.employee-card').forEach(card => {
-            card.classList.remove('active');
-        });
-        event.currentTarget.classList.add('active');
+    // Mở modal chỉnh sửa
+    async openEditModal(maNV) {
+        try {
+            const response = await fetch(`/NhanVien/FormChinhSuaNhanVien?maNV=${maNV}`);
+            if (!response.ok) throw new Error('Failed to load form');
 
-        // Load detail
-        const response = await fetch(`/NhanVien/GetDetail/${maNV}`);
-        if (!response.ok) throw new Error('Failed to load employee detail');
+            const html = await response.text();
+            openModal('✏️ Chỉnh sửa nhân viên', html);
+        } catch (error) {
+            console.error('Error:', error);
+            this.showNotification('❌ Có lỗi khi tải form: ' + error.message, 'error');
+        }
+    },
 
-        const html = await response.text();
-        const detailPanel = document.getElementById('detailPanel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+    // Xem chi tiết nhân viên (Right Panel)
+    async viewDetail(maNV) {
+        try {
+            const response = await fetch(`/NhanVien/ChiTietNhanVien?maNV=${maNV}`);
+            if (!response.ok) throw new Error('Failed to load detail');
+
+            const html = await response.text();
+
+            const detailPanel = document.getElementById('detailPanel');
+            if (detailPanel) {
+                detailPanel.innerHTML = html;
+                detailPanel.scrollTop = 0;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showNotification('❌ Có lỗi khi tải chi tiết: ' + error.message, 'error');
+        }
+    },
+
+    // Xác nhận xóa
+    confirmDelete(maNV, tenNV) {
+        if (confirm(`⚠️ Bạn có chắc chắn muốn xóa nhân viên "${tenNV}"?\n\nLưu ý: Nếu nhân viên có dữ liệu liên quan, tài khoản sẽ chuyển sang trạng thái Nghỉ thay vì xóa hoàn toàn.`)) {
+            this.deleteNhanVien(maNV);
+        }
+    },
+
+    // Xóa nhân viên
+    async deleteNhanVien(maNV) {
+        try {
+            const response = await fetch('/NhanVien/XoaNhanVien', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ MaNV: maNV })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showNotification('✅ ' + result.message, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                this.showNotification('❌ ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showNotification('❌ Có lỗi xảy ra: ' + error.message, 'error');
+        }
+    },
+
+    // Xem lịch sử hoạt động
+    async viewHistory(maNV) {
+        try {
+            const response = await fetch(`/NhanVien/LichSuHoatDong?maNV=${maNV}`);
+            if (!response.ok) throw new Error('Failed to load history');
+
+            const html = await response.text();
+            openModal('📜 Lịch sử hoạt động', html);
+        } catch (error) {
+            console.error('Error:', error);
+            this.showNotification('❌ Có lỗi khi tải lịch sử: ' + error.message, 'error');
+        }
+    },
+
+    // Xem chấm công
+    async viewAttendance(maNV) {
+        try {
+            const thang = new Date().getMonth() + 1;
+            const nam = new Date().getFullYear();
+
+            const response = await fetch(`/NhanVien/ChamCongNhanVien?maNV=${maNV}&thang=${thang}&nam=${nam}`);
+            if (!response.ok) throw new Error('Failed to load attendance');
+
+            const html = await response.text();
+            openModal('📅 Chấm công chi tiết', html);
+        } catch (error) {
+            console.error('Error:', error);
+            this.showNotification('❌ Có lỗi khi tải chấm công: ' + error.message, 'error');
+        }
+    },
+
+    // Mở modal chấm công
+    openAttendanceModal(maNV) {
+        if (typeof openAttendanceModal === 'function') {
+            openAttendanceModal(maNV);
+        } else {
+            this.showNotification('⚠️ Chức năng chấm công chưa được tải', 'warning');
+        }
+    },
+
+    // Xuất Excel
+    exportToExcel() {
+        const visibleCards = Array.from(document.querySelectorAll('.employee-card'))
+            .filter(card => card.style.display !== 'none');
+
+        if (visibleCards.length === 0) {
+            this.showNotification('❌ Không có dữ liệu để xuất', 'warning');
+            return;
         }
 
-        // Store current employee ID
-        window.currentEmployeeId = maNV;
-    } catch (error) {
-        console.error('Error loading employee detail:', error);
-        alert('Không thể tải thông tin nhân viên. Vui lòng thử lại.');
-    }
-}
+        let csv = '\uFEFF'; // UTF-8 BOM
+        csv += 'Mã NV,Họ tên,Số điện thoại,Nhóm quyền,Ca làm việc,Lương cơ bản,Trạng thái\n';
 
-// Add employee
-function openAddEmployeeModal() {
-    if (!window.canManage) {
-        alert('Bạn không có quyền thêm nhân viên');
-        return;
-    }
+        visibleCards.forEach(card => {
+            const maNV = card.getAttribute('data-employee-id');
+            const tenNV = card.querySelector('.employee-name')?.textContent.trim() || '';
+            const sdt = card.querySelector('.employee-phone')?.textContent.replace('📱', '').trim() || '';
+            const nhomQuyen = card.getAttribute('data-role') || '';
+            const caLamViec = card.getAttribute('data-shift') || '';
+            const luong = card.querySelector('.employee-salary')?.textContent.replace('💵', '').trim() || '';
+            const trangThai = card.getAttribute('data-status') === 'DangLam' ? 'Đang làm' : 'Nghỉ việc';
 
-    const content = `
-        <form id="addEmployeeForm" onsubmit="submitAddEmployee(event)">
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Họ tên *</label>
-                    <input type="text" class="form-control" name="TenNV" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Số điện thoại</label>
-                    <input type="tel" class="form-control" name="SDT" pattern="[0-9]{10}">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Chức vụ *</label>
-                    <select class="form-control" name="MaNhom" required>
-                        <option value="">-- Chọn chức vụ --</option>
-                        <option value="1">Admin</option>
-                        <option value="2">Quản lý</option>
-                        <option value="3">Thu ngân</option>
-                        <option value="4">Phục vụ</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ca làm việc *</label>
-                    <select class="form-control" name="CaMacDinh" required>
-                        <option value="Sáng">Sáng (7h - 15h)</option>
-                        <option value="Chiều">Chiều (15h - 23h)</option>
-                        <option value="Tối">Tối (19h - 3h)</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Lương cơ bản *</label>
-                    <input type="number" class="form-control" name="LuongCoBan" value="0" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Phụ cấp</label>
-                    <input type="number" class="form-control" name="PhuCap" value="0">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Mật khẩu *</label>
-                <input type="password" class="form-control" name="MatKhau" required minlength="6">
-            </div>
-            <div class="action-buttons">
-                <button type="submit" class="btn btn-primary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    Lưu
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
-            </div>
-        </form>
-    `;
-
-    openModal('Thêm nhân viên mới', content);
-}
-
-// Submit add employee
-async function submitAddEmployee(event) {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-        const response = await fetch('/NhanVien/Create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            csv += `#${maNV},"${tenNV}",${sdt},"${nhomQuyen}","${caLamViec}","${luong}","${trangThai}"\n`;
         });
 
-        if (!response.ok) throw new Error('Failed to create employee');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
 
-        alert('Thêm nhân viên thành công!');
-        closeModal();
-        location.reload();
-    } catch (error) {
-        console.error('Error creating employee:', error);
-        alert('Không thể thêm nhân viên. Vui lòng thử lại.');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `DanhSachNhanVien_${new Date().getTime()}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        this.showNotification('✅ Xuất Excel thành công!', 'success');
+    },
+
+    // Show notification
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : type === 'warning' ? '#fff3cd' : '#d1ecf1'};
+            color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : type === 'warning' ? '#856404' : '#0c5460'};
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            font-weight: 600;
+            max-width: 350px;
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
-}
+};
 
-// Edit employee
-async function openEditEmployeeModal(maNV) {
-    if (!window.canManage) {
-        alert('Bạn không có quyền sửa thông tin nhân viên');
-        return;
-    }
+// Khởi tạo khi trang load
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('✅ NhanVienManager initialized');
 
-    try {
-        const response = await fetch(`/NhanVien/GetEditForm/${maNV}`);
-        if (!response.ok) throw new Error('Failed to load edit form');
-
-        const html = await response.text();
-        openModal('Sửa thông tin nhân viên', html);
-    } catch (error) {
-        console.error('Error loading edit form:', error);
-        alert('Không thể tải form sửa. Vui lòng thử lại.');
-    }
-}
-
-// Deactivate employee
-async function deactivateEmployee(maNV) {
-    if (!window.canManage) {
-        alert('Bạn không có quyền thay đổi trạng thái nhân viên');
-        return;
-    }
-
-    if (!confirm('Bạn có chắc muốn cho nhân viên này nghỉ việc?')) return;
-
-    try {
-        const response = await fetch(`/NhanVien/Deactivate/${maNV}`, {
-            method: 'POST'
-        });
-
-        if (!response.ok) throw new Error('Failed to deactivate employee');
-
-        alert('Đã chuyển trạng thái sang nghỉ việc');
-        location.reload();
-    } catch (error) {
-        console.error('Error deactivating employee:', error);
-        alert('Không thể cập nhật trạng thái. Vui lòng thử lại.');
-    }
-}
-
-// Activate employee
-async function activateEmployee(maNV) {
-    if (!window.canManage) {
-        alert('Bạn không có quyền thay đổi trạng thái nhân viên');
-        return;
+    // Auto-focus search input
+    const searchInput = document.getElementById('searchNhanVien');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => NhanVienManager.search());
     }
 
-    if (!confirm('Bạn có chắc muốn cho nhân viên này làm lại?')) return;
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+        // Ctrl+F to focus search
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            searchInput?.focus();
+        }
 
-    try {
-        const response = await fetch(`/NhanVien/Activate/${maNV}`, {
-            method: 'POST'
-        });
+        // Ctrl+N to add new employee (if has permission)
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            const addBtn = document.querySelector('[onclick*="openAddModal"]');
+            if (addBtn) {
+                NhanVienManager.openAddModal();
+            }
+        }
+    });
+});
 
-        if (!response.ok) throw new Error('Failed to activate employee');
-
-        alert('Đã chuyển trạng thái sang đang làm');
-        location.reload();
-    } catch (error) {
-        console.error('Error activating employee:', error);
-        alert('Không thể cập nhật trạng thái. Vui lòng thử lại.');
-    }
-}
-
-// Export attendance report
-async function exportAttendanceReport() {
-    try {
-        const month = prompt('Nhập tháng cần xuất báo cáo (MM/YYYY):',
-            new Date().getMonth() + 1 + '/' + new Date().getFullYear());
-
-        if (!month) return;
-
-        window.location.href = `/NhanVien/ExportAttendanceReport?month=${month}`;
-    } catch (error) {
-        console.error('Error exporting report:', error);
-        alert('Không thể xuất báo cáo. Vui lòng thử lại.');
-    }
-}
-
-// Permission management
-function openPermissionModal() {
-    if (!window.canManage) {
-        alert('Bạn không có quyền quản lý phân quyền');
-        return;
-    }
-
-    const content = `
-        <div class="permission-grid">
-            <div class="permission-item">
-                <span class="permission-label">Admin</span>
-                <span>Toàn quyền</span>
-            </div>
-            <div class="permission-item">
-                <span class="permission-label">Quản lý</span>
-                <button class="btn btn-secondary btn-sm" onclick="editRolePermissions(2)">Chỉnh sửa</button>
-            </div>
-            <div class="permission-item">
-                <span class="permission-label">Thu ngân</span>
-                <button class="btn btn-secondary btn-sm" onclick="editRolePermissions(3)">Chỉnh sửa</button>
-            </div>
-            <div class="permission-item">
-                <span class="permission-label">Phục vụ</span>
-                <button class="btn btn-secondary btn-sm" onclick="editRolePermissions(4)">Chỉnh sửa</button>
-            </div>
-        </div>
-        <div class="action-buttons" style="margin-top: 20px;">
-            <button class="btn btn-secondary" onclick="closeModal()">Đóng</button>
-        </div>
-    `;
-
-    openModal('Quản lý phân quyền', content);
-}
-
-function editRolePermissions(roleId) {
-    // TODO: Implement permission editor
-    alert('Chức năng đang phát triển');
-}
+// Make globally available
+window.NhanVienManager = NhanVienManager;

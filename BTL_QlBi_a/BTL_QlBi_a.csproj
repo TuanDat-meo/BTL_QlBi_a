@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="Views\Home\Partials\NhanVien\_AddEmployeeForm.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20">
       <PrivateAssets>all</PrivateAssets>
@@ -34,14 +30,13 @@
     <Folder Include="Controllers\Users\" />
     <Folder Include="Migrations\" />
     <Folder Include="resources\" />
-    <Folder Include="Views\Users\" />
+    <Folder Include="Views\Users\Partials\" />
     <Folder Include="wwwroot\asset\img\tables\" />
     <Folder Include="wwwroot\asset\js\qlHoaDon\" />
+    <Folder Include="wwwroot\asset_user\css\" />
+    <Folder Include="wwwroot\asset_user\js\" />
+    <Folder Include="wwwroot\asset_user\img\" />
     <Folder Include="wwwroot\css\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Views\Home\Partials\NhanVien\_AddEmployeeForm.cshtml" />
   </ItemGroup>
 
 </Project>

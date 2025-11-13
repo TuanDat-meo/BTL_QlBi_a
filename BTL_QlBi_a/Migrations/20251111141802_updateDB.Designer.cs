@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BTL_QlBi_a.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251106025843_update_banBia")]
-    partial class update_banBia
+    [Migration("20251111141802_updateDB")]
+    partial class updateDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -939,6 +939,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasDefaultValue("Sáng")
                         .HasColumnName("ca_mac_dinh");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("email");
 
                     b.Property<string>("FaceIDAnh")
                         .HasMaxLength(255)
