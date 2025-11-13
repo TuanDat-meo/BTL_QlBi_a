@@ -2333,6 +2333,131 @@ namespace BTL_QlBi_a.Controllers
             }
         }
         #endregion
+        [HttpGet]
+        public async Task<IActionResult> FormChinhSuaNhanVien(int maNV)
+        {
+            if (!KiemTraQuyen(new[] { "Admin", "Quản lý" }))
+            {
+                return Forbid();
+            }
+
+            var nhanVien = await _context.NhanVien
+                .Include(nv => nv.NhomQuyen)
+                .FirstOrDefaultAsync(nv => nv.MaNV == maNV);
+
+            if (nhanVien == null)
+                return NotFound(new { message = "Không tìm thấy nhân viên" });
+
+            var nhomQuyen = await _context.NhomQuyen.ToListAsync();
+            ViewBag.NhomQuyen = nhomQuyen;
+
+            return PartialView("~/Views/Home/Partials/NhanVien/_EditNhanVien.cshtml", nhanVien);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CapNhatNhanVien([FromForm] CapNhatNhanVienRequest request)
+        {
+            try
+            {
+                if (!KiemTraQuyen(new[] { "Admin", "Quản lý" }))
+                {
+                    return Json(new { success = false, message = "Không có quyền cập nhật" });
+                }
+
+                var nhanVien = await _context.NhanVien.FindAsync(request.MaNV);
+                if (nhanVien == null)
+                    return Json(new { success = false, message = "Không tìm thấy nhân viên" });
+
+                // Update basic info
+                nhanVien.TenNV = request.TenNV;
+                nhanVien.SDT = request.SDT;
+                nhanVien.Email = request.Email;
+                nhanVien.MaNhom = request.MaNhom;
+                nhanVien.LuongCoBan = request.LuongCoBan;
+                nhanVien.PhuCap = request.PhuCap;
+                nhanVien.CaMacDinh = request.CaMacDinh;
+                nhanVien.TrangThai = request.TrangThai;
+
+                // Update password if provided
+                if (!string.IsNullOrEmpty(request.MatKhauMoi))
+                {
+                    nhanVien.MatKhau = HashPassword(request.MatKhauMoi);
+                }
+
+                // Update Face ID if new image uploaded
+                if (request.FaceIDAnh != null && request.FaceIDAnh.Length > 0)
+                {
+                    // Delete old image if exists
+                    if (!string.IsNullOrEmpty(nhanVien.FaceIDAnh))
+                    {
+                        var oldImagePath = Path.Combine(_environment.WebRootPath, "asset", "img", nhanVien.FaceIDAnh);
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            try
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Could not delete old image: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    // Save new image
+                    var faceIdPath = await SaveImageAsync(request.FaceIDAnh);
+                    var faceIdHash = await GenerateFaceHashFromFile(request.FaceIDAnh);
+
+                    nhanVien.FaceIDAnh = faceIdPath;
+                    nhanVien.FaceIDHash = faceIdHash;
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Log activity
+                int? maNV = HttpContext.Session.GetInt32("MaNV");
+                if (maNV.HasValue)
+                {
+                    var lichSu = new LichSuHoatDong
+                    {
+                        MaNV = maNV.Value,
+                        ThoiGian = DateTime.Now,
+                        HanhDong = "Cập nhật nhân viên",
+                        ChiTiet = $"Cập nhật thông tin {nhanVien.TenNV} (ID: {nhanVien.MaNV})"
+                    };
+                    _context.LichSuHoatDong.Add(lichSu);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Json(new { success = true, message = "Cập nhật nhân viên thành công" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CapNhatNhanVien: {ex.Message}");
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetEditForm(int maNV)
+        {
+            if (!KiemTraQuyen(new[] { "Admin", "Quản lý" }))
+            {
+                return Forbid();
+            }
+
+            var nhanVien = await _context.NhanVien
+                .Include(nv => nv.NhomQuyen)
+                .FirstOrDefaultAsync(nv => nv.MaNV == maNV);
+
+            if (nhanVien == null)
+                return NotFound(new { message = "Không tìm thấy nhân viên" });
+
+            var nhomQuyen = await _context.NhomQuyen.ToListAsync();
+            ViewBag.NhomQuyen = nhomQuyen;
+
+            return PartialView("~/Views/Home/Partials/NhanVien/_EditNhanVien.cshtml", nhanVien);
+        }
     }
 
     #region Request Models

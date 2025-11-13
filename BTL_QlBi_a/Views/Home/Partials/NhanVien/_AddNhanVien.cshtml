@@ -103,15 +103,64 @@
         <small style="color: #6c757d; font-size: 11px;">Tối thiểu 6 ký tự</small>
     </div>
 
+    <!-- Face ID Upload Section - UPDATED -->
     <div class="form-group">
-        <label class="form-label">Ảnh nhân viên (Face ID)</label>
-        <input type="file"
-               name="FaceIDAnh"
-               id="faceIdInput"
-               class="form-control"
-               accept="image/*"
-               onchange="previewImage(this, 'faceIdPreview')">
-        <div id="faceIdPreview" style="margin-top: 10px; text-align: center;"></div>
+        <label class="form-label">
+            📸 Ảnh Face ID
+            <span style="color: #667eea; font-size: 11px;">(Khuyến nghị)</span>
+        </label>
+
+        <div class="faceid-upload-container">
+            <!-- Upload Methods -->
+            <div class="upload-methods">
+                <button type="button" class="upload-method-btn active" onclick="switchUploadMethod('file')" data-method="file">
+                    📁 Chọn file
+                </button>
+                <button type="button" class="upload-method-btn" onclick="switchUploadMethod('camera')" data-method="camera">
+                    📷 Chụp ảnh
+                </button>
+            </div>
+
+            <!-- File Upload Method -->
+            <div id="fileUploadSection" class="upload-section active">
+                <input type="file"
+                       name="FaceIDAnh"
+                       id="faceIdFileInput"
+                       class="form-control"
+                       accept="image/jpeg,image/jpg,image/png"
+                       onchange="handleFileSelect(this)">
+                <div class="upload-hint">
+                    <span>📌 Chấp nhận: JPG, JPEG, PNG</span>
+                    <span>📏 Kích thước tối đa: 5MB</span>
+                    <span>👤 Nên chụp rõ khuôn mặt, ánh sáng đủ</span>
+                </div>
+            </div>
+
+            <!-- Camera Upload Method -->
+            <div id="cameraUploadSection" class="upload-section">
+                <div class="camera-container">
+                    <video id="addFaceVideo" autoplay playsinline></video>
+                    <canvas id="addFaceCanvas" style="display: none;"></canvas>
+                    <div class="camera-overlay">
+                        <div class="face-guide"></div>
+                    </div>
+                </div>
+                <div class="camera-controls">
+                    <button type="button" class="btn btn-camera" onclick="startCamera()">
+                        📷 Bật camera
+                    </button>
+                    <button type="button" class="btn btn-capture" onclick="capturePhoto()" style="display: none;">
+                        📸 Chụp ảnh
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="stopCamera()" style="display: none;">
+                        ❌ Tắt camera
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div id="faceIdPreview" class="preview-container"></div>
+        </div>
     </div>
 
     <div class="form-actions" style="display: flex; gap: 10px; margin-top: 20px;">
@@ -124,56 +173,8 @@
     </div>
 </form>
 
-<script>
-    function togglePassword(inputId) {
-        const input = document.getElementById(inputId);
-        input.type = input.type === 'password' ? 'text' : 'password';
-    }
-
-    function previewImage(input, previewId) {
-        const preview = document.getElementById(previewId);
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = `
-                    <img src="${e.target.result}"
-                         style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 2px solid #dee2e6;">
-                `;
-            };
-            reader.readAsDataURL(input.files[0]);
-        } else {
-            preview.innerHTML = '';
-        }
-    }
-
-    document.getElementById('formThemNhanVien').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch('/NhanVien/ThemNhanVien', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('✅ ' + result.message);
-                closeModal();
-                location.reload();
-            } else {
-                alert('❌ ' + result.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('❌ Có lỗi xảy ra: ' + error.message);
-        }
-    });
-</script>
-
 <style>
+    /* Existing styles... */
     .form-row {
         display: flex;
         gap: 15px;
@@ -213,10 +214,385 @@
         cursor: pointer;
     }
 
+    /* Face ID Upload Styles */
+    .faceid-upload-container {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 20px;
+        background: #f8f9fa;
+    }
+
+    .upload-methods {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .upload-method-btn {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #dee2e6;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .upload-method-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-method-btn.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+    .upload-section {
+        display: none;
+    }
+
+        .upload-section.active {
+            display: block;
+        }
+
+    .upload-hint {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 10px;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        font-size: 11px;
+        color: #6c757d;
+    }
+
+    .camera-container {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto 15px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+    }
+
+    #addFaceVideo {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .camera-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .face-guide {
+        width: 60%;
+        padding-bottom: 80%;
+        border: 3px solid rgba(102, 126, 234, 0.8);
+        border-radius: 50%;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+    }
+
+    .camera-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .btn-camera, .btn-capture {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-camera {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-capture {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .preview-container {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+        .preview-container img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 12px;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .preview-actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
     media (max-width: 768px) {
         .form-row {
             flex-direction: column;
             gap: 0;
         }
+
+        .camera-container {
+            max-width: 100%;
+        }
     }
 </style>
+
+<script>
+    let cameraStream = null;
+    let capturedImageBlob = null;
+
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function switchUploadMethod(method, event) {
+        // Prevent default if event exists
+        if (event) {
+            event.preventDefault();
+
+            // Update buttons
+            document.querySelectorAll('#formThemNhanVien .upload-method-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Update sections
+        const fileSection = document.getElementById('fileUploadSection');
+        const cameraSection = document.getElementById('cameraUploadSection');
+
+        if (method === 'file') {
+            if (fileSection) fileSection.classList.add('active');
+            if (cameraSection) cameraSection.classList.remove('active');
+            stopCamera();
+        } else {
+            if (fileSection) fileSection.classList.remove('active');
+            if (cameraSection) cameraSection.classList.add('active');
+        }
+    }
+
+    function handleFileSelect(input) {
+        const preview = document.getElementById('faceIdPreview');
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate file type
+            if (!file.type.match('image/(jpeg|jpg|png)')) {
+                alert('❌ Chỉ chấp nhận file JPG, JPEG, PNG');
+                input.value = '';
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('❌ Kích thước file không được vượt quá 5MB');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Face ID Preview">
+                    <div class="preview-actions">
+                        <button type="button" class="btn btn-secondary" onclick="clearPreview()">
+                            🗑️ Xóa ảnh
+                        </button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+        }
+    }
+
+    async function startCamera() {
+        const video = document.getElementById('addFaceVideo');
+        const btnStart = document.querySelector('.btn-camera');
+        const btnCapture = document.querySelector('.btn-capture');
+        const btnStop = document.querySelector('.btn-secondary');
+
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'user',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                }
+            });
+
+            video.srcObject = cameraStream;
+
+            // Update UI
+            btnStart.style.display = 'none';
+            btnCapture.style.display = 'inline-block';
+            btnStop.style.display = 'inline-block';
+
+        } catch (error) {
+            console.error('Camera error:', error);
+            alert('❌ Không thể truy cập camera: ' + error.message);
+        }
+    }
+
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+
+        const video = document.getElementById('addFaceVideo');
+        video.srcObject = null;
+
+        const btnStart = document.querySelector('.btn-camera');
+        const btnCapture = document.querySelector('.btn-capture');
+        const btnStop = document.querySelector('.btn-secondary');
+
+        btnStart.style.display = 'inline-block';
+        btnCapture.style.display = 'none';
+        btnStop.style.display = 'none';
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('addFaceVideo');
+        const canvas = document.getElementById('addFaceCanvas');
+        const preview = document.getElementById('faceIdPreview');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0);
+
+        canvas.toBlob(function(blob) {
+            capturedImageBlob = blob;
+
+            const url = URL.createObjectURL(blob);
+            preview.innerHTML = `
+                <img src="${url}" alt="Captured Photo">
+                <div class="preview-actions">
+                    <button type="button" class="btn btn-secondary" onclick="retakePhoto()">
+                        🔄 Chụp lại
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="confirmPhoto()">
+                        ✅ Sử dụng ảnh này
+                    </button>
+                </div>
+            `;
+        }, 'image/jpeg', 0.95);
+    }
+
+    function retakePhoto() {
+        const preview = document.getElementById('faceIdPreview');
+        preview.innerHTML = '';
+        capturedImageBlob = null;
+    }
+
+    function confirmPhoto() {
+        if (capturedImageBlob) {
+            // Create a File object from blob
+            const file = new File([capturedImageBlob], 'face-capture.jpg', { type: 'image/jpeg' });
+
+            // Create a DataTransfer to set the file input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+
+            const fileInput = document.getElementById('faceIdFileInput');
+            fileInput.files = dataTransfer.files;
+
+            stopCamera();
+
+            // Switch to file method to show the uploaded image
+            switchUploadMethod('file');
+            handleFileSelect(fileInput);
+
+            alert('✅ Đã chọn ảnh thành công!');
+        }
+    }
+
+    function clearPreview() {
+        const preview = document.getElementById('faceIdPreview');
+        const fileInput = document.getElementById('faceIdFileInput');
+
+        preview.innerHTML = '';
+        fileInput.value = '';
+        capturedImageBlob = null;
+    }
+
+    // Form submission
+    document.getElementById('formThemNhanVien').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        // If using captured photo, ensure it's in the form data
+        if (capturedImageBlob && !formData.get('FaceIDAnh')) {
+            formData.append('FaceIDAnh', capturedImageBlob, 'face-capture.jpg');
+        }
+
+        try {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Đang xử lý...';
+
+            const response = await fetch('/NhanVien/ThemNhanVien', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ ' + result.message);
+                stopCamera();
+                closeModal();
+                location.reload();
+            } else {
+                alert('❌ ' + result.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '✅ Thêm nhân viên';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Có lỗi xảy ra: ' + error.message);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '✅ Thêm nhân viên';
+        }
+    });
+
+    // Cleanup when modal closes
+    window.addEventListener('beforeunload', function() {
+        stopCamera();
+    });
+</script>

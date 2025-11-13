@@ -43,14 +43,70 @@ async function openAttendanceModal() {
 }
 
 function closeAttendanceModal() {
-    console.log('🛑 Closing attendance modal...');
-    stopFaceCamera();
-    closeModal();
-    todayAttendanceRecord = null;
-    recognizedEmployee = null;
-    isRecognizing = false;
-}
+    console.log('🛑 Closing attendance modal and cleaning up...');
 
+    // Stop camera and clear intervals
+    stopFaceCamera();
+
+    // Reset all data
+    resetAttendanceState();
+
+    // Close modal
+    closeModal();
+
+    console.log('✅ Attendance modal closed and cleaned up');
+}
+function resetAttendanceState() {
+    console.log('🔄 Resetting attendance state...');
+
+    // Clear recognition data
+    recognizedEmployee = null;
+    todayAttendanceRecord = null;
+    isRecognizing = false;
+    currentMethod = 'faceid';
+
+    // Clear UI elements if they exist
+    const employeeInfo = document.getElementById('recognizedEmployeeInfo');
+    if (employeeInfo) {
+        employeeInfo.style.display = 'none';
+        employeeInfo.innerHTML = '';
+    }
+
+    const statusEl = document.getElementById('attendanceStatus');
+    if (statusEl) {
+        statusEl.innerHTML = `
+            <div class="status-info info">
+                <span class="status-icon">👤</span>
+                <div class="status-content">
+                    <div class="status-title">Hệ thống chấm công</div>
+                    <div class="status-subtitle">Chọn phương thức chấm công</div>
+                </div>
+            </div>
+        `;
+    }
+
+    const submitBtn = document.getElementById('submitAttendanceBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="btn-icon">⏰</span><span>Vui lòng nhận diện</span>';
+    }
+
+    const ghiChu = document.getElementById('ghiChu');
+    if (ghiChu) {
+        ghiChu.value = '';
+    }
+
+    const manualInput = document.getElementById('manualMaNV');
+    if (manualInput) {
+        manualInput.value = '';
+    }
+
+    const manualInfo = document.getElementById('manualEmployeeInfo');
+    if (manualInfo) {
+        manualInfo.style.display = 'none';
+        manualInfo.innerHTML = '';
+    }
+}
 // ===========================
 // METHOD SELECTION
 // ===========================
@@ -73,7 +129,7 @@ function selectAttendanceMethod(method) {
     const methodSection = document.getElementById(`${method}Section`);
     if (methodSection) methodSection.classList.add('active');
 
-    // Reset
+    // Reset data when switching methods
     recognizedEmployee = null;
     todayAttendanceRecord = null;
     isRecognizing = false;
@@ -95,7 +151,6 @@ function selectAttendanceMethod(method) {
         }, 100);
     }
 }
-
 // ===========================
 // CAMERA & FACE RECOGNITION
 // ===========================
@@ -155,6 +210,27 @@ async function startFaceCamera() {
         handleCameraError(error, statusEl);
     }
 }
+function handleCameraError(error, statusEl) {
+    let errorMessage = 'Không thể truy cập camera';
+
+    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = 'Vui lòng cấp quyền truy cập camera';
+    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage = 'Không tìm thấy camera';
+    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage = 'Camera đang được sử dụng bởi ứng dụng khác';
+    }
+
+    statusEl.innerHTML = `<span class="status-icon">❌</span><span>${errorMessage}</span>`;
+    statusEl.className = 'biometric-status error';
+
+    // Suggest manual method
+    setTimeout(() => {
+        if (confirm(`${errorMessage}\n\nBạn có muốn chuyển sang chấm công thủ công?`)) {
+            openManualAttendanceModal();
+        }
+    }, 1000);
+}
 
 function handleCameraError(error, statusEl) {
     let errorMessage = 'Không thể truy cập camera';
@@ -185,23 +261,32 @@ function stopFaceCamera() {
     if (faceDetectionInterval) {
         clearInterval(faceDetectionInterval);
         faceDetectionInterval = null;
+        console.log('✓ Cleared face detection interval');
     }
 
     // Stop video stream
     if (attendanceFaceStream) {
-        attendanceFaceStream.getTracks().forEach(track => track.stop());
+        attendanceFaceStream.getTracks().forEach(track => {
+            track.stop();
+            console.log('✓ Stopped camera track:', track.label);
+        });
         attendanceFaceStream = null;
+        console.log('✓ Camera stream released');
     }
 
     // Clear video element
     const video = document.getElementById('attendanceFaceVideo');
     if (video) {
         video.srcObject = null;
+        video.pause();
+        console.log('✓ Video element cleared');
     }
 
+    // Reset recognition flag
     isRecognizing = false;
-}
 
+    console.log('✅ Camera fully stopped and cleaned up');
+}
 function startContinuousFaceDetection() {
     console.log('🔍 Starting continuous face detection...');
 

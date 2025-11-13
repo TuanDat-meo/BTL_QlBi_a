@@ -1,5 +1,4 @@
-﻿// NhanVienManager - Quản lý nhân viên hoàn chỉnh
-const NhanVienManager = {
+﻿const NhanVienManager = {
     currentFilters: {
         status: 'all',
         role: 'all',
@@ -7,8 +6,8 @@ const NhanVienManager = {
         search: ''
     },
 
-    // Filter theo trạng thái
-    filterByStatus(status, event) {
+    // Filter methods không cần async
+    filterByStatus: function (status, event) {
         if (event) {
             document.querySelectorAll('#page-nhanvien .filter-buttons button').forEach(btn => {
                 if (btn.getAttribute('onclick')?.includes('filterByStatus')) {
@@ -17,13 +16,11 @@ const NhanVienManager = {
             });
             event.target.classList.add('active');
         }
-
         this.currentFilters.status = status;
         this.applyFilters();
     },
 
-    // Filter theo nhóm quyền
-    filterByRole(role, event) {
+    filterByRole: function (role, event) {
         if (event) {
             document.querySelectorAll('#page-nhanvien .filter-buttons button').forEach(btn => {
                 if (btn.getAttribute('onclick')?.includes('filterByRole')) {
@@ -32,13 +29,11 @@ const NhanVienManager = {
             });
             event.target.classList.add('active');
         }
-
         this.currentFilters.role = role;
         this.applyFilters();
     },
 
-    // Filter theo ca làm việc
-    filterByShift(shift, event) {
+    filterByShift: function (shift, event) {
         if (event) {
             document.querySelectorAll('#page-nhanvien .filter-buttons button').forEach(btn => {
                 if (btn.getAttribute('onclick')?.includes('filterByShift')) {
@@ -47,20 +42,17 @@ const NhanVienManager = {
             });
             event.target.classList.add('active');
         }
-
         this.currentFilters.shift = shift;
         this.applyFilters();
     },
 
-    // Tìm kiếm
-    search() {
+    search: function () {
         const searchInput = document.getElementById('searchNhanVien');
         this.currentFilters.search = searchInput.value.toLowerCase().trim();
         this.applyFilters();
     },
 
-    // Áp dụng tất cả filters
-    applyFilters() {
+    applyFilters: function () {
         const cards = document.querySelectorAll('.employee-card');
         let visibleCount = 0;
 
@@ -72,23 +64,19 @@ const NhanVienManager = {
 
             let show = true;
 
-            // Filter status
             if (this.currentFilters.status !== 'all') {
                 if (this.currentFilters.status === 'DangLam' && status !== 'DangLam') show = false;
                 if (this.currentFilters.status === 'Nghi' && status !== 'Nghi') show = false;
             }
 
-            // Filter role
             if (this.currentFilters.role !== 'all' && role !== this.currentFilters.role) {
                 show = false;
             }
 
-            // Filter shift
             if (this.currentFilters.shift !== 'all' && shift !== this.currentFilters.shift) {
                 show = false;
             }
 
-            // Search
             if (this.currentFilters.search && !searchText.includes(this.currentFilters.search)) {
                 show = false;
             }
@@ -97,12 +85,10 @@ const NhanVienManager = {
             if (show) visibleCount++;
         });
 
-        // Hiển thị thông báo nếu không có kết quả
         this.showNoResultsMessage(visibleCount);
     },
 
-    // Hiển thị thông báo không có kết quả
-    showNoResultsMessage(count) {
+    showNoResultsMessage: function (count) {
         let messageDiv = document.getElementById('noResultsMessage');
 
         if (count === 0) {
@@ -128,8 +114,7 @@ const NhanVienManager = {
         }
     },
 
-    // Reset filters
-    resetFilters() {
+    resetFilters: function () {
         this.currentFilters = {
             status: 'all',
             role: 'all',
@@ -137,7 +122,6 @@ const NhanVienManager = {
             search: ''
         };
 
-        // Reset UI
         document.getElementById('searchNhanVien').value = '';
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -149,8 +133,7 @@ const NhanVienManager = {
         this.applyFilters();
     },
 
-    // Mở modal thêm nhân viên
-    async openAddModal() {
+    openAddModal: async function () {
         try {
             const response = await fetch('/NhanVien/FormThemNhanVien');
             if (!response.ok) throw new Error('Failed to load form');
@@ -163,8 +146,7 @@ const NhanVienManager = {
         }
     },
 
-    // Mở modal chỉnh sửa
-    async openEditModal(maNV) {
+    openEditModal: async function (maNV) {
         try {
             const response = await fetch(`/NhanVien/FormChinhSuaNhanVien?maNV=${maNV}`);
             if (!response.ok) throw new Error('Failed to load form');
@@ -177,8 +159,7 @@ const NhanVienManager = {
         }
     },
 
-    // Xem chi tiết nhân viên (Right Panel)
-    async viewDetail(maNV) {
+    viewDetail: async function (maNV) {
         try {
             const response = await fetch(`/NhanVien/ChiTietNhanVien?maNV=${maNV}`);
             if (!response.ok) throw new Error('Failed to load detail');
@@ -196,15 +177,13 @@ const NhanVienManager = {
         }
     },
 
-    // Xác nhận xóa
-    confirmDelete(maNV, tenNV) {
+    confirmDelete: function (maNV, tenNV) {
         if (confirm(`⚠️ Bạn có chắc chắn muốn xóa nhân viên "${tenNV}"?\n\nLưu ý: Nếu nhân viên có dữ liệu liên quan, tài khoản sẽ chuyển sang trạng thái Nghỉ thay vì xóa hoàn toàn.`)) {
             this.deleteNhanVien(maNV);
         }
     },
 
-    // Xóa nhân viên
-    async deleteNhanVien(maNV) {
+    deleteNhanVien: async function (maNV) {
         try {
             const response = await fetch('/NhanVien/XoaNhanVien', {
                 method: 'POST',
@@ -228,8 +207,7 @@ const NhanVienManager = {
         }
     },
 
-    // Xem lịch sử hoạt động
-    async viewHistory(maNV) {
+    viewHistory: async function (maNV) {
         try {
             const response = await fetch(`/NhanVien/LichSuHoatDong?maNV=${maNV}`);
             if (!response.ok) throw new Error('Failed to load history');
@@ -242,8 +220,7 @@ const NhanVienManager = {
         }
     },
 
-    // Xem chấm công
-    async viewAttendance(maNV) {
+    viewAttendance: async function (maNV) {
         try {
             const thang = new Date().getMonth() + 1;
             const nam = new Date().getFullYear();
@@ -259,8 +236,7 @@ const NhanVienManager = {
         }
     },
 
-    // Mở modal chấm công
-    openAttendanceModal(maNV) {
+    openAttendanceModal: function (maNV) {
         if (typeof openAttendanceModal === 'function') {
             openAttendanceModal(maNV);
         } else {
@@ -268,8 +244,7 @@ const NhanVienManager = {
         }
     },
 
-    // Xuất Excel
-    exportToExcel() {
+    exportToExcel: function () {
         const visibleCards = Array.from(document.querySelectorAll('.employee-card'))
             .filter(card => card.style.display !== 'none');
 
@@ -278,7 +253,7 @@ const NhanVienManager = {
             return;
         }
 
-        let csv = '\uFEFF'; // UTF-8 BOM
+        let csv = '\uFEFF';
         csv += 'Mã NV,Họ tên,Số điện thoại,Nhóm quyền,Ca làm việc,Lương cơ bản,Trạng thái\n';
 
         visibleCards.forEach(card => {
@@ -308,8 +283,7 @@ const NhanVienManager = {
         this.showNotification('✅ Xuất Excel thành công!', 'success');
     },
 
-    // Show notification
-    showNotification(message, type = 'info') {
+    showNotification: function (message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.style.cssText = `
@@ -337,25 +311,21 @@ const NhanVienManager = {
     }
 };
 
-// Khởi tạo khi trang load
+// Initialize
 document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ NhanVienManager initialized');
 
-    // Auto-focus search input
     const searchInput = document.getElementById('searchNhanVien');
     if (searchInput) {
         searchInput.addEventListener('input', () => NhanVienManager.search());
     }
 
-    // Add keyboard shortcuts
     document.addEventListener('keydown', function (e) {
-        // Ctrl+F to focus search
         if (e.ctrlKey && e.key === 'f') {
             e.preventDefault();
             searchInput?.focus();
         }
 
-        // Ctrl+N to add new employee (if has permission)
         if (e.ctrlKey && e.key === 'n') {
             e.preventDefault();
             const addBtn = document.querySelector('[onclick*="openAddModal"]');
@@ -366,5 +336,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Make globally available
+// Export globally
 window.NhanVienManager = NhanVienManager;
