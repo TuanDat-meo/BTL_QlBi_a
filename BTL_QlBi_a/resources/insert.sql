@@ -93,17 +93,17 @@ GO
 -- =============================================
 -- 7. KHÁCH HÀNG
 -- =============================================
-INSERT INTO khach_hang (ten_kh, sdt, mat_khau, email, ngay_sinh, hang_tv, diem_tich_luy, tong_chi_tieu, ngay_dang_ky, lan_den_cuoi) VALUES
-(N'Nguyễn Văn An', '0901234567', 'hashed_pass_001', 'nguyenvanan@gmail.com', '1990-05-15', N'Bạch kim', 500, 5000000, '2024-01-15', '2025-10-28'),
-(N'Trần Thị Bình', '0912345678', 'hashed_pass_002', 'tranthibinh@gmail.com', '1995-08-20', N'Vàng', 300, 3000000, '2024-03-20', '2025-10-27'),
-(N'Lê Hoàng Cường', '0923456789', 'hashed_pass_003', 'lehoangcuong@gmail.com', '1988-12-10', N'Bạc', 150, 1500000, '2024-06-10', '2025-10-26'),
-(N'Phạm Thị Dung', '0934567890', 'hashed_pass_004', 'phamthidung@gmail.com', '1992-03-25', N'Đồng', 50, 500000, '2024-08-05', '2025-10-25'),
-(N'Hoàng Văn Em', '0945678901', 'hashed_pass_005', 'hoangvanem@gmail.com', '1998-07-18', N'Đồng', 30, 300000, '2024-09-12', '2025-10-24'),
-(N'Vũ Minh Khang', '0956789012', 'hashed_pass_006', 'vuminhkhang@gmail.com', '1991-11-30', N'Bạc', 180, 1800000, '2024-04-15', '2025-10-28'),
-(N'Đặng Thu Hà', '0967890123', 'hashed_pass_007', 'dangthuha@gmail.com', '1994-06-08', N'Vàng', 250, 2500000, '2024-02-20', '2025-10-27'),
-(N'Trịnh Quốc Dũng', '0978901234', 'hashed_pass_008', 'trinhquocdung@gmail.com', '1989-09-22', N'Bạch kim', 600, 6000000, '2023-12-10', '2025-10-28'),
-(N'Ngô Thị Mai', '0989012345', 'hashed_pass_009', 'ngothimai@gmail.com', '1996-04-15', N'Đồng', 80, 800000, '2024-07-18', '2025-10-23'),
-(N'Bùi Văn Tú', '0990123456', 'hashed_pass_010', 'buivantu@gmail.com', '1993-02-28', N'Bạc', 120, 1200000, '2024-05-25', '2025-10-26');
+INSERT INTO khach_hang (ten_kh, sdt, mat_khau, email, ngay_sinh, hang_tv, diem_tich_luy, tong_chi_tieu, ngay_dang_ky, lan_den_cuoi, hoat_dong) VALUES
+(N'Nguyễn Văn An', '0901234567', 'hashed_pass_001', 'nguyenvanan@gmail.com', '1990-05-15', N'Bạch kim', 500, 5000000, '2024-01-15', '2025-10-28', 1),
+(N'Trần Thị Bình', '0912345678', 'hashed_pass_002', 'tranthibinh@gmail.com', '1995-08-20', N'Vàng', 300, 3000000, '2024-03-20', '2025-10-27', 1),
+(N'Lê Hoàng Cường', '0923456789', 'hashed_pass_003', 'lehoangcuong@gmail.com', '1988-12-10', N'Bạc', 150, 1500000, '2024-06-10', '2025-10-26', 1),
+(N'Phạm Thị Dung', '0934567890', 'hashed_pass_004', 'phamthidung@gmail.com', '1992-03-25', N'Đồng', 50, 500000, '2024-08-05', '2025-10-25', 1),
+(N'Hoàng Văn Em', '0945678901', 'hashed_pass_005', 'hoangvanem@gmail.com', '1998-07-18', N'Đồng', 30, 300000, '2024-09-12', '2025-10-24', 1),
+(N'Vũ Minh Khang', '0956789012', 'hashed_pass_006', 'vuminhkhang@gmail.com', '1991-11-30', N'Bạc', 180, 1800000, '2024-04-15', '2025-10-28', 1),
+(N'Đặng Thu Hà', '0967890123', 'hashed_pass_007', 'dangthuha@gmail.com', '1994-06-08', N'Vàng', 250, 2500000, '2024-02-20', '2025-10-27', 1),
+(N'Trịnh Quốc Dũng', '0978901234', 'hashed_pass_008', 'trinhquocdung@gmail.com', '1989-09-22', N'Bạch kim', 600, 6000000, '2023-12-10', '2025-10-28', 1),
+(N'Ngô Thị Mai', '0989012345', 'hashed_pass_009', 'ngothimai@gmail.com', '1996-04-15', N'Đồng', 80, 800000, '2024-07-18', '2025-10-23', 1),
+(N'Bùi Văn Tú', '0990123456', 'hashed_pass_010', 'buivantu@gmail.com', '1993-02-28', N'Bạc', 120, 1200000, '2024-05-25', '2025-10-26', 1);
 GO
 
 -- =============================================

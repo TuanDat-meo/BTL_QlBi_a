@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\css\**" />
-    <Content Remove="wwwroot\css\**" />
-    <EmbeddedResource Remove="wwwroot\css\**" />
-    <None Remove="wwwroot\css\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20">
       <PrivateAssets>all</PrivateAssets>
@@ -27,12 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="resources\" />
     <Folder Include="wwwroot\asset\css\" />
     <Folder Include="wwwroot\asset\js\" />
     <Folder Include="wwwroot\asset\img\tables\" />
-    <Folder Include="wwwroot\asset\js\qlHoaDon\" />
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
