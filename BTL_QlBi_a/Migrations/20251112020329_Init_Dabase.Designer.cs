@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BTL_QlBi_a.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251104020900_Init")]
-    partial class Init
+    [Migration("20251112020329_Init_Dabase")]
+    partial class Init_Dabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,16 +80,12 @@ namespace BTL_QlBi_a.Migrations
                         .HasDefaultValue("Trống")
                         .HasColumnName("trang_thai");
 
-                    b.Property<int>("ViTriX")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                    b.Property<decimal?>("ViTriX")
+                        .HasColumnType("decimal(5,2)")
                         .HasColumnName("vi_tri_x");
 
-                    b.Property<int>("ViTriY")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                    b.Property<decimal?>("ViTriY")
+                        .HasColumnType("decimal(5,2)")
                         .HasColumnName("vi_tri_y");
 
                     b.HasKey("MaBan");
@@ -658,6 +654,12 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("Đồng")
                         .HasColumnName("hang_tv");
+
+                    b.Property<bool>("HoatDong")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("hoat_dong");
 
                     b.Property<DateTime?>("LanDenCuoi")
                         .HasColumnType("datetime2")

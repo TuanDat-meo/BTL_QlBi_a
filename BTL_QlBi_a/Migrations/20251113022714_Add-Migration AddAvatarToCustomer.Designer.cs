@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BTL_QlBi_a.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251106025843_update_banBia")]
-    partial class update_banBia
+    [Migration("20251113022714_Add-Migration AddAvatarToCustomer")]
+    partial class AddMigrationAddAvatarToCustomer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -637,6 +637,11 @@ namespace BTL_QlBi_a.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaKH"));
 
+                    b.Property<string>("Avatar")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("avatar");
+
                     b.Property<int>("DiemTichLuy")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -654,6 +659,12 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasDefaultValue("Đồng")
                         .HasColumnName("hang_tv");
+
+                    b.Property<bool>("HoatDong")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("hoat_dong");
 
                     b.Property<DateTime?>("LanDenCuoi")
                         .HasColumnType("datetime2")

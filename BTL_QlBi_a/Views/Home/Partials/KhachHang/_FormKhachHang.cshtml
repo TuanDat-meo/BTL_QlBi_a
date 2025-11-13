@@ -1,37 +1,58 @@
 ﻿@model BTL_QlBi_a.Models.Entities.KhachHang
 
-<form id="customerForm" onsubmit="saveCustomerForm(event)">
+<link rel="stylesheet" href="~/asset/css/qlKhachHang/form-khach-hang.css" />
+
+<form id="customerForm" onsubmit="saveCustomerForm(event)" enctype="multipart/form-data">
 
     @Html.AntiForgeryToken()
 
     <input type="hidden" asp-for="MaKH" />
 
+    <input type="hidden" name="AvatarCu" value="@Model.Avatar" />
     <input type="hidden" asp-for="NgayDangKy" />
     <input type="hidden" asp-for="DiemTichLuy" />
     <input type="hidden" asp-for="TongChiTieu" />
 
-    <div class="form-group">
-        <label asp-for="TenKH">Tên khách hàng</label>
-        <input type="text" class="form-control" asp-for="TenKH" placeholder="Nhập tên khách hàng" required>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="SDT">Số điện thoại</label>
-        <input type="tel" class="form-control" asp-for="SDT" placeholder="Nhập SĐT" required>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Email">Email</label>
-        <input type="email" class="form-control" asp-for="Email" placeholder="Nhập email (không bắt buộc)">
-    </div>
-
-    @if (Model.MaKH > 0)
-    {
-            <div class="form-group">
-                <label asp-for="HangTV">Hạng thành viên</label>
-                <input type="text" class="form-control" asp-for="HangTV" readonly>
+    <div class="row" style="display: flex; gap: 20px;">
+        <div style="width: 120px; text-align: center;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px auto; border: 2px solid #ddd; position: relative;">
+                <img id="avatarPreview" 
+                     src="@(string.IsNullOrEmpty(Model.Avatar) ? "/asset/img/avatar_khach_hang/user.svg" : Model.Avatar)" 
+                     style="width: 100%; height: 100%; object-fit: cover;" 
+                     onerror="this.src='https://via.placeholder.com/100?text=User'"/>
             </div>
-    }
+
+            <label for="fileAvatar" class="btn btn-sm btn-secondary" style="cursor: pointer; font-size: 12px;">
+                📷 Chọn ảnh
+            </label>
+            <input type="file" id="fileAvatar" name="fileAvatar" accept="image/*" style="display: none;" onchange="previewImage(this)">
+        </div>
+
+        <div style="flex: 1;">
+            <div class="form-group">
+                <label asp-for="TenKH">Tên khách hàng</label>
+                <input type="text" class="form-control" asp-for="TenKH" required>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SDT">Số điện thoại</label>
+                <input type="tel" class="form-control" asp-for="SDT" required>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input type="email" class="form-control" asp-for="Email">
+            </div>
+
+            @if (Model.MaKH > 0)
+            {
+                    <div class="form-group">
+                        <label>Hạng thành viên</label>
+                        <input type="text" class="form-control" value="@Model.HangTV" readonly style="background: #e9ecef;">
+                    </div>
+            }
+        </div>
+	</div>
 
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>

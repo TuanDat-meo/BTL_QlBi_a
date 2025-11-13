@@ -1,0 +1,9 @@
+﻿#invoiceTableBody .clickable-row {
+    cursor: pointer;
+}
+
+    #invoiceTableBody .clickable-row:hover {
+        background-color: #f8f9fa; /* Màu hover nhẹ */
+        transform: scale(1.01); /* Hiệu ứng nổi lên 1 chút */
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }

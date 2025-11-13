@@ -58,6 +58,8 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.TongChiTieu).HasColumnName("tong_chi_tieu").HasColumnType("decimal(12,0)").HasDefaultValue(0);
                 entity.Property(e => e.NgayDangKy).HasColumnName("ngay_dang_ky").HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.LanDenCuoi).HasColumnName("lan_den_cuoi");
+                entity.Property(e => e.HoatDong).HasColumnName("hoat_dong").HasDefaultValue(true);
+                entity.Property(e => e.Avatar).HasColumnName("avatar").HasMaxLength(255);
 
                 entity.HasIndex(e => e.SDT).IsUnique();
             });

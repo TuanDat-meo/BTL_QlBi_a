@@ -1,5 +1,7 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.HoaDon>
 
+<link href="~/asset/css/qlHoaDon/hoa-don.css" rel="stylesheet" />
+
 <div class="section-header">
     <h2 class="section-title">Quản lý hóa đơn</h2>
     <div class="action-buttons">
@@ -41,7 +43,6 @@
                             <th>Thời gian</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="invoiceTableBody">
@@ -52,7 +53,12 @@
                     string statusText = hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan
                     ? "Đã thanh toán" : "Đang chơi";
 
-                                    <tr data-status="@hd.TrangThai" data-date="@hd.ThoiGianBatDau?.ToString("yyyy-MM-dd")">
+                                    <tr data-status="@hd.TrangThai" 
+                                        data-date="@hd.ThoiGianBatDau?.ToString("yyyy-MM-dd")" 
+                                        data-tongtien = "@hd.TongTien"
+                                        class ="clickable-row" 
+                                        onclick="viewInvoice(@hd.MaHD)">
+
                                         <td><strong>HD@(hd.MaHD.ToString("D4"))</strong></td>
                                         <td>@hd.BanBia?.TenBan</td>
                                         <td>@(hd.KhachHang?.TenKH ?? "Khách lẻ")</td>
@@ -60,17 +66,6 @@
                                         <td>@hd.ThoiGianBatDau?.ToString("dd/MM/yyyy HH:mm")</td>
                                         <td><strong>@hd.TongTien.ToString("N0") đ</strong></td>
                                         <td><span class="table-status @statusClass">@statusText</span></td>
-                                        <td>
-                                            <button class="btn btn-primary" onclick="viewInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
-                                                👁️ Xem
-                                            </button>
-                            @if (hd.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan)
-                            {
-                                                        <button class="btn btn-secondary" onclick="printInvoice(@hd.MaHD)" style="padding: 6px 12px; font-size: 12px;">
-                                                            🖨️ In
-                                                        </button>
-                            }
-                                        </td>
                                     </tr>
                 }
                     </tbody>
@@ -80,15 +75,15 @@
             <div class="info-card" style="margin-top: 20px;">
                 <div class="info-row">
                     <span class="info-label">Tổng hóa đơn:</span>
-                    <span class="info-value">@Model.Count() hóa đơn</span>
+                    <span class="info-value" id = "summaryTongHoaDon">@Model.Count() hóa đơn</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Tổng doanh thu:</span>
-                    <span class="info-value">@Model.Sum(h => h.TongTien).ToString("N0") đ</span>
+                    <span class="info-value" id = "summaryTongDoanhThu">@Model.Sum(h => h.TongTien).ToString("N0") đ</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Đã thanh toán:</span>
-                    <span class="info-value">@Model.Count(h => h.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan) hóa đơn</span>
+                    <span class="info-value" id = "summaryDaThanhToan">@Model.Count(h => h.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiHoaDon.DaThanhToan) hóa đơn</span>
                 </div>
             </div>
 }
