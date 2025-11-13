@@ -57,11 +57,14 @@ namespace BTL_QlBi_a.Controllers
             {
                 var extension = Path.GetExtension(file.FileName);
                 var fileName = $"face_{Guid.NewGuid()}{extension}";
+
+                // QUAN TRỌNG: Đường dẫn phải khớp với cấu trúc thư mục
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "asset", "img", "employees");
 
                 if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
+                    Console.WriteLine($"✅ Created directory: {uploadsFolder}");
                 }
 
                 var filePath = Path.Combine(uploadsFolder, fileName);
@@ -71,11 +74,14 @@ namespace BTL_QlBi_a.Controllers
                     await file.CopyToAsync(stream);
                 }
 
+                Console.WriteLine($"✅ Image saved: {filePath}");
+
+                // Trả về đường dẫn TƯƠNG ĐỐI từ wwwroot
                 return $"employees/{fileName}";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving image: {ex.Message}");
+                Console.WriteLine($"❌ Error saving image: {ex.Message}");
                 return null;
             }
         }
@@ -2368,6 +2374,8 @@ namespace BTL_QlBi_a.Controllers
                 if (nhanVien == null)
                     return Json(new { success = false, message = "Không tìm thấy nhân viên" });
 
+                Console.WriteLine($"🔄 Updating employee #{request.MaNV}");
+
                 // Update basic info
                 nhanVien.TenNV = request.TenNV;
                 nhanVien.SDT = request.SDT;
@@ -2382,12 +2390,15 @@ namespace BTL_QlBi_a.Controllers
                 if (!string.IsNullOrEmpty(request.MatKhauMoi))
                 {
                     nhanVien.MatKhau = HashPassword(request.MatKhauMoi);
+                    Console.WriteLine("🔑 Password updated");
                 }
 
-                // Update Face ID if new image uploaded
-                if (request.FaceIDAnh != null && request.FaceIDAnh.Length > 0)
+                // Handle Face ID deletion
+                if (request.DeleteFaceID)
                 {
-                    // Delete old image if exists
+                    Console.WriteLine("🗑️ Deleting Face ID");
+
+                    // Delete old image file if exists
                     if (!string.IsNullOrEmpty(nhanVien.FaceIDAnh))
                     {
                         var oldImagePath = Path.Combine(_environment.WebRootPath, "asset", "img", nhanVien.FaceIDAnh);
@@ -2396,10 +2407,39 @@ namespace BTL_QlBi_a.Controllers
                             try
                             {
                                 System.IO.File.Delete(oldImagePath);
+                                Console.WriteLine($"✅ Deleted old image: {oldImagePath}");
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"Could not delete old image: {ex.Message}");
+                                Console.WriteLine($"⚠️ Could not delete old image: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    // Clear Face ID data
+                    nhanVien.FaceIDAnh = null;
+                    nhanVien.FaceIDHash = null;
+                }
+
+                // Handle Face ID update (new image uploaded or captured)
+                if (request.FaceIDAnh != null && request.FaceIDAnh.Length > 0)
+                {
+                    Console.WriteLine($"📸 Processing new Face ID image: {request.FaceIDAnh.FileName}");
+
+                    // Delete old image if exists (and not already deleted)
+                    if (!request.DeleteFaceID && !string.IsNullOrEmpty(nhanVien.FaceIDAnh))
+                    {
+                        var oldImagePath = Path.Combine(_environment.WebRootPath, "asset", "img", nhanVien.FaceIDAnh);
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            try
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                                Console.WriteLine($"✅ Deleted old image before update");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"⚠️ Could not delete old image: {ex.Message}");
                             }
                         }
                     }
@@ -2408,11 +2448,20 @@ namespace BTL_QlBi_a.Controllers
                     var faceIdPath = await SaveImageAsync(request.FaceIDAnh);
                     var faceIdHash = await GenerateFaceHashFromFile(request.FaceIDAnh);
 
-                    nhanVien.FaceIDAnh = faceIdPath;
-                    nhanVien.FaceIDHash = faceIdHash;
+                    if (!string.IsNullOrEmpty(faceIdPath))
+                    {
+                        nhanVien.FaceIDAnh = faceIdPath;
+                        nhanVien.FaceIDHash = faceIdHash;
+                        Console.WriteLine($"✅ New Face ID saved: {faceIdPath}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("❌ Failed to save new Face ID image");
+                    }
                 }
 
                 await _context.SaveChangesAsync();
+                Console.WriteLine("✅ Employee updated successfully");
 
                 // Log activity
                 int? maNV = HttpContext.Session.GetInt32("MaNV");
@@ -2433,11 +2482,11 @@ namespace BTL_QlBi_a.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in CapNhatNhanVien: {ex.Message}");
+                Console.WriteLine($"❌ Error in CapNhatNhanVien: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetEditForm(int maNV)
         {
@@ -2510,7 +2559,6 @@ namespace BTL_QlBi_a.Controllers
         public string MatKhau { get; set; } = "";
         public IFormFile? FaceIDAnh { get; set; }
     }
-
     public class CapNhatNhanVienRequest
     {
         public int MaNV { get; set; }
@@ -2524,6 +2572,7 @@ namespace BTL_QlBi_a.Controllers
         public TrangThaiNhanVien TrangThai { get; set; }
         public string? MatKhauMoi { get; set; }
         public IFormFile? FaceIDAnh { get; set; }
+        public bool DeleteFaceID { get; set; } = false; // New field
     }
 
     public class XoaNhanVienRequest

@@ -2,6 +2,7 @@
 
 <form id="formEditNhanVien" enctype="multipart/form-data">
     <input type="hidden" name="MaNV" value="@Model.MaNV">
+    <input type="hidden" id="shouldDeleteFaceID" name="DeleteFaceID" value="false">
 
     <div class="form-row">
         <div class="form-group" style="flex: 1;">
@@ -41,17 +42,13 @@
             <select name="MaNhom" class="form-control" required>
                 @foreach (var nhom in ViewBag.NhomQuyen)
                 {
-                    if (nhom.MaNhom == Model.MaNhom)
+                    @if (nhom.MaNhom == Model.MaNhom)
                     {
-                        <option value="@nhom.MaNhom" selected>
-                            @nhom.TenNhom
-                        </option>
+                        <option value="@nhom.MaNhom" selected>@nhom.TenNhom</option>
                     }
                     else
                     {
-                        <option value="@nhom.MaNhom">
-                            @nhom.TenNhom
-                        </option>
+                        <option value="@nhom.MaNhom">@nhom.TenNhom</option>
                     }
                 }
             </select>
@@ -65,7 +62,6 @@
                    name="LuongCoBan"
                    class="form-control"
                    value="@Model.LuongCoBan"
-                   placeholder="5000000"
                    min="0"
                    step="100000"
                    required>
@@ -77,7 +73,6 @@
                    name="PhuCap"
                    class="form-control"
                    value="@Model.PhuCap"
-                   placeholder="500000"
                    min="0"
                    step="100000">
         </div>
@@ -133,7 +128,7 @@
         <small style="color: #6c757d; font-size: 11px;">Để trống nếu không muốn thay đổi mật khẩu</small>
     </div>
 
-    <!-- Face ID Update Section - UPDATED -->
+    <!-- Face ID Update Section -->
     <div class="form-group">
         <label class="form-label">
             📸 Cập nhật Face ID
@@ -151,7 +146,7 @@
             <!-- Current Face ID -->
             @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
             {
-                <div class="current-faceid">
+                <div class="current-faceid" id="currentFaceSection">
                     <div class="current-label">Ảnh hiện tại:</div>
                     <img src="~/asset/img/@Model.FaceIDAnh"
                          alt="Current Face ID"
@@ -166,7 +161,7 @@
 
             <!-- Upload New Face ID -->
             <div class="upload-new-section">
-                <div class="section-header">
+                <div class="section-header" id="sectionHeader">
                     @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
                     {
                         <span>Cập nhật ảnh mới:</span>
@@ -179,10 +174,10 @@
 
                 <!-- Upload Methods -->
                 <div class="upload-methods">
-                    <button type="button" class="upload-method-btn active" onclick="switchEditUploadMethod('file')" data-method="file">
+                    <button type="button" class="upload-method-btn active" onclick="switchEditUploadMethod('file', event)" data-method="file">
                         📁 Chọn file
                     </button>
-                    <button type="button" class="upload-method-btn" onclick="switchEditUploadMethod('camera')" data-method="camera">
+                    <button type="button" class="upload-method-btn" onclick="switchEditUploadMethod('camera', event)" data-method="camera">
                         📷 Chụp ảnh
                     </button>
                 </div>
@@ -241,7 +236,7 @@
 </form>
 
 <style>
-    /* Existing styles... */
+    /* Existing styles remain the same */
     .form-row {
         display: flex;
         gap: 15px;
@@ -269,11 +264,11 @@
         transition: all 0.3s;
     }
 
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
 
     input[type="radio"] {
         width: 18px;
@@ -281,7 +276,6 @@
         cursor: pointer;
     }
 
-    /* Face ID Update Styles */
     .faceid-update-container {
         border: 2px dashed #dee2e6;
         border-radius: 12px;
@@ -326,10 +320,10 @@
         transition: all 0.3s;
     }
 
-        .btn-remove-faceid:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-        }
+    .btn-remove-faceid:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
 
     .upload-new-section {
         padding-top: 15px;
@@ -361,24 +355,24 @@
         transition: all 0.3s;
     }
 
-        .upload-method-btn:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
+    .upload-method-btn:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
 
-        .upload-method-btn.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+    .upload-method-btn.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
 
     .upload-section {
         display: none;
     }
 
-        .upload-section.active {
-            display: block;
-        }
+    .upload-section.active {
+        display: block;
+    }
 
     .upload-hint {
         display: flex;
@@ -459,13 +453,13 @@
         text-align: center;
     }
 
-        .preview-container img {
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 12px;
-            border: 3px solid #667eea;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
+    .preview-container img {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 12px;
+        border: 3px solid #667eea;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
     .preview-actions {
         margin-top: 10px;
@@ -484,6 +478,28 @@
             max-width: 100%;
         }
     }
+
+    keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
 </style>
 
 <script>
@@ -496,30 +512,33 @@
     }
 
     function switchEditUploadMethod(method, event) {
-        // Prevent default if event exists
         if (event) {
             event.preventDefault();
-
-            // Update buttons
-            document.querySelectorAll('#formEditNhanVien .upload-method-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            event.stopPropagation();
         }
 
-        // Update sections
+        // Update button states
+        document.querySelectorAll('#formEditNhanVien .upload-method-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        const clickedBtn = event ? event.currentTarget : document.querySelector(`#formEditNhanVien [data-method="${method}"]`);
+        if (clickedBtn) clickedBtn.classList.add('active');
+
+        // Show/hide sections
         const fileSection = document.getElementById('editFileUploadSection');
         const cameraSection = document.getElementById('editCameraUploadSection');
 
         if (method === 'file') {
-            if (fileSection) fileSection.classList.add('active');
-            if (cameraSection) cameraSection.classList.remove('active');
+            fileSection?.classList.add('active');
+            cameraSection?.classList.remove('active');
             stopEditCamera();
         } else {
-            if (fileSection) fileSection.classList.remove('active');
-            if (cameraSection) cameraSection.classList.add('active');
+            fileSection?.classList.remove('active');
+            cameraSection?.classList.add('active');
         }
     }
+
 
     function handleEditFileSelect(input) {
         const preview = document.getElementById('faceIdEditPreview');
@@ -527,35 +546,35 @@
         if (input.files && input.files[0]) {
             const file = input.files[0];
 
-            // Validate file type
             if (!file.type.match('image/(jpeg|jpg|png)')) {
                 alert('❌ Chỉ chấp nhận file JPG, JPEG, PNG');
                 input.value = '';
                 return;
             }
 
-            // Validate file size (5MB)
             if (file.size > 5 * 1024 * 1024) {
                 alert('❌ Kích thước file không được vượt quá 5MB');
                 input.value = '';
                 return;
             }
 
+            console.log('📁 Edit file selected:', file.name, file.size, 'bytes');
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 preview.innerHTML = `
-                    <div class="current-label">Ảnh mới:</div>
-                    <img src="${e.target.result}" alt="New Face ID">
-                    <div class="preview-actions">
-                        <button type="button" class="btn btn-secondary" onclick="clearEditPreview()">
-                            🗑️ Xóa ảnh
-                        </button>
+                    <div style="margin-top: 15px;">
+                        <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Ảnh đã chọn:</div>
+                        <img src="${e.target.result}" alt="Face ID Preview" style="max-width: 300px; max-height: 300px; border-radius: 12px; border: 3px solid #667eea; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                            <button type="button" class="btn btn-secondary" onclick="clearEditPreview()">
+                                🗑️ Xóa ảnh
+                            </button>
+                        </div>
                     </div>
                 `;
             };
             reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = '';
         }
     }
 
@@ -565,36 +584,61 @@
         const btnCapture = document.querySelector('#editCameraUploadSection .btn-capture');
         const btnStop = document.querySelector('#editCameraUploadSection .btn-secondary');
 
+        if (!video) {
+            console.error('Edit video element not found');
+            return;
+        }
+
         try {
+            console.log('📷 Starting edit camera...');
+
             editCameraStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'user',
                     width: { ideal: 640 },
                     height: { ideal: 480 }
-                }
+                },
+                audio: false
             });
 
             video.srcObject = editCameraStream;
+            await video.play();
 
-            // Update UI
-            btnStart.style.display = 'none';
-            btnCapture.style.display = 'inline-block';
-            btnStop.style.display = 'inline-block';
+            console.log('✅ Edit camera started successfully');
+
+            if (btnStart) btnStart.style.display = 'none';
+            if (btnCapture) btnCapture.style.display = 'inline-block';
+            if (btnStop) btnStop.style.display = 'inline-block';
 
         } catch (error) {
-            console.error('Camera error:', error);
-            alert('❌ Không thể truy cập camera: ' + error.message);
+            console.error('❌ Edit camera error:', error);
+            let errorMsg = 'Không thể truy cập camera';
+
+            if (error.name === 'NotAllowedError') {
+                errorMsg = 'Vui lòng cấp quyền truy cập camera';
+            } else if (error.name === 'NotFoundError') {
+                errorMsg = 'Không tìm thấy camera';
+            }
+
+            alert('❌ ' + errorMsg + '\n\n' + error.message);
         }
     }
 
     function stopEditCamera() {
+        console.log('🛑 Stopping edit camera...');
+
         if (editCameraStream) {
-            editCameraStream.getTracks().forEach(track => track.stop());
+            editCameraStream.getTracks().forEach(track => {
+                track.stop();
+                console.log('✓ Stopped edit track:', track.label);
+            });
             editCameraStream = null;
         }
 
         const video = document.getElementById('editFaceVideo');
-        if (video) video.srcObject = null;
+        if (video) {
+            video.srcObject = null;
+        }
 
         const btnStart = document.querySelector('#editCameraUploadSection .btn-camera');
         const btnCapture = document.querySelector('#editCameraUploadSection .btn-capture');
@@ -610,58 +654,96 @@
         const canvas = document.getElementById('editFaceCanvas');
         const preview = document.getElementById('faceIdEditPreview');
 
+        if (!video || !canvas) {
+            console.error('Edit video or canvas not found');
+            return;
+        }
+
+        if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+            alert('⚠️ Video chưa sẵn sàng. Vui lòng đợi một chút.');
+            return;
+        }
+
+        console.log('📸 Capturing edit photo...');
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
         const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0);
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         canvas.toBlob(function(blob) {
-            editCapturedImageBlob = blob;
+            if (!blob) {
+                alert('❌ Không thể chụp ảnh. Vui lòng thử lại.');
+                return;
+            }
+
+            editCapturedBlob = blob;
+            console.log('✅ Edit photo captured:', blob.size, 'bytes');
 
             const url = URL.createObjectURL(blob);
             preview.innerHTML = `
-                <div class="current-label">Ảnh vừa chụp:</div>
-                <img src="${url}" alt="Captured Photo">
-                <div class="preview-actions">
-                    <button type="button" class="btn btn-secondary" onclick="retakeEditPhoto()">
-                        🔄 Chụp lại
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="confirmEditPhoto()">
-                        ✅ Sử dụng ảnh này
-                    </button>
+                <div style="margin-top: 15px;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Ảnh vừa chụp:</div>
+                    <img src="${url}" alt="Captured Photo" style="max-width: 300px; max-height: 300px; border-radius: 12px; border: 3px solid #667eea; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary" onclick="retakeEditPhoto()">
+                            🔄 Chụp lại
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="confirmEditPhoto()">
+                            ✅ Sử dụng ảnh này
+                        </button>
+                    </div>
                 </div>
             `;
+
         }, 'image/jpeg', 0.95);
     }
 
     function retakeEditPhoto() {
         const preview = document.getElementById('faceIdEditPreview');
-        preview.innerHTML = '';
-        editCapturedImageBlob = null;
+        if (preview) preview.innerHTML = '';
+        editCapturedBlob = null;
     }
 
     function confirmEditPhoto() {
-        if (editCapturedImageBlob) {
-            // Create a File object from blob
-            const file = new File([editCapturedImageBlob], 'face-edit-capture.jpg', { type: 'image/jpeg' });
-
-            // Create a DataTransfer to set the file input
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-
-            const fileInput = document.getElementById('faceIdEditFileInput');
-            fileInput.files = dataTransfer.files;
-
-            stopEditCamera();
-
-            // Switch to file method to show the uploaded image
-            switchEditUploadMethod('file');
-            handleEditFileSelect(fileInput);
-
-            alert('✅ Đã chọn ảnh thành công!');
+        if (!editCapturedBlob) {
+            alert('❌ Không có ảnh để xác nhận');
+            return;
         }
+
+        console.log('✅ Confirming edit photo...');
+
+        const file = new File([editCapturedBlob], 'face-edit-capture.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        const fileInput = document.getElementById('faceIdEditFileInput');
+        if (fileInput) {
+            fileInput.files = dataTransfer.files;
+            console.log('✅ Edit file set to input:', fileInput.files[0].name);
+        }
+
+        stopEditCamera();
+        switchEditUploadMethod('file');
+
+        const preview = document.getElementById('faceIdEditPreview');
+        const url = URL.createObjectURL(editCapturedBlob);
+        preview.innerHTML = `
+            <div style="margin-top: 15px;">
+                <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Ảnh đã chọn:</div>
+                <img src="${url}" alt="Selected Photo" style="max-width: 300px; max-height: 300px; border-radius: 12px; border: 3px solid #28a745; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                    <button type="button" class="btn btn-secondary" onclick="clearEditPreview()">
+                        🗑️ Xóa ảnh
+                    </button>
+                </div>
+            </div>
+        `;
+
+        alert('✅ Đã chọn ảnh thành công!');
     }
+
 
     function clearEditPreview() {
         const preview = document.getElementById('faceIdEditPreview');
@@ -672,34 +754,30 @@
         editCapturedImageBlob = null;
     }
 
-    async function removeFaceID(maNV) {
+    window.removeFaceID = function(maNV) {
         if (!confirm('⚠️ Bạn có chắc muốn xóa Face ID của nhân viên này?')) {
             return;
         }
 
-        try {
-            const response = await fetch('/NhanVien/DeleteFaceId', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ MaNV: maNV })
-            });
+        document.getElementById('shouldDeleteFaceID').value = 'true';
 
-            const result = await response.json();
-
-            if (result.success) {
-                alert('✅ Đã xóa Face ID');
-                closeModal();
-                location.reload();
-            } else {
-                alert('❌ ' + (result.message || 'Không thể xóa Face ID'));
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('❌ Có lỗi xảy ra: ' + error.message);
+        const currentFaceSection = document.getElementById('currentFaceSection');
+        if (currentFaceSection) {
+            currentFaceSection.style.display = 'none';
         }
-    }
+
+        const sectionHeader = document.getElementById('sectionHeader');
+        if (sectionHeader) {
+            sectionHeader.innerHTML = `
+                <div style="padding: 10px; background: #d4edda; border-radius: 8px; color: #155724; margin-bottom: 15px;">
+                    ✅ Face ID sẽ được xóa khi lưu thay đổi
+                </div>
+                <span>Thêm Face ID mới (tùy chọn):</span>
+            `;
+        }
+
+        showNotification('Face ID sẽ được xóa khi bạn lưu thay đổi', 'success');
+    };
 
     // Form submission
     document.getElementById('formEditNhanVien').addEventListener('submit', async function(e) {
@@ -707,10 +785,24 @@
 
         const formData = new FormData(this);
 
-        // If using captured photo, ensure it's in the form data
-        if (editCapturedImageBlob && !formData.get('FaceIDAnh')) {
+        if (editCapturedImageBlob) {
+            formData.delete('FaceIDAnh');
             formData.append('FaceIDAnh', editCapturedImageBlob, 'face-edit-capture.jpg');
+            console.log('✅ Using captured photo from camera');
         }
+
+        const shouldDelete = document.getElementById('shouldDeleteFaceID').value === 'true';
+        if (shouldDelete) {
+            formData.set('DeleteFaceID', 'true');
+            console.log('🗑️ Will delete existing Face ID');
+        }
+
+        console.log('📤 Submitting form data:', {
+            maNV: formData.get('MaNV'),
+            tenNV: formData.get('TenNV'),
+            hasFaceImage: formData.has('FaceIDAnh'),
+            deleteFaceID: formData.get('DeleteFaceID')
+        });
 
         try {
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -723,28 +815,75 @@
             });
 
             const result = await response.json();
+            console.log('📥 Server response:', result);
 
             if (result.success) {
-                alert('✅ ' + result.message);
+                showNotification('✅ ' + result.message, 'success');
                 stopEditCamera();
-                closeModal();
-                location.reload();
+                
+                setTimeout(() => {
+                    closeModal();
+                    location.reload();
+                }, 1000);
             } else {
-                alert('❌ ' + result.message);
+                showNotification('❌ ' + result.message, 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '💾 Lưu thay đổi';
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('❌ Có lỗi xảy ra: ' + error.message);
+            console.error('❌ Submit error:', error);
+            showNotification('❌ Có lỗi xảy ra: ' + error.message, 'error');
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '💾 Lưu thay đổi';
         }
     });
 
-    // Cleanup when modal closes
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#667eea'};
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            font-weight: 600;
+            font-size: 14px;
+            animation: slideInRight 0.4s ease;
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.4s ease';
+            setTimeout(() => notification.remove(), 400);
+        }, 3000);
+    }
+
     window.addEventListener('beforeunload', function() {
+        stopCamera();
         stopEditCamera();
     });
+        window.switchUploadMethod = switchUploadMethod;
+    window.startCamera = startCamera;
+    window.stopCamera = stopCamera;
+    window.capturePhoto = capturePhoto;
+    window.retakePhoto = retakePhoto;
+    window.confirmPhoto = confirmPhoto;
+    window.handleFileSelect = handleFileSelect;
+    window.clearPreview = clearPreview;
+
+    window.switchEditUploadMethod = switchEditUploadMethod;
+    window.startEditCamera = startEditCamera;
+    window.stopEditCamera = stopEditCamera;
+    window.captureEditPhoto = captureEditPhoto;
+    window.retakeEditPhoto = retakeEditPhoto;
+    window.confirmEditPhoto = confirmEditPhoto;
+    window.handleEditFileSelect = handleEditFileSelect;
+    window.clearEditPreview = clearEditPreview;
 </script>
