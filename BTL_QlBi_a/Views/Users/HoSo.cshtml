@@ -1,0 +1,200 @@
+﻿@model BTL_QlBi_a.Models.ViewModels.UserProfileViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card text-center h-100" style="background-color: #16213e; border: 1px solid #2a2a4e;">
+                <div class="card-body">
+                    <div class="avatar-wrapper mb-3">
+                        <img src="@(Model.KhachHang.Avatar ?? "/asset/img/default-avatar.png")" 
+                             class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #00f2fe;">
+                    </div>
+                    <h3 class="text-white">@Model.KhachHang.TenKH</h3>
+                    <span class="badge bg-warning text-dark mb-3">@Model.KhachHang.HangTV</span>
+
+                    <div class="d-flex justify-content-around text-white mt-4">
+                        <div>
+                            <h5>@Model.KhachHang.DiemTichLuy</h5>
+                            <small class="text-muted">Điểm tích lũy</small>
+                        </div>
+                        <div>
+                            <h5>@(Model.KhachHang.TongChiTieu.ToString("N0"))đ</h5>
+                            <small class="text-muted">Tổng chi tiêu</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card" style="background-color: #16213e; border: 1px solid #2a2a4e;">
+                <div class="card-header border-bottom border-secondary">
+                    <ul class="nav nav-tabs card-header-tabs" id="profileTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active text-info" data-bs-toggle="tab" data-bs-target="#info">📝 Cập nhật thông tin</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link text-warning" data-bs-toggle="tab" data-bs-target="#booking">📅 Lịch đặt bàn</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link text-success" data-bs-toggle="tab" data-bs-target="#history">💰 Lịch sử chơi</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body text-white">
+                    <div class="tab-content">
+
+                        <div class="tab-pane fade show active" id="info">
+                            <form asp-action="UpdateProfile" asp-controller="Users" method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" class="form-control bg-dark text-white border-secondary" name="TenKH" value="@Model.KhachHang.TenKH" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control bg-dark text-white border-secondary" value="@Model.KhachHang.SDT" readonly style="cursor: not-allowed;">
+                                    <small class="text-muted">Không thể thay đổi SĐT</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control bg-dark text-white border-secondary" name="Email" value="@Model.KhachHang.Email">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Đổi Avatar</label>
+                                    <input type="file" class="form-control bg-dark text-white border-secondary" name="fileAvatar" accept="image/*">
+                                </div>
+                                <button type="submit" class="btn btn-info fw-bold">Lưu thay đổi</button>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="booking">
+                            @if (Model.LichSuDatBan.Any())
+                            {
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ngày đặt</th>
+                                                    <th>Bàn</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Hành động</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach (var item in Model.LichSuDatBan)
+                                            {
+                                                        <tr>
+                                                            <td>@item.ThoiGianDat.ToString("dd/MM/yyyy HH:mm")</td>
+                                                            <td>@(item.BanBia?.TenBan ?? "Bàn " + item.MaBan)</td>
+                                                            <td>
+                                                        @if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
+                                                        {
+                                                                        <span class="badge bg-warning text-dark">Đang chờ</span>
+                                                        }
+                                                        else if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DaXacNhan)
+                                                        {
+                                                                        <span class="badge bg-success">Đã xác nhận</span>
+                                                        }
+                                                        else if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DaHuy)
+                                                        {
+                                                                        <span class="badge bg-danger">Đã hủy</span>
+                                                        }
+                                                        else
+                                                        {
+                                                                        <span class="badge bg-info">Hoàn thành</span>
+                                                        }
+                                                            </td>
+                                                            <td>
+                                                        @if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
+                                                        {
+                                                                        <button class="btn btn-sm btn-outline-danger" onclick="cancelBooking(@item.MaDat)">Hủy</button>
+                                                        }
+                                                            </td>
+                                                        </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                            }
+                            else
+                            {
+                                    <p class="text-muted text-center mt-3">Bạn chưa đặt bàn nào.</p>
+                            }
+                        </div>
+
+                        <div class="tab-pane fade" id="history">
+                            @if (Model.LichSuHoaDon.Any())
+                            {
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mã HĐ</th>
+                                                    <th>Ngày chơi</th>
+                                                    <th>Bàn</th>
+                                                    <th>Tổng tiền</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach (var hd in Model.LichSuHoaDon)
+                                            {
+                                                        <tr>
+                                                            <td>#@hd.MaHD</td>
+                                                            <td>@hd.ThoiGianKetThuc?.ToString("dd/MM/yyyy")</td>
+                                                            <td>@hd.BanBia?.TenBan</td>
+                                                            <td class="text-success fw-bold">@hd.TongTien.ToString("N0")đ</td>
+                                                        </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                            }
+                            else
+                            {
+                                    <p class="text-muted text-center mt-3">Bạn chưa có lịch sử giao dịch.</p>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            // Hàm hủy lịch đặt
+            function cancelBooking(maDat) {
+                Swal.fire({
+                    title: 'Bạn muốn hủy lịch này?',
+                    text: "Hành động này không thể hoàn tác!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Đúng, hủy nó!',
+                    cancelButtonText: 'Không',
+                    background: '#16213e', color: '#fff'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/Users/HuyLich?maDat=' + maDat, { method: 'POST' })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({ title: 'Đã hủy!', icon: 'success', background: '#16213e', color: '#fff' })
+                                    .then(() => location.reload());
+                                } else {
+                                    Swal.fire({ title: 'Lỗi', text: data.message, icon: 'error', background: '#16213e', color: '#fff' });
+                                }
+                            });
+                    }
+                })
+            }
+        </script>
+}

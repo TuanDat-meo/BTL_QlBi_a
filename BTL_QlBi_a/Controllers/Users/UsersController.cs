@@ -1,5 +1,6 @@
 ﻿using BTL_QlBi_a.Models.EF;
 using BTL_QlBi_a.Models.Entities;
+using BTL_QlBi_a.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -128,6 +129,95 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
+        //============
+        // Xem ho so
+        //===========
+        [Route("Profile")]
+        public async Task<IActionResult> HoSo()
+        {
+            int? maKH = HttpContext.Session.GetInt32("MaKH");
+            if (maKH == null) return RedirectToAction("Login", "Account");
 
+            var kh = await _context.KhachHang.FindAsync(maKH);
+
+            // lich su dat ban
+            var historyBooking = await _context.DatBan
+                .Where(d => d.MaKH == maKH)
+                .Include(d => d.BanBia)
+                .OrderByDescending(d => d.ThoiGianDat)
+                .ToListAsync();
+
+            // lich su hoa don
+            var historyBill = await _context.HoaDon
+                .Where(h => h.MaKH == maKH && h.TrangThai == TrangThaiHoaDon.DaThanhToan)
+                .Include(h => h.BanBia)
+                .OrderByDescending(h => h.ThoiGianKetThuc)
+                .ToListAsync();
+
+            var viewModel = new UserProfileViewModel
+            {
+                KhachHang = kh,
+                LichSuDatBan = historyBooking,
+                LichSuHoaDon = historyBill,
+            };
+
+            return View(viewModel);
+        }
+
+        //============
+        // Thong tin ca nhaan
+        //===========
+        [HttpPost("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile(KhachHang model, IFormFile? fileAvatar)
+        {
+            int? maKH = HttpContext.Session.GetInt32("MaKH");
+            var kh = await _context.KhachHang.FindAsync(maKH);
+            if (kh == null) return RedirectToAction("Login", "Account");
+
+            kh.TenKH = model.TenKH;
+            kh.Email = model.Email;
+
+            // String Avatar
+            if (fileAvatar != null)
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileAvatar.FileName);
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/asset/img/avatar_khach_hang", fileName);
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await fileAvatar.CopyToAsync(stream);
+                }
+                kh.Avatar = "/asset/img/avatar_khach_hang/" + fileName;
+            }
+
+            _context.KhachHang.Update(kh);
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString("TenKH", kh.TenKH);
+
+            return RedirectToAction("HoSo");
+        }
+
+        //============
+        // Huy dat ban
+        //===========
+        [HttpPost("HuyLich")]
+        public async Task<IActionResult> HuyLich(int maDat)
+        {
+            int? maKH = HttpContext.Session.GetInt32("MaKH");
+            var lich = await _context.DatBan.FirstOrDefaultAsync(d => d.MaDat == maDat && d.MaKH == maKH);
+
+            if (lich == null) return Json(new { success = false, message = "Không tìm thấy lịch." });
+
+            if (lich.TrangThai != TrangThaiDatBan.DangCho)
+            {
+                return Json(new { success = false, message = "Không thể hủy lịch đã xác nhận hoặc đã hoàn thành." });
+            }
+
+            // Cập nhật trạng thái sang Đã Hủy
+            lich.TrangThai = TrangThaiDatBan.DaHuy;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Đã hủy lịch đặt thành công." });
+        }
     }
 }
