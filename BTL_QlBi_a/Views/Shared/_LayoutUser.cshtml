@@ -27,9 +27,88 @@
         .nav-link { color: #fff !important; }
         .nav-link:hover { color: var(--primary-color) !important; }
         footer { background-color: #0f3460; padding: 20px 0; margin-top: 50px; text-align: center; color: #ccc; }
+
+
+        /* --- STYLE CHO TAB --- */
+.nav-pills .nav-link {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    margin: 0 5px;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+}
+
+.nav-pills .nav-link.active, .nav-pills .nav-link:hover {
+    background-color: var(--primary-color); /* Màu xanh neon */
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+/* --- STYLE CHO CARD BÀN --- */
+.table-card {
+    background-color: #16213e;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.table-card:hover {
+    transform: translateY(-5px);
+}
+
+.glow-border {
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+/* Xử lý ảnh */
+.card-img-wrapper {
+    position: relative;
+    height: 180px; /* Chiều cao cố định cho ảnh */
+    overflow: hidden;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Quan trọng: Cắt ảnh để vừa khung mà không méo */
+    transition: transform 0.5s;
+}
+
+.table-card:hover .card-img-top {
+    transform: scale(1.1); /* Zoom ảnh khi hover */
+}
+
+/* Badge giá tiền & trạng thái */
+.price-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffd700; /* Màu vàng kim */
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    border: 1px solid #ffd700;
+}
+
+.status-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
     </style>
 
-    @await RenderSectionAsync("Styles", required: false)
+@await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
@@ -88,12 +167,14 @@
 
     <footer>
         <div class="container">
-            &copy; 2025 - CLB Bi-a Pro - Design by You
+            &copy; 2025 - CLB Bi-a Pro - Design by Những kẻ nghiện Bi a
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

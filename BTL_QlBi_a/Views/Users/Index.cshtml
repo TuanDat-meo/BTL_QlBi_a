@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
 @{
-    Layout = "~/Views/Shared/_LayoutUser.cshtml"; // Trỏ vào layout mới tạo
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
     ViewData["Title"] = "Trang chủ";
 }
 
@@ -73,15 +73,24 @@
         string statusText = isTrong ? "Sẵn sàng" : "Đang chơi";
         string glowClass = isTrong ? "glow-border" : "";
 
-        // Ảnh mặc định nếu chưa có ảnh
-        string imgSrc = string.IsNullOrEmpty(ban.HinhAnh)
-            ? "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=600&q=80" // Ảnh bi-a mẫu
-            : ban.HinhAnh; 
+        // --- CẬP NHẬT LOGIC ẢNH TẠI ĐÂY ---
+        string imgSrc;
 
+        if (!string.IsNullOrEmpty(ban.HinhAnh))
+        {
+            // Dùng Url.Content như bạn muốn để trỏ đúng vào thư mục asset
+            imgSrc = Url.Content($"~/asset/img/{ban.HinhAnh}");
+        }
+        else
+        {
+            // Ảnh mặc định (Online hoặc Local) nếu bàn chưa có hình
+            imgSrc = "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=600&q=80";
+        }
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card h-100 table-card @glowClass">
                         <div class="card-img-wrapper">
                             <img src="@imgSrc" class="card-img-top" alt="@ban.TenBan">
+
                             <div class="price-badge">
                         @(ban.LoaiBan?.GiaGio.ToString("N0"))đ/h
                             </div>
@@ -99,27 +108,24 @@
                         </div>
 
                         <div class="card-body text-center">
-                            <h5 class="card-title text-white fw-bold">@ban.TenBan</h5>
-                            <p class="card-text text-muted small">
-                                <i class="fa-solid fa-layer-group me-1"></i> @(ban.LoaiBan?.TenLoai ?? "Bàn tiêu chuẩn") <br/>
-                                <i class="fa-solid fa-location-dot me-1"></i> @(ban.KhuVuc?.TenKhuVuc ?? "Sảnh chính")
-                            </p>
+                                    @if (Context.Session.GetInt32("MaKH") != null)
+                                    {
+                                    <button class="btn btn-info w-100 fw-bold" 
+                                            onclick="bookTable(@ban.MaBan, '@ban.TenBan')">
+                                        ĐẶT BÀN (Chọn giờ)
+                                    </button>
+                                    }
+                                    else
+                                    {
+                                    <a href="/Account/Login" class="btn btn-outline-light w-100 btn-sm">Đăng nhập để đặt</a>
+                                    }
 
-                    @if (isTrong)
-                    {
-                        if (Context.Session.GetInt32("MaKH") != null)
-                        {
-                                            <button class="btn btn-info w-100 fw-bold" onclick="bookTable(@ban.MaBan)">ĐẶT BÀN NGAY</button>
-                        }
-                        else
-                        {
-                                            <a href="/Account/Login" class="btn btn-outline-light w-100 btn-sm">Đăng nhập để đặt</a>
-                        }
-                    }
-                    else
-                    {
-                                    <button class="btn btn-secondary w-100" disabled>Vui lòng chờ</button>
-                    }
+                                    @if (!isTrong)
+                                    {
+                                    <div class="mt-2 text-danger small">
+                                        <i class="fa-solid fa-circle-info"></i> Bàn đang có khách chơi
+                                    </div>
+                                    }
                         </div>
                     </div>
                 </div>
@@ -160,8 +166,132 @@
     </div>
 </div>
 
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #1a1a2e; border: 1px solid #00f2fe; color: white;">
+            <div class="modal-header" style="border-bottom: 1px solid #2a2a4e;">
+                <h5 class="modal-title">📅 ĐẶT BÀN BI-A</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    <input type="hidden" id="bookMaBan" name="maBan" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-info">Bàn số:</label>
+                        <span id="bookTenBan" class="fw-bold fs-5 text-white"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Giờ đến dự kiến:</label>
+                        <input type="datetime-local" id="bookThoiGian" class="form-control" required 
+                               style="background: #16213e; border: 1px solid #4facfe; color: white;">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Thời lượng:</label>
+                            <select id="bookSoGio" class="form-select" style="background: #1a1a2e; color: white; border: 1px solid #4facfe;">
+                                <option value="1">1 Giờ</option>
+                                <option value="2">2 Giờ</option>
+                                <option value="3">3 Giờ</option>
+                                <option value="4">4 Giờ</option>
+                                <option value="5">5+ Giờ</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Số người:</label>
+                            <input type="number" id="bookSoNguoi" class="form-control" value="2" min="1" max="10"
+                                   style="background: #1a1a2e; color: white; border: 1px solid #4facfe;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú (nếu có):</label>
+                        <textarea id="bookGhiChu" class="form-control" rows="3" placeholder="Ví dụ: Cần 5 gậy, nước ngọt..."
+                                  style="background: #16213e; border: 1px solid #4facfe; color: white;"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #2a2a4e;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-info fw-bold" onclick="submitBooking()" style="background: #00f2fe; border: none;">XÁC NHẬN ĐẶT</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
         <script>
+
+    // Hàm mở Modal (Gắn vào nút Đặt bàn)
+        function bookTable(maBan, tenBan) {
+            document.getElementById('bookMaBan').value = maBan;
+            document.getElementById('bookTenBan').innerText = tenBan || ("Bàn " + maBan);
+
+            // Set giờ mặc định là hiện tại
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('bookThoiGian').value = now.toISOString().slice(0, 16);
+
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
+        }
+
+        // Hàm gửi dữ liệu
+        async function submitBooking() {
+            const maBan = document.getElementById('bookMaBan').value;
+            const thoiGian = document.getElementById('bookThoiGian').value;
+            const ghiChu = document.getElementById('bookGhiChu').value;
+            const soGio = document.getElementById('bookSoGio').value;
+            const soNguoi = document.getElementById('bookSoNguoi').value;
+
+            if (!thoiGian) { alert("Vui lòng chọn giờ đến"); return; }
+
+            // Dữ liệu gửi đi
+            const formData = new FormData();
+            formData.append('maBan', maBan);
+            formData.append('thoiGian', thoiGian);
+            formData.append('ghiChu', ghiChu);
+            formData.append('soGio', soGio);
+            formData.append('soNguoi', soNguoi);
+
+            try {
+                const response = await fetch('/Users/DatBan', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    // Đóng modal trước
+                    const modalEl = document.getElementById('bookingModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+
+                    // Hiện thông báo đẹp
+                    Swal.fire({
+                        title: 'Đặt bàn thành công!',
+                        text: 'Vui lòng đến đúng giờ. Nhân viên sẽ giữ bàn cho bạn.',
+                        icon: 'success',
+                        background: '#16213e', // Màu nền tối
+                        color: '#fff', // Chữ trắng
+                        confirmButtonColor: '#00f2fe', // Màu nút xanh neon
+                        confirmButtonText: 'Tuyệt vời!'
+                    }).then((result) => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                            title: 'Không thành công',
+                            text: result.message,
+                            icon: 'error',
+                            background: '#16213e',
+                            color: '#fff'
+                        });
+                }
+            } catch (err) {
+                alert("Lỗi kết nối server!");
+            }
+        }
+
             async function lookupMember() {
                 const sdt = document.getElementById('sdtInput').value;
                 if (!sdt) { alert('Vui lòng nhập SĐT!'); return; }
