@@ -1,8 +1,8 @@
 ﻿/* ===========================
-   SIDE PANEL SYSTEM - CENTERED MODAL
+   EDIT EMPLOYEE PANEL - CENTERED MODAL (GIỐNG ADD)
    ========================== */
 
-.side-panel {
+.edit-side-panel {
     position: fixed;
     top: 0;
     right: 0;
@@ -14,12 +14,12 @@
     transition: opacity 0.3s ease;
 }
 
-    .side-panel.active {
+    .edit-side-panel.active {
         pointer-events: all;
         opacity: 1;
     }
 
-.side-panel-overlay {
+.edit-panel-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -30,7 +30,7 @@
     cursor: pointer;
 }
 
-.side-panel-content {
+.edit-panel-container {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -49,25 +49,25 @@
     overflow-y: auto;
 }
 
-.side-panel.active .side-panel-content {
+.edit-side-panel.active .edit-panel-container {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
 }
 
 /* Header */
-.side-panel-header {
+.edit-panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 20px 24px;
-    margin: -25px -25px 20px -25px;
+    margin: -20px -20px 20px -20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 12px 12px 0 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.side-panel-title {
+.edit-panel-title {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -80,7 +80,7 @@
     font-size: 24px;
 }
 
-.side-panel-close {
+.edit-panel-close-btn {
     width: 36px;
     height: 36px;
     border: none;
@@ -95,17 +95,74 @@
     transition: all 0.3s;
 }
 
-    .side-panel-close:hover {
+    .edit-panel-close-btn:hover {
         background: rgba(255, 255, 255, 0.3);
         transform: rotate(90deg);
     }
 
 /* Body */
-.side-panel-body {
+.edit-panel-body {
     flex: 1;
     overflow-y: auto;
     padding: 0;
 }
+
+/* ===========================
+   FORM SECTIONS
+   ========================== */
+
+.edit-employee-container {
+    padding: 0;
+}
+
+/* Current Face ID Display */
+.current-face-id {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+    border: 2px solid #28a745;
+}
+
+    .current-face-id h4 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 12px;
+    }
+
+.face-id-preview {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+    .face-id-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.no-face-id {
+    background: #fff3cd;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+    border: 1px solid #ffeaa7;
+}
+
+    .no-face-id p {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #856404;
+    }
 
 /* Form Sections */
 .form-section {
@@ -195,7 +252,10 @@
     font-style: italic;
 }
 
-/* Camera Section */
+/* ===========================
+   CAMERA SECTION
+   ========================== */
+
 .camera-controls {
     display: flex;
     flex-wrap: wrap;
@@ -212,7 +272,7 @@
     margin-bottom: 15px;
 }
 
-#addEmployeeVideo {
+#editEmployeeVideo {
     width: 100%;
     height: auto;
     display: block;
@@ -326,7 +386,10 @@
         line-height: 1.8;
     }
 
-/* Buttons */
+/* ===========================
+   BUTTONS
+   ========================== */
+
 .form-actions {
     display: flex;
     gap: 10px;
@@ -389,6 +452,11 @@
         box-shadow: 0 4px 12px rgba(235, 51, 73, 0.4);
     }
 
+.btn-lg {
+    padding: 12px 20px;
+    font-size: 14px;
+}
+
 .btn-sm {
     padding: 8px 15px;
     font-size: 13px;
@@ -403,36 +471,42 @@
     font-size: 16px;
 }
 
-/* Scrollbar */
-.side-panel-body::-webkit-scrollbar,
-.side-panel-content::-webkit-scrollbar {
+/* ===========================
+   SCROLLBAR
+   ========================== */
+
+.edit-panel-body::-webkit-scrollbar,
+.edit-panel-container::-webkit-scrollbar {
     width: 5px;
 }
 
-.side-panel-body::-webkit-scrollbar-track,
-.side-panel-content::-webkit-scrollbar-track {
+.edit-panel-body::-webkit-scrollbar-track,
+.edit-panel-container::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
 
-.side-panel-body::-webkit-scrollbar-thumb,
-.side-panel-content::-webkit-scrollbar-thumb {
+.edit-panel-body::-webkit-scrollbar-thumb,
+.edit-panel-container::-webkit-scrollbar-thumb {
     background: #667eea;
     border-radius: 4px;
 }
 
-    .side-panel-body::-webkit-scrollbar-thumb:hover,
-    .side-panel-content::-webkit-scrollbar-thumb:hover {
+    .edit-panel-body::-webkit-scrollbar-thumb:hover,
+    .edit-panel-container::-webkit-scrollbar-thumb:hover {
         background: #5568d3;
     }
 
-/* Responsive */
+/* ===========================
+   RESPONSIVE
+   ========================== */
+
 @media (max-width: 768px) {
-    .side-panel-content {
+    .edit-panel-container {
         max-width: 95%;
         padding: 20px;
     }
 
-    .side-panel-header {
+    .edit-panel-header {
         margin: -20px -20px 15px -20px;
     }
 
@@ -443,9 +517,31 @@
     .camera-controls {
         flex-direction: column;
     }
+
+    .face-id-preview {
+        width: 150px;
+        height: 150px;
+    }
 }
 
-/* Biometric Status */
+@media (max-width: 480px) {
+    .edit-panel-header {
+        padding: 16px;
+    }
+
+    .edit-panel-title {
+        font-size: 16px;
+    }
+
+    .form-section {
+        padding: 15px;
+    }
+}
+
+/* ===========================
+   BIOMETRIC STATUS
+   ========================== */
+
 .biometric-status {
     display: flex;
     align-items: center;

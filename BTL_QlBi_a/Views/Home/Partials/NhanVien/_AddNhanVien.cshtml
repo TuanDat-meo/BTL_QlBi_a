@@ -1,19 +1,10 @@
 ﻿<link rel="stylesheet" href="~/asset/css/qlNhanVien/addNhanVien.css" asp-append-version="true">
 <div class="add-employee-container">
-    <!-- Form Header Info -->
-    <div class="form-info-banner">
-        <div class="info-icon">📋</div>
-        <div class="info-content">
-            <div class="info-title">Thêm nhân viên mới</div>
-            <div class="info-subtitle">Điền đầy đủ thông tin bên dưới</div>
-        </div>
-    </div>
-
     <!-- Employee Basic Info -->
     <div class="form-section">
         <h3 class="section-title">👤 Thông tin cơ bản</h3>
 
-        <div class="form-row">
+        <div class="form-row full-width">
             <div class="form-group">
                 <label for="addTenNV">Họ và tên <span class="required">*</span></label>
                 <input type="text"
@@ -30,14 +21,12 @@
                 <input type="tel"
                        id="addSDT"
                        class="form-control"
-                       placeholder="Nhập số điện thoại (10-11 số)"
+                       placeholder="Nhập số điện thoại"
                        pattern="[0-9]{10,11}"
                        required>
-                <small class="form-hint">Ví dụ: 0987654321</small>
+                <small class="form-hint">VD: 0987654321</small>
             </div>
-        </div>
 
-        <div class="form-row">
             <div class="form-group">
                 <label for="addEmail">Email</label>
                 <input type="email"
@@ -47,7 +36,7 @@
             </div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row full-width">
             <div class="form-group">
                 <label for="addMaNhom">Nhóm quyền <span class="required">*</span></label>
                 <select id="addMaNhom" class="form-control" required>
@@ -60,8 +49,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Salary Info -->
     <div class="form-section">
         <h3 class="section-title">💰 Thông tin lương</h3>
 
@@ -77,11 +64,9 @@
                            required>
                     <span class="unit">VNĐ</span>
                 </div>
-                <small class="form-hint">Ví dụ: 5000000 → 5.000.000 VNĐ</small>
+                <small class="form-hint">VD: 5000000 → 5.000.000 VNĐ</small>
             </div>
-        </div>
 
-        <div class="form-row">
             <div class="form-group">
                 <label for="addPhuCap">Phụ cấp</label>
                 <div class="input-with-unit">
@@ -92,7 +77,7 @@
                            value="0">
                     <span class="unit">VNĐ</span>
                 </div>
-                <small class="form-hint">Ví dụ: 500000 → 500.000 VNĐ</small>
+                <small class="form-hint">VD: 500000 → 500.000 VNĐ</small>
             </div>
         </div>
     </div>
@@ -110,9 +95,7 @@
                        placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                        required>
             </div>
-        </div>
 
-        <div class="form-row">
             <div class="form-group">
                 <label for="addMatKhauConfirm">Xác nhận mật khẩu <span class="required">*</span></label>
                 <input type="password"
@@ -218,16 +201,16 @@
     .form-info-banner {
         display: flex;
         align-items: center;
-        gap: 15px;
-        padding: 20px;
+        gap: 12px;
+        padding: 15px;
         background: linear-gradient(135deg, #e7f3ff 0%, #d0e9ff 100%);
         border: 1px solid #667eea;
-        border-radius: 12px;
-        margin-bottom: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
     }
 
     .info-icon {
-        font-size: 32px;
+        font-size: 28px;
     }
 
     .info-content {
@@ -235,20 +218,20 @@
     }
 
     .info-title {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         color: #1a1a2e;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
     .info-subtitle {
-        font-size: 13px;
+        font-size: 12px;
         color: #6c757d;
     }
 
     .btn-lg {
-        padding: 14px 24px;
-        font-size: 15px;
+        padding: 12px 20px;
+        font-size: 14px;
     }
 </style>
 

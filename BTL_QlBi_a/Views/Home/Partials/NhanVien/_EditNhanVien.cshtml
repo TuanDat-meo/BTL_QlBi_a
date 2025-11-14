@@ -1,852 +1,305 @@
 ﻿@model BTL_QlBi_a.Models.Entities.NhanVien
 
-<form id="formEditNhanVien" enctype="multipart/form-data">
-    <input type="hidden" name="MaNV" value="@Model.MaNV">
-    <input type="hidden" id="shouldDeleteFaceID" name="DeleteFaceID" value="false">
+<link rel="stylesheet" href="~/asset/css/qlNhanVien/editNhanVien.css" asp-append-version="true">
 
-    <div class="form-row">
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Họ tên <span style="color: red;">*</span></label>
-            <input type="text"
-                   name="TenNV"
-                   class="form-control"
-                   value="@Model.TenNV"
-                   placeholder="Nhập họ tên nhân viên"
-                   required>
+<div class="edit-employee-container">
+    <!-- Employee Basic Info -->
+    <div class="form-section">
+        <h3 class="section-title">👤 Thông tin cơ bản</h3>
+
+        <input type="hidden" id="editMaNV" value="@Model.MaNV">
+
+        <div class="form-row full-width">
+            <div class="form-group">
+                <label for="editTenNV">Họ và tên <span class="required">*</span></label>
+                <input type="text"
+                       id="editTenNV"
+                       class="form-control"
+                       placeholder="Nhập họ và tên nhân viên"
+                       value="@Model.TenNV"
+                       required>
+            </div>
         </div>
 
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Số điện thoại <span style="color: red;">*</span></label>
-            <input type="tel"
-                   name="SDT"
-                   class="form-control"
-                   value="@Model.SDT"
-                   placeholder="0123456789"
-                   pattern="[0-9]{10,11}"
-                   required>
-        </div>
-    </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editSDT">Số điện thoại <span class="required">*</span></label>
+                <input type="tel"
+                       id="editSDT"
+                       class="form-control"
+                       placeholder="Nhập số điện thoại"
+                       value="@Model.SDT"
+                       pattern="[0-9]{10,11}"
+                       required>
+                <small class="form-hint">VD: 0987654321</small>
+            </div>
 
-    <div class="form-row">
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Email</label>
-            <input type="email"
-                   name="Email"
-                   class="form-control"
-                   value="@Model.Email"
-                   placeholder="email@example.com">
+            <div class="form-group">
+                <label for="editEmail">Email</label>
+                <input type="email"
+                       id="editEmail"
+                       class="form-control"
+                       placeholder="Nhập email (tùy chọn)"
+                       value="@Model.Email">
+            </div>
         </div>
 
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Nhóm quyền <span style="color: red;">*</span></label>
-            <select name="MaNhom" class="form-control" required>
-                @foreach (var nhom in ViewBag.NhomQuyen)
-                {
-                    @if (nhom.MaNhom == Model.MaNhom)
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editMaNhom">Nhóm quyền <span class="required">*</span></label>
+                <select id="editMaNhom" class="form-control" required>
+                    <option value="">-- Chọn nhóm quyền --</option>
+                    @if (ViewBag.NhomQuyen != null)
                     {
-                        <option value="@nhom.MaNhom" selected>@nhom.TenNhom</option>
+                        foreach (var nhom in ViewBag.NhomQuyen)
+                        {
+                            if (nhom.MaNhom == Model.MaNhom)
+                            {
+                                <option value="@nhom.MaNhom" selected>@nhom.TenNhom</option>
+                            }
+                            else
+                            {
+                                <option value="@nhom.MaNhom">@nhom.TenNhom</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="editCaMacDinh">Ca làm việc <span class="required">*</span></label>
+                <select id="editCaMacDinh" class="form-control" required>
+                    @if (Model.CaMacDinh.ToString() == "Sang")
+                    {
+                        <option value="Sang" selected>Ca sáng</option>
                     }
                     else
                     {
-                        <option value="@nhom.MaNhom">@nhom.TenNhom</option>
+                        <option value="Sang">Ca sáng</option>
                     }
-                }
-            </select>
+                    @if (Model.CaMacDinh.ToString() == "Chieu")
+                    {
+                        <option value="Chieu" selected>Ca chiều</option>
+                    }
+                    else
+                    {
+                        <option value="Chieu">Ca chiều</option>
+                    }
+                    @if (Model.CaMacDinh.ToString() == "Toi")
+                    {
+                        <option value="Toi" selected>Ca tối</option>
+                    }
+                    else
+                    {
+                        <option value="Toi">Ca tối</option>
+                    }
+                    @if (Model.CaMacDinh.ToString() == "FullTime")
+                    {
+                        <option value="FullTime" selected>Full time</option>
+                    }
+                    else
+                    {
+                        <option value="FullTime">Full time</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row full-width">
+            <div class="form-group">
+                <label for="editTrangThai">Trạng thái <span class="required">*</span></label>
+                <select id="editTrangThai" class="form-control" required>
+                    @if (Model.TrangThai.ToString() == "DangLam")
+                    {
+                        <option value="DangLam" selected>Đang làm</option>
+                    }
+                    else
+                    {
+                        <option value="DangLam">Đang làm</option>
+                    }
+                    @if (Model.TrangThai.ToString() == "Nghi")
+                    {
+                        <option value="Nghi" selected>Nghỉ việc</option>
+                    }
+                    else
+                    {
+                        <option value="Nghi">Nghỉ việc</option>
+                    }
+                </select>
+            </div>
         </div>
     </div>
 
-    <div class="form-row">
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Lương cơ bản (VNĐ) <span style="color: red;">*</span></label>
-            <input type="number"
-                   name="LuongCoBan"
-                   class="form-control"
-                   value="@Model.LuongCoBan"
-                   min="0"
-                   step="100000"
-                   required>
-        </div>
+    <!-- Salary Info -->
+    <div class="form-section">
+        <h3 class="section-title">💰 Thông tin lương</h3>
 
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Phụ cấp (VNĐ)</label>
-            <input type="number"
-                   name="PhuCap"
-                   class="form-control"
-                   value="@Model.PhuCap"
-                   min="0"
-                   step="100000">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editLuongCoBan">Lương cơ bản <span class="required">*</span></label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="editLuongCoBan"
+                           class="form-control currency-input"
+                           placeholder="Nhập lương cơ bản"
+                           value="@Model.LuongCoBan.ToString("N0")"
+                           required>
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">VD: 5000000 → 5.000.000 VNĐ</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editPhuCap">Phụ cấp</label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="editPhuCap"
+                           class="form-control currency-input"
+                           placeholder="Nhập phụ cấp"
+                           value="@Model.PhuCap.ToString("N0")">
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">VD: 500000 → 500.000 VNĐ</small>
+            </div>
         </div>
     </div>
 
-    <div class="form-group">
-        <label class="form-label">Trạng thái</label>
-        <div style="display: flex; gap: 15px;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="radio" name="TrangThai" value="0" 
-                       @(Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.DangLam ? "checked" : "")>
-                <span>✅ Đang làm việc</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="radio" name="TrangThai" value="1" 
-                       @(Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.Nghi ? "checked" : "")>
-                <span>❌ Nghỉ việc</span>
-            </label>
-        </div>
-    </div>
+    <!-- Password Update (Optional) -->
+    <div class="form-section">
+        <h3 class="section-title">🔐 Đổi mật khẩu (Tùy chọn)</h3>
 
-    <div class="form-group">
-        <label class="form-label">Đổi mật khẩu mới</label>
-        <div style="position: relative;">
-            <input type="password"
-                   name="MatKhauMoi"
-                   id="matKhauMoiInput"
-                   class="form-control"
-                   placeholder="Để trống nếu không đổi mật khẩu"
-                   minlength="6">
-            <button type="button"
-                    onclick="toggleEditPassword('matKhauMoiInput')"
-                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px;">
-                👁️
-            </button>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editMatKhauMoi">Mật khẩu mới</label>
+                <input type="password"
+                       id="editMatKhauMoi"
+                       class="form-control"
+                       placeholder="Để trống nếu không đổi">
+                <small class="form-hint">Tối thiểu 6 ký tự</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editMatKhauConfirm">Xác nhận mật khẩu mới</label>
+                <input type="password"
+                       id="editMatKhauConfirm"
+                       class="form-control"
+                       placeholder="Nhập lại mật khẩu mới">
+            </div>
         </div>
-        <small style="color: #6c757d; font-size: 11px;">Để trống nếu không muốn thay đổi mật khẩu</small>
     </div>
 
     <!-- Face ID Section -->
-    <div class="form-group">
-        <label class="form-label">
-            📸 Face ID
-            @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
-            {
-                <span style="color: #28a745; font-size: 11px;">✓ Đã có Face ID</span>
-            }
-            else
-            {
-                <span style="color: #dc3545; font-size: 11px;">✗ Chưa có Face ID</span>
-            }
-        </label>
+    <div class="form-section">
+        <h3 class="section-title">📸 Face ID</h3>
 
-        <div class="faceid-container">
-            <!-- Current Face ID -->
-            @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
-            {
-                <div class="current-faceid" id="currentFaceSection">
-                    <div class="current-label">Ảnh hiện tại:</div>
-                    <img src="~/asset/img/@Model.FaceIDAnh" 
-                         alt="Current Face ID" 
-                         class="current-face-img">
-                    <button type="button"
-                            class="btn-remove-faceid"
-                            onclick="removeEditFaceID()">
-                        🗑️ Xóa Face ID
-                    </button>
+        @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
+        {
+            <div class="current-face-id">
+                <h4>✅ Face ID hiện tại:</h4>
+                <div class="face-id-preview">
+                    <img src="~/asset/img/@Model.FaceIDAnh" alt="Face ID" id="currentFaceImage">
                 </div>
-            }
-
-            <!-- Update Face ID Button -->
-            <div id="updateFaceSection">
-                <button type="button" 
-                        id="btnStartEditCamera" 
-                        class="btn-start-camera"
-                        onclick="startEditCamera()">
-                    <span class="btn-icon">📷</span>
-                    <span>@(string.IsNullOrEmpty(Model.FaceIDAnh) ? "Quét khuôn mặt" : "Cập nhật Face ID")</span>
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="confirmDeleteFaceID()">
+                    <span>🗑️ Xóa Face ID</span>
                 </button>
+                <input type="hidden" id="deleteFaceIDFlag" value="false">
             </div>
-
-            <!-- Camera Section (Hidden by default) -->
-            <div id="editCameraSection" class="camera-section" style="display: none;">
-                <div class="camera-container">
-                    <video id="editFaceVideo" autoplay playsinline></video>
-                    <canvas id="editFaceCanvas" style="display: none;"></canvas>
-                    <div class="camera-overlay">
-                        <div class="face-guide"></div>
-                    </div>
-                </div>
-
-                <div class="camera-status" id="editCameraStatus">
-                    <span class="status-icon">📸</span>
-                    <span>Đang khởi động camera...</span>
-                </div>
-
-                <div class="camera-controls">
-                    <button type="button" 
-                            class="btn btn-capture" 
-                            id="btnEditCapture"
-                            onclick="captureEditPhoto()"
-                            disabled>
-                        📸 Chụp ảnh
-                    </button>
-                    <button type="button" 
-                            class="btn btn-secondary" 
-                            onclick="stopEditCamera()">
-                        ❌ Đóng camera
-                    </button>
-                </div>
+        }
+        else
+        {
+            <div class="no-face-id">
+                <p>❌ Chưa có Face ID</p>
             </div>
+        }
 
-            <!-- Preview Section -->
-            <div id="editFacePreview" class="preview-section" style="display: none;">
-                <div class="preview-label">✅ Ảnh đã chụp:</div>
-                <img id="editPreviewImage" alt="Face Preview">
-                <div class="preview-actions">
-                    <button type="button" 
-                            class="btn btn-secondary"
-                            onclick="retakeEditPhoto()">
-                        🔄 Chụp lại
-                    </button>
-                </div>
+        <div class="camera-controls">
+            <button type="button"
+                    class="btn btn-primary"
+                    id="btnEditStartCamera"
+                    onclick="startEditEmployeeCamera()">
+                <span class="btn-icon">📸</span>
+                <span>Bật Camera</span>
+            </button>
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    id="btnEditStopCamera"
+                    onclick="stopEditEmployeeCamera()"
+                    style="display: none;">
+                <span class="btn-icon">🛑</span>
+                <span>Tắt Camera</span>
+            </button>
+
+            <button type="button"
+                    class="btn btn-success"
+                    id="btnEditCaptureFace"
+                    onclick="captureEditEmployeeFace()"
+                    style="display: none;">
+                <span class="btn-icon">📷</span>
+                <span>Chụp ảnh</span>
+            </button>
+        </div>
+
+        <div class="face-preview-container" id="editFacePreviewContainer" style="display: none;">
+            <video id="editEmployeeVideo" autoplay playsinline></video>
+            <canvas id="editEmployeeCanvas" style="display: none;"></canvas>
+
+            <div class="face-overlay">
+                <div class="face-frame"></div>
             </div>
+        </div>
 
-            <!-- Hidden file input -->
-            <input type="file" 
-                   name="FaceIDAnh" 
-                   id="faceIdEditFileInput" 
-                   style="display: none;" 
-                   accept="image/jpeg,image/jpg,image/png">
+        <div class="captured-face" id="editCapturedFaceContainer" style="display: none;">
+            <h4>✅ Ảnh mới đã chụp:</h4>
+            <img id="editCapturedFaceImage" alt="New captured face">
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="deleteEditCapturedFace()">
+                <span>🗑️ Xóa và chụp lại</span>
+            </button>
+        </div>
 
-            <div class="faceid-hint">
-                <span>💡 Tip: Đặt khuôn mặt vào khung hình tròn, ánh sáng đủ, không đeo khẩu trang</span>
-            </div>
+        <div class="face-status info" id="editFaceStatus">
+            <span class="status-icon">ℹ️</span>
+            <span>Nhấn "Bật Camera" để chụp ảnh Face ID mới</span>
+        </div>
+
+        <div class="instruction-card">
+            <h4>📌 Hướng dẫn chụp Face ID:</h4>
+            <ul>
+                <li>✅ Đặt khuôn mặt vào khung hình tròn</li>
+                <li>✅ Giữ khuôn mặt thẳng, ánh sáng đủ</li>
+                <li>❌ Không đeo khẩu trang, kính đen</li>
+                <li>📷 Nhấn "Chụp ảnh" khi sẵn sàng</li>
+            </ul>
         </div>
     </div>
 
+    <!-- Action Buttons -->
     <div class="form-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
-            ❌ Hủy
+        <button type="button"
+                class="btn btn-primary btn-lg"
+                id="btnSubmitEditEmployee"
+                onclick="submitEditEmployee()">
+            <span class="btn-icon">💾</span>
+            <span>Cập nhật</span>
         </button>
-        <button type="submit" class="btn btn-primary">
-            💾 Lưu thay đổi
+
+        <button type="button"
+                class="btn btn-secondary btn-lg"
+                onclick="closeEditEmployeePanel()">
+            <span class="btn-icon">❌</span>
+            <span>Hủy</span>
         </button>
     </div>
-</form>
+</div>
 
-<style>
-    .form-row {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-label {
-        display: block;
-        font-weight: 600;
-        font-size: 13px;
-        color: #495057;
-        margin-bottom: 6px;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 8px 12px;
-        border: 2px solid #dee2e6;
-        border-radius: 8px;
-        font-size: 13px;
-        transition: all 0.3s;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    input[type="radio"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-
-    .faceid-container {
-        border: 2px dashed #dee2e6;
-        border-radius: 12px;
-        padding: 20px;
-        background: #f8f9fa;
-    }
-
-    .current-faceid {
-        text-align: center;
-        padding: 15px;
-        background: white;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        border: 2px solid #28a745;
-    }
-
-    .current-label {
-        font-size: 12px;
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 10px;
-    }
-
-    .current-face-img {
-        max-width: 200px;
-        max-height: 200px;
-        border-radius: 10px;
-        border: 3px solid #28a745;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        margin-bottom: 10px;
-    }
-
-    .btn-remove-faceid {
-        padding: 8px 16px;
-        background: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .btn-remove-faceid:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-    }
-
-    #updateFaceSection {
-        margin-top: 15px;
-    }
-
-    .btn-start-camera {
-        width: 100%;
-        padding: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: all 0.3s;
-    }
-
-    .btn-start-camera:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-icon {
-        font-size: 20px;
-    }
-
-    .camera-section {
-        margin-top: 15px;
-    }
-
-    .camera-container {
-        position: relative;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto 15px;
-        border-radius: 12px;
-        overflow: hidden;
-        background: #000;
-    }
-
-    #editFaceVideo {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .camera-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-    }
-
-    .face-guide {
-        width: 60%;
-        padding-bottom: 80%;
-        border: 3px solid rgba(102, 126, 234, 0.8);
-        border-radius: 50%;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
-        animation: pulse-guide 2s infinite;
-    }
-
-    keyframes pulse-guide {
-        0%, 100% {
-            border-color: rgba(102, 126, 234, 0.8);
-            transform: scale(1);
-        }
-        50% {
-            border-color: rgba(102, 126, 234, 1);
-            transform: scale(1.05);
-        }
-    }
-
-    .camera-status {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        padding: 10px;
-        background: #e7f3ff;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .camera-status.ready {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .camera-status.error {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .status-icon {
-        font-size: 18px;
-    }
-
-    .camera-controls {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .btn-capture {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-    }
-
-    .btn-capture:disabled {
-        background: #6c757d;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .btn-capture:not(:disabled):hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-    }
-
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: #5a6268;
-        transform: translateY(-2px);
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-
-    .preview-section {
-        text-align: center;
-        margin-top: 15px;
-    }
-
-    .preview-label {
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #28a745;
-    }
-
-    #editPreviewImage {
-        max-width: 300px;
-        max-height: 300px;
-        border-radius: 12px;
-        border: 3px solid #28a745;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .preview-actions {
-        margin-top: 10px;
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-
-    .faceid-hint {
-        margin-top: 15px;
-        padding: 10px;
-        background: white;
-        border-radius: 8px;
-        font-size: 11px;
-        color: #6c757d;
-        text-align: center;
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .form-actions button {
-        flex: 1;
-        padding: 12px;
-    }
-
-    media (max-width: 768px) {
-        .form-row {
-            flex-direction: column;
-            gap: 0;
-        }
-
-        .camera-container {
-            max-width: 100%;
-        }
-    }
-</style>
-
+<script src="~/asset/js/qlNhanVien/editEmployee.js"></script>
 <script>
-    let editCameraStream = null;
-    let editCapturedBlob = null;
-    let editCameraActive = false;
-    let faceIdMarkedForDeletion = false;
-
-    // ===========================
-    // PASSWORD TOGGLE
-    // ===========================
-    function toggleEditPassword(inputId) {
-        const input = document.getElementById(inputId);
-        input.type = input.type === 'password' ? 'text' : 'password';
-    }
-
-    // ===========================
-    // FACE ID DELETION
-    // ===========================
-    function removeEditFaceID() {
-        if (!confirm('⚠️ Bạn có chắc muốn xóa Face ID của nhân viên này?')) {
-            return;
-        }
-
-        console.log('🗑️ Marking Face ID for deletion');
-
-        // Mark for deletion
-        document.getElementById('shouldDeleteFaceID').value = 'true';
-        faceIdMarkedForDeletion = true;
-
-        // Hide current face section
-        const currentFaceSection = document.getElementById('currentFaceSection');
-        if (currentFaceSection) {
-            currentFaceSection.style.display = 'none';
-        }
-
-        // Update button text
-        const btnStart = document.getElementById('btnStartEditCamera');
-        if (btnStart) {
-            btnStart.innerHTML = '<span class="btn-icon">📷</span><span>Quét khuôn mặt mới</span>';
-        }
-
-        showNotification('Face ID sẽ được xóa khi bạn lưu thay đổi', 'success');
-    }
-
-    // ===========================
-    // CAMERA FUNCTIONS
-    // ===========================
-    async function startEditCamera() {
-        console.log('📷 Starting edit camera...');
-
-        const btnStart = document.getElementById('btnStartEditCamera');
-        const cameraSection = document.getElementById('editCameraSection');
-        const video = document.getElementById('editFaceVideo');
-        const statusEl = document.getElementById('editCameraStatus');
-        const btnCapture = document.getElementById('btnEditCapture');
-        const previewSection = document.getElementById('editFacePreview');
-
-        // Hide start button, show camera section
-        btnStart.style.display = 'none';
-        cameraSection.style.display = 'block';
-        previewSection.style.display = 'none';
-
-        statusEl.className = 'camera-status';
-        statusEl.innerHTML = '<span class="status-icon">🔄</span><span>Đang khởi động camera...</span>';
-
-        try {
-            editCameraStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'user',
-                    width: { ideal: 640 },
-                    height: { ideal: 480 }
-                },
-                audio: false
-            });
-
-            video.srcObject = editCameraStream;
-            await video.play();
-
-            editCameraActive = true;
-
-            statusEl.className = 'camera-status ready';
-            statusEl.innerHTML = '<span class="status-icon">✅</span><span>Camera đã sẵn sàng - Đặt khuôn mặt vào khung</span>';
-            
-            btnCapture.disabled = false;
-
-            console.log('✅ Edit camera started successfully');
-
-        } catch (error) {
-            console.error('❌ Edit camera error:', error);
-            
-            let errorMsg = 'Không thể truy cập camera';
-            if (error.name === 'NotAllowedError') {
-                errorMsg = 'Vui lòng cấp quyền truy cập camera';
-            } else if (error.name === 'NotFoundError') {
-                errorMsg = 'Không tìm thấy camera';
-            } else if (error.name === 'NotReadableError') {
-                errorMsg = 'Camera đang được sử dụng bởi ứng dụng khác';
-            }
-
-            statusEl.className = 'camera-status error';
-            statusEl.innerHTML = `<span class="status-icon">❌</span><span>${errorMsg}</span>`;
-            
-            btnCapture.disabled = true;
-        }
-    }
-
-    function stopEditCamera() {
-        console.log('🛑 Stopping edit camera...');
-
-        if (editCameraStream) {
-            editCameraStream.getTracks().forEach(track => {
-                track.stop();
-                console.log('✓ Stopped track:', track.label);
-            });
-            editCameraStream = null;
-        }
-
-        const video = document.getElementById('editFaceVideo');
-        if (video) {
-            video.srcObject = null;
-        }
-
-        editCameraActive = false;
-
-        // Show start button again, hide camera section
-        document.getElementById('btnStartEditCamera').style.display = 'flex';
-        document.getElementById('editCameraSection').style.display = 'none';
-
-        console.log('✅ Edit camera stopped');
-    }
-
-    function captureEditPhoto() {
-        const video = document.getElementById('editFaceVideo');
-        const canvas = document.getElementById('editFaceCanvas');
-        const statusEl = document.getElementById('editCameraStatus');
-
-        if (!video || !canvas) {
-            console.error('Video or canvas not found');
-            return;
-        }
-
-        if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-            statusEl.className = 'camera-status error';
-            statusEl.innerHTML = '<span class="status-icon">⚠️</span><span>Video chưa sẵn sàng, vui lòng đợi...</span>';
-            return;
-        }
-
-        console.log('📸 Capturing edit photo...');
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob(function(blob) {
-            if (!blob) {
-                statusEl.className = 'camera-status error';
-                statusEl.innerHTML = '<span class="status-icon">❌</span><span>Không thể chụp ảnh, vui lòng thử lại</span>';
-                return;
-            }
-
-            editCapturedBlob = blob;
-            console.log('✅ Edit photo captured:', blob.size, 'bytes');
-
-            // Set file input
-            const file = new File([blob], 'face-edit-capture.jpg', { type: 'image/jpeg' });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            
-            const fileInput = document.getElementById('faceIdEditFileInput');
-            fileInput.files = dataTransfer.files;
-
-            // Show preview
-            const url = URL.createObjectURL(blob);
-            const previewSection = document.getElementById('editFacePreview');
-            const previewImage = document.getElementById('editPreviewImage');
-            
-            previewImage.src = url;
-            previewSection.style.display = 'block';
-
-            // Stop camera and hide camera section
-            stopEditCamera();
-
-            showNotification('✅ Đã chụp ảnh thành công!', 'success');
-
-        }, 'image/jpeg', 0.95);
-    }
-
-    function retakeEditPhoto() {
-        console.log('🔄 Retaking edit photo...');
-        
-        // Clear preview
-        document.getElementById('editFacePreview').style.display = 'none';
-        document.getElementById('faceIdEditFileInput').value = '';
-        editCapturedBlob = null;
-
-        // Restart camera
-        startEditCamera();
-    }
-
-    // ===========================
-    // MODAL CLOSE
-    // ===========================
-    function closeEditModal() {
-        console.log('🛑 Closing edit modal...');
-        
-        // Stop camera if active
-        if (editCameraActive) {
-            stopEditCamera();
-        }
-
-        // Clear data
-        editCapturedBlob = null;
-        faceIdMarkedForDeletion = false;
-        
-        // Close modal
-        closeModal();
-    }
-
-    // ===========================
-    // FORM SUBMISSION
-    // ===========================
-    document.getElementById('formEditNhanVien').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        try {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Đang xử lý...';
-
-            console.log('📤 Submitting form data:', {
-                maNV: formData.get('MaNV'),
-                tenNV: formData.get('TenNV'),
-                hasFaceImage: formData.has('FaceIDAnh') && formData.get('FaceIDAnh').size > 0,
-                deleteFaceID: formData.get('DeleteFaceID')
-            });
-
-            const response = await fetch('/NhanVien/CapNhatNhanVien', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-            console.log('📥 Server response:', result);
-
-            if (result.success) {
-                showNotification('✅ ' + result.message, 'success');
-                
-                // Stop camera if still active
-                if (editCameraActive) {
-                    stopEditCamera();
-                }
-                
-                setTimeout(() => {
-                    closeModal();
-                    location.reload();
-                }, 1000);
-            } else {
-                showNotification('❌ ' + result.message, 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '💾 Lưu thay đổi';
-            }
-        } catch (error) {
-            console.error('❌ Submit error:', error);
-            showNotification('❌ Có lỗi xảy ra: ' + error.message, 'error');
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '💾 Lưu thay đổi';
-        }
+    // Initialize currency inputs when modal loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeEditCurrencyInputs();
     });
-
-    // ===========================
-    // NOTIFICATION
-    // ===========================
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#667eea'};
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-            font-weight: 600;
-            font-size: 14px;
-            animation: slideInRight 0.4s ease;
-        `;
-        notification.textContent = message;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.4s ease';
-            setTimeout(() => notification.remove(), 400);
-        }, 3000);
-    }
-
-    window.addEventListener('beforeunload', function() {
-        if (editCameraActive) {
-            stopEditCamera();
-        }
-    });
-
-    // Export functions to global scope IMMEDIATELY (not in IIFE)
-    window.startEditCamera = startEditCamera;
-    window.stopEditCamera = stopEditCamera;
-    window.captureEditPhoto = captureEditPhoto;
-    window.retakeEditPhoto = retakeEditPhoto;
-    window.removeEditFaceID = removeEditFaceID;
-    window.closeEditModal = closeEditModal;
-    window.toggleEditPassword = toggleEditPassword;
-
-    console.log('✅ Edit Employee Form initialized');
 </script>
