@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BTL_QlBi_a.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251113022714_Add-Migration AddAvatarToCustomer")]
-    partial class AddMigrationAddAvatarToCustomer
+    [Migration("20251113094808_finalDb")]
+    partial class finalDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -950,6 +950,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasDefaultValue("Sáng")
                         .HasColumnName("ca_mac_dinh");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("email");
 
                     b.Property<string>("FaceIDAnh")
                         .HasMaxLength(255)

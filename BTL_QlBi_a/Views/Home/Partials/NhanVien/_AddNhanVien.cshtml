@@ -1,0 +1,244 @@
+﻿<link rel="stylesheet" href="~/asset/css/qlNhanVien/addNhanVien.css" asp-append-version="true">
+<div class="add-employee-container">
+    <!-- Employee Basic Info -->
+    <div class="form-section">
+        <h3 class="section-title">👤 Thông tin cơ bản</h3>
+
+        <div class="form-row full-width">
+            <div class="form-group">
+                <label for="addTenNV">Họ và tên <span class="required">*</span></label>
+                <input type="text"
+                       id="addTenNV"
+                       class="form-control"
+                       placeholder="Nhập họ và tên nhân viên"
+                       required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addSDT">Số điện thoại <span class="required">*</span></label>
+                <input type="tel"
+                       id="addSDT"
+                       class="form-control"
+                       placeholder="Nhập số điện thoại"
+                       pattern="[0-9]{10,11}"
+                       required>
+                <small class="form-hint">VD: 0987654321</small>
+            </div>
+
+            <div class="form-group">
+                <label for="addEmail">Email</label>
+                <input type="email"
+                       id="addEmail"
+                       class="form-control"
+                       placeholder="Nhập email (tùy chọn)">
+            </div>
+        </div>
+
+        <div class="form-row full-width">
+            <div class="form-group">
+                <label for="addMaNhom">Nhóm quyền <span class="required">*</span></label>
+                <select id="addMaNhom" class="form-control" required>
+                    <option value="">-- Chọn nhóm quyền --</option>
+                    <option value="1">Admin</option>
+                    <option value="2">Quản lý</option>
+                    <option value="3">Thu ngân</option>
+                    <option value="4">Phục vụ</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="form-section">
+        <h3 class="section-title">💰 Thông tin lương</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addLuongCoBan">Lương cơ bản <span class="required">*</span></label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="addLuongCoBan"
+                           class="form-control currency-input"
+                           placeholder="Nhập lương cơ bản"
+                           value="0"
+                           required>
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">VD: 5000000 → 5.000.000 VNĐ</small>
+            </div>
+
+            <div class="form-group">
+                <label for="addPhuCap">Phụ cấp</label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="addPhuCap"
+                           class="form-control currency-input"
+                           placeholder="Nhập phụ cấp"
+                           value="0">
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">VD: 500000 → 500.000 VNĐ</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-section">
+        <h3 class="section-title">🔐 Mật khẩu</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addMatKhau">Mật khẩu <span class="required">*</span></label>
+                <input type="password"
+                       id="addMatKhau"
+                       class="form-control"
+                       placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="addMatKhauConfirm">Xác nhận mật khẩu <span class="required">*</span></label>
+                <input type="password"
+                       id="addMatKhauConfirm"
+                       class="form-control"
+                       placeholder="Nhập lại mật khẩu"
+                       required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Face ID Section -->
+    <div class="form-section">
+        <h3 class="section-title">📸 Face ID (Tùy chọn)</h3>
+
+        <div class="camera-controls">
+            <button type="button"
+                    class="btn btn-primary"
+                    id="btnStartCamera"
+                    onclick="startAddEmployeeCamera()">
+                <span class="btn-icon">📸</span>
+                <span>Bật Camera</span>
+            </button>
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    id="btnStopCamera"
+                    onclick="stopAddEmployeeCamera()"
+                    style="display: none;">
+                <span class="btn-icon">🛑</span>
+                <span>Tắt Camera</span>
+            </button>
+
+            <button type="button"
+                    class="btn btn-success"
+                    id="btnCaptureFace"
+                    onclick="captureAddEmployeeFace()"
+                    style="display: none;">
+                <span class="btn-icon">📷</span>
+                <span>Chụp ảnh</span>
+            </button>
+        </div>
+
+        <div class="face-preview-container" id="facePreviewContainer" style="display: none;">
+            <video id="addEmployeeVideo" autoplay playsinline></video>
+            <canvas id="addEmployeeCanvas" style="display: none;"></canvas>
+
+            <div class="face-overlay">
+                <div class="face-frame"></div>
+            </div>
+        </div>
+
+        <div class="captured-face" id="capturedFaceContainer" style="display: none;">
+            <h4>✅ Ảnh đã chụp:</h4>
+            <img id="capturedFaceImage" alt="Captured face">
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="deleteCapturedFace()">
+                <span>🗑️ Xóa và chụp lại</span>
+            </button>
+        </div>
+
+        <div class="face-status info" id="faceStatus">
+            <span class="status-icon">ℹ️</span>
+            <span>Nhấn "Bật Camera" để chụp ảnh Face ID cho nhân viên</span>
+        </div>
+
+        <div class="instruction-card">
+            <h4>📌 Hướng dẫn chụp Face ID:</h4>
+            <ul>
+                <li>✅ Đặt khuôn mặt vào khung hình tròn</li>
+                <li>✅ Giữ khuôn mặt thẳng, ánh sáng đủ</li>
+                <li>❌ Không đeo khẩu trang, kính đen</li>
+                <li>📷 Nhấn "Chụp ảnh" khi sẵn sàng</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+        <button type="button"
+                class="btn btn-primary btn-lg"
+                id="btnSubmitAddEmployee"
+                onclick="submitAddEmployee()">
+            <span class="btn-icon">✅</span>
+            <span>Thêm nhân viên</span>
+        </button>
+
+        <button type="button"
+                class="btn btn-secondary btn-lg"
+                onclick="closeAddEmployeePanel()">
+            <span class="btn-icon">❌</span>
+            <span>Hủy</span>
+        </button>
+    </div>
+</div>
+
+<style>
+    .add-employee-container {
+        padding: 0;
+    }
+
+    .form-info-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #d0e9ff 100%);
+        border: 1px solid #667eea;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    .info-icon {
+        font-size: 28px;
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+    }
+
+    .info-subtitle {
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .btn-lg {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+</style>
+
+<script src="~/asset/js/qlNhanVien/addEmployee.js"></script>
+<script>
+    // Initialize currency inputs when modal loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCurrencyInputs();
+    });
+</script>

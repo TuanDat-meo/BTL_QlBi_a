@@ -68,14 +68,21 @@ namespace BTL_QlBi_a.Controllers
                 HttpContext.Session.SetInt32("MaNV", nhanVien.MaNV);
                 HttpContext.Session.SetString("TenNV", nhanVien.TenNV);
                 HttpContext.Session.SetInt32("MaNhom", nhanVien.MaNhom);
-                HttpContext.Session.SetString("TenNhom", nhanVien.NhomQuyen?.TenNhom ?? "Nhân viên");
+
+                // Lưu role name - QUAN TRỌNG: Dùng TenNhom từ database
+                string roleName = nhanVien.NhomQuyen?.TenNhom ?? "Phục vụ";
+                HttpContext.Session.SetString("TenNhom", roleName);
+                HttpContext.Session.SetString("ChucVu", roleName);
+
+                // Debug log
+                Console.WriteLine($"Login: {nhanVien.TenNV}, Role: {roleName}, MaNhom: {nhanVien.MaNhom}");
 
                 // Ghi log hoạt động
                 var logHoatDong = new LichSuHoatDong
                 {
                     MaNV = nhanVien.MaNV,
                     HanhDong = "Đăng nhập",
-                    ChiTiet = $"Nhân viên {nhanVien.TenNV} đăng nhập vào hệ thống",
+                    ChiTiet = $"Nhân viên {nhanVien.TenNV} ({roleName}) đăng nhập vào hệ thống",
                     ThoiGian = DateTime.Now
                 };
                 _context.LichSuHoatDong.Add(logHoatDong);
@@ -173,42 +180,54 @@ namespace BTL_QlBi_a.Controllers
             return View("Forgot");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ForgotPassword(string? sdt)
-        {
-            if (string.IsNullOrEmpty(sdt))
-            {
-                ViewBag.Error = "Vui lòng nhập số điện thoại";
-                return View();
-            }
+        //[HttpPost]
+        //public async Task<IActionResult> ForgotPassword(string? email)
+        //{
+        //    // 1. Kiểm tra email đầu vào
+        //    if (string.IsNullOrEmpty(email))
+        //    {
+        //        ViewBag.Error = "Vui lòng nhập địa chỉ email";
+        //        // Vẫn trả về View("Forgot") để xử lý lỗi đã đề cập ở câu hỏi trước
+        //        return View("Forgot");
+        //    }
 
-            // Tìm nhân viên theo SDT
-            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.SDT == sdt);
+        //    // 2. Tìm nhân viên theo Email
+        //    // Thay đổi: .FirstOrDefaultAsync(nv => nv.SDT == sdt) thành .FirstOrDefaultAsync(nv => nv.Email == email)
+        //    var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.mail == email);
 
-            if (nhanVien == null)
-            {
-                ViewBag.Success = "Nếu số điện thoại tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến bạn.";
-                return View();
-            }
+        //    if (nhanVien == null)
+        //    {
+        //        // Thông báo chung chung để tránh lộ thông tin tài khoản
+        //        ViewBag.Success = "Nếu địa chỉ email tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến bạn.";
+        //        return View("Forgot");
+        //    }
 
-            try
-            {
-                string otp = GenerateOTP();
-                // Lưu OTP vào Session
-                HttpContext.Session.SetString("PasswordResetOTP_" + sdt, otp);
-                HttpContext.Session.SetString("PasswordResetSDT", sdt);
+        //    try
+        //    {
+        //        string otp = GenerateOTP();
 
-                // Gửi OTP qua SMS hoặc email (nếu có)
-                // await SendOtpSMS(sdt, otp);
+        //        // Gửi OTP qua Email
+        //        // Thay đổi: recipientEmail là email lấy từ input
+        //        await SendOtpEmail(email, otp);
 
-                return RedirectToAction("ResetPassword", new { sdt });
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng thử lại sau.";
-                return View();
-            }
-        }
+        //        // 3. Lưu OTP và Email vào Session
+        //        // Thay đổi: "PasswordResetOTP_" + sdt thành "PasswordResetOTP_" + email
+        //        HttpContext.Session.SetString("PasswordResetOTP_" + email, otp);
+        //        // Thay đổi: "PasswordResetSDT" thành "PasswordResetEmail"
+        //        HttpContext.Session.SetString("PasswordResetEmail", email);
+
+        //        // 4. Chuyển hướng sang trang ResetPassword
+        //        // Thay đổi: new { sdt } thành new { email }
+        //        return RedirectToAction("ResetPassword", new { email });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Ghi log lỗi để kiểm tra dịch vụ Email
+        //        Console.WriteLine($"Lỗi ForgotPassword: {ex.Message}");
+        //        ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng thử lại sau.";
+        //        return View("Forgot");
+        //    }
+        //}
 
         [HttpGet]
         public IActionResult ResetPassword(string? sdt)

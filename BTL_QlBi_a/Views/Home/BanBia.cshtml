@@ -11,9 +11,11 @@
 
 @await Html.PartialAsync("~/Views/Home/Partials/QLBan_Bi_a/_QuanLyBan.cshtml", Model)
 @section Scripts {
-    <script src="~/asset/js/qlban/quanlyban.js"></script>
-    <script src="~/asset/js/qlban/datBan.js"></script>
-    <script src="~/asset/js/qlban/banBiaManager.js"></script>
+    <script src="~/asset/js/qlBan/chinhSuaBan.js"></script>
+    <script src="~/asset/js/qlBan/menuDichVu.js"></script>
+    <script src="~/asset/js/qlban/quanlyban.js?v=@DateTime.Now.Ticks"></script>
+    <script src="~/asset/js/qlban/datBan.js?v=@DateTime.Now.Ticks"></script>
+    <script src="~/asset/js/qlban/banBiaManager.js?v=@DateTime.Now.Ticks"></script>
     <script>
         // Test debug
         console.log('✅ Page loaded');

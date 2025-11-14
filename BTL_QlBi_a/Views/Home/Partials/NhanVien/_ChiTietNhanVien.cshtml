@@ -1,0 +1,180 @@
+﻿@model BTL_QlBi_a.Models.Entities.NhanVien
+
+<div class="detail-header">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h3 style="margin-top: 12px; margin-bottom: 5px; color: #1a1a2e;">@Model.TenNV</h3>
+        <p style="color: #6c757d; font-size: 13px;">@Model.NhomQuyen?.TenNhom</p>
+        @if (Model.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiNhanVien.DangLam)
+        {
+            <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                Đang làm việc
+            </span>
+        }
+        else
+        {
+            <span style="background: #dc3545; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                Nghỉ việc
+            </span>
+        }
+    </div>
+</div>
+
+<div class="info-card">
+    <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e;">
+        📋 Thông tin cơ bản
+    </h4>
+    <div class="info-row">
+        <span class="info-label">Số điện thoại:</span>
+        <span class="info-value">@Model.SDT</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">@(Model.Email ?? "Chưa cập nhật")</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Ca làm việc:</span>
+        <span class="info-value">@Model.CaMacDinh</span>
+    </div>
+</div>
+
+<!-- Thông tin lương -->
+<div class="info-card">
+    <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e;">
+        💰 Thông tin lương
+    </h4>
+    <div class="info-row">
+        <span class="info-label">Lương cơ bản:</span>
+        <span class="info-value" style="color: #28a745; font-weight: 700;">
+            @Model.LuongCoBan.ToString("N0")đ
+        </span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Phụ cấp:</span>
+        <span class="info-value" style="color: #ffc107; font-weight: 700;">
+            @Model.PhuCap.ToString("N0")đ
+        </span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Tổng:</span>
+        <span class="info-value" style="color: #e74c3c; font-weight: 700; font-size: 15px;">
+            @((Model.LuongCoBan + Model.PhuCap).ToString("N0"))đ
+        </span>
+    </div>
+</div>
+
+<!-- Thống kê chấm công tháng này -->
+<div class="info-card">
+    <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e;">
+        📊 Chấm công tháng @DateTime.Now.Month/@DateTime.Now.Year
+    </h4>
+    <div class="info-row">
+        <span class="info-label">Số ngày làm:</span>
+        <span class="info-value" style="font-weight: 700;">@ViewBag.SoNgayLam ngày</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Tổng giờ làm:</span>
+        <span class="info-value" style="font-weight: 700; color: #667eea;">
+            @ViewBag.TongGioLam giờ
+        </span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Số lần đi trễ:</span>
+        <span class="info-value" style="font-weight: 700; color: #dc3545;">
+            @ViewBag.SoLanDiTre lần
+        </span>
+    </div>
+    <button class="btn btn-secondary"
+            onclick="NhanVienManager.viewAttendance(@Model.MaNV)"
+            style="width: 100%; margin-top: 10px; font-size: 12px;">
+        📅 Xem chi tiết chấm công
+    </button>
+</div>
+
+<!-- Bảng lương gần nhất -->
+@if (ViewBag.BangLuong != null)
+{
+    var bangLuong = ViewBag.BangLuong as BTL_QlBi_a.Models.Entities.BangLuong;
+    <div class="info-card">
+        <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e;">
+            💵 Bảng lương @bangLuong.Thang/@bangLuong.Nam
+        </h4>
+        <div class="info-row">
+            <span class="info-label">Lương cơ bản:</span>
+            <span class="info-value">@bangLuong.LuongCoBan.ToString("N0")đ</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Phụ cấp:</span>
+            <span class="info-value">@bangLuong.PhuCap.ToString("N0")đ</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Thưởng:</span>
+            <span class="info-value" style="color: #28a745;">+@bangLuong.Thuong.ToString("N0")đ</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Phạt:</span>
+            <span class="info-value" style="color: #dc3545;">-@bangLuong.Phat.ToString("N0")đ</span>
+        </div>
+        <div class="info-row" style="border-top: 2px solid #dee2e6; padding-top: 10px; margin-top: 5px;">
+            <span class="info-label"><strong>Tổng lương:</strong></span>
+            <span class="info-value" style="color: #e74c3c; font-weight: 700; font-size: 16px;">
+                @bangLuong.TongLuong.ToString("N0")đ
+            </span>
+        </div>
+    </div>
+}
+
+<!-- Thao tác nhanh -->
+<div class="action-buttons" style="margin-top: 20px;">
+    <button class="btn btn-primary" onclick="NhanVienManager.openEditModal(@Model.MaNV)" style="flex: 1;">
+        ✏️ Chỉnh sửa
+    </button>
+    <button class="btn btn-secondary" onclick="NhanVienManager.viewHistory(@Model.MaNV)" style="flex: 1;">
+        📜 Lịch sử
+    </button>
+</div>
+
+<style>
+    .detail-header {
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 15px;
+    }
+
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+        .info-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+        gap: 10px;
+    }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 13px;
+    }
+
+    .info-value {
+        color: #1a1a2e;
+        font-weight: 500;
+        font-size: 13px;
+        text-align: right;
+    }
+</style>

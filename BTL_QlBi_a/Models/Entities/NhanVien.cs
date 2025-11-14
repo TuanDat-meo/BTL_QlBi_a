@@ -28,6 +28,10 @@ namespace BTL_QlBi_a.Models.Entities
         [MaxLength(15)]
         public string? SDT { get; set; }
 
+        [MaxLength(100)]
+        [EmailAddress]
+        public string? Email { get; set; }
+
         [Column(TypeName = "decimal(12,0)")]
         public decimal LuongCoBan { get; set; } = 0;
 
