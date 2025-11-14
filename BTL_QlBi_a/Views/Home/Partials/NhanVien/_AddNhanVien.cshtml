@@ -1,7 +1,17 @@
-﻿<div class="add-employee-container">
+﻿<link rel="stylesheet" href="~/asset/css/qlNhanVien/addNhanVien.css" asp-append-version="true">
+<div class="add-employee-container">
+    <!-- Form Header Info -->
+    <div class="form-info-banner">
+        <div class="info-icon">📋</div>
+        <div class="info-content">
+            <div class="info-title">Thêm nhân viên mới</div>
+            <div class="info-subtitle">Điền đầy đủ thông tin bên dưới</div>
+        </div>
+    </div>
+
     <!-- Employee Basic Info -->
     <div class="form-section">
-        <h3 class="section-title">📋 Thông tin cơ bản</h3>
+        <h3 class="section-title">👤 Thông tin cơ bản</h3>
 
         <div class="form-row">
             <div class="form-group">
@@ -12,15 +22,18 @@
                        placeholder="Nhập họ và tên nhân viên"
                        required>
             </div>
+        </div>
 
+        <div class="form-row">
             <div class="form-group">
                 <label for="addSDT">Số điện thoại <span class="required">*</span></label>
                 <input type="tel"
                        id="addSDT"
                        class="form-control"
-                       placeholder="Nhập số điện thoại"
+                       placeholder="Nhập số điện thoại (10-11 số)"
                        pattern="[0-9]{10,11}"
                        required>
+                <small class="form-hint">Ví dụ: 0987654321</small>
             </div>
         </div>
 
@@ -32,7 +45,9 @@
                        class="form-control"
                        placeholder="Nhập email (tùy chọn)">
             </div>
+        </div>
 
+        <div class="form-row">
             <div class="form-group">
                 <label for="addMaNhom">Nhóm quyền <span class="required">*</span></label>
                 <select id="addMaNhom" class="form-control" required>
@@ -64,7 +79,9 @@
                 </div>
                 <small class="form-hint">Ví dụ: 5000000 → 5.000.000 VNĐ</small>
             </div>
+        </div>
 
+        <div class="form-row">
             <div class="form-group">
                 <label for="addPhuCap">Phụ cấp</label>
                 <div class="input-with-unit">
@@ -90,10 +107,12 @@
                 <input type="password"
                        id="addMatKhau"
                        class="form-control"
-                       placeholder="Nhập mật khẩu"
+                       placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                        required>
             </div>
+        </div>
 
+        <div class="form-row">
             <div class="form-group">
                 <label for="addMatKhauConfirm">Xác nhận mật khẩu <span class="required">*</span></label>
                 <input type="password"
@@ -105,62 +124,70 @@
         </div>
     </div>
 
-    <!-- Face ID -->
+    <!-- Face ID Section -->
     <div class="form-section">
         <h3 class="section-title">📸 Face ID (Tùy chọn)</h3>
 
-        <div class="face-capture-section">
-            <div class="camera-controls">
-                <button type="button"
-                        class="btn btn-primary"
-                        id="btnStartCamera"
-                        onclick="startAddEmployeeCamera()">
-                    <span class="btn-icon">📸</span>
-                    <span>Bật Camera</span>
-                </button>
+        <div class="camera-controls">
+            <button type="button"
+                    class="btn btn-primary"
+                    id="btnStartCamera"
+                    onclick="startAddEmployeeCamera()">
+                <span class="btn-icon">📸</span>
+                <span>Bật Camera</span>
+            </button>
 
-                <button type="button"
-                        class="btn btn-secondary"
-                        id="btnStopCamera"
-                        onclick="stopAddEmployeeCamera()"
-                        style="display: none;">
-                    <span class="btn-icon">🛑</span>
-                    <span>Tắt Camera</span>
-                </button>
+            <button type="button"
+                    class="btn btn-secondary"
+                    id="btnStopCamera"
+                    onclick="stopAddEmployeeCamera()"
+                    style="display: none;">
+                <span class="btn-icon">🛑</span>
+                <span>Tắt Camera</span>
+            </button>
 
-                <button type="button"
-                        class="btn btn-success"
-                        id="btnCaptureFace"
-                        onclick="captureAddEmployeeFace()"
-                        style="display: none;">
-                    <span class="btn-icon">📷</span>
-                    <span>Chụp ảnh</span>
-                </button>
+            <button type="button"
+                    class="btn btn-success"
+                    id="btnCaptureFace"
+                    onclick="captureAddEmployeeFace()"
+                    style="display: none;">
+                <span class="btn-icon">📷</span>
+                <span>Chụp ảnh</span>
+            </button>
+        </div>
+
+        <div class="face-preview-container" id="facePreviewContainer" style="display: none;">
+            <video id="addEmployeeVideo" autoplay playsinline></video>
+            <canvas id="addEmployeeCanvas" style="display: none;"></canvas>
+
+            <div class="face-overlay">
+                <div class="face-frame"></div>
             </div>
+        </div>
 
-            <div class="face-preview-container" id="facePreviewContainer" style="display: none;">
-                <video id="addEmployeeVideo" autoplay playsinline></video>
-                <canvas id="addEmployeeCanvas" style="display: none;"></canvas>
+        <div class="captured-face" id="capturedFaceContainer" style="display: none;">
+            <h4>✅ Ảnh đã chụp:</h4>
+            <img id="capturedFaceImage" alt="Captured face">
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="deleteCapturedFace()">
+                <span>🗑️ Xóa và chụp lại</span>
+            </button>
+        </div>
 
-                <div class="face-overlay">
-                    <div class="face-frame"></div>
-                </div>
-            </div>
+        <div class="face-status info" id="faceStatus">
+            <span class="status-icon">ℹ️</span>
+            <span>Nhấn "Bật Camera" để chụp ảnh Face ID cho nhân viên</span>
+        </div>
 
-            <div class="captured-face" id="capturedFaceContainer" style="display: none;">
-                <h4>Ảnh đã chụp:</h4>
-                <img id="capturedFaceImage" alt="Captured face">
-                <button type="button"
-                        class="btn btn-danger btn-sm"
-                        onclick="deleteCapturedFace()">
-                    <span>🗑️ Xóa ảnh</span>
-                </button>
-            </div>
-
-            <div class="face-status" id="faceStatus">
-                <span class="status-icon">ℹ️</span>
-                <span>Nhấn "Bật Camera" để chụp ảnh Face ID</span>
-            </div>
+        <div class="instruction-card">
+            <h4>📌 Hướng dẫn chụp Face ID:</h4>
+            <ul>
+                <li>✅ Đặt khuôn mặt vào khung hình tròn</li>
+                <li>✅ Giữ khuôn mặt thẳng, ánh sáng đủ</li>
+                <li>❌ Không đeo khẩu trang, kính đen</li>
+                <li>📷 Nhấn "Chụp ảnh" khi sẵn sàng</li>
+            </ul>
         </div>
     </div>
 
@@ -176,7 +203,7 @@
 
         <button type="button"
                 class="btn btn-secondary btn-lg"
-                onclick="closeModal()">
+                onclick="closeAddEmployeePanel()">
             <span class="btn-icon">❌</span>
             <span>Hủy</span>
         </button>
@@ -185,270 +212,43 @@
 
 <style>
     .add-employee-container {
-        padding: 20px;
-        max-width: 900px;
-        margin: 0 auto;
+        padding: 0;
     }
 
-    .form-section {
-        background: #f8f9fa;
+    .form-info-banner {
+        display: flex;
+        align-items: center;
+        gap: 15px;
         padding: 20px;
+        background: linear-gradient(135deg, #e7f3ff 0%, #d0e9ff 100%);
+        border: 1px solid #667eea;
         border-radius: 12px;
         margin-bottom: 20px;
     }
 
-    .section-title {
+    .info-icon {
+        font-size: 32px;
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-title {
         font-size: 16px;
         font-weight: 700;
         color: #1a1a2e;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        margin-bottom: 5px;
     }
 
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-        .form-row:last-child {
-            margin-bottom: 0;
-        }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-        .form-group label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 8px;
-        }
-
-    .required {
-        color: #dc3545;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid #dee2e6;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: all 0.3s;
-    }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-    .input-with-unit {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-        .input-with-unit input {
-            flex: 1;
-            padding-right: 60px;
-        }
-
-        .input-with-unit .unit {
-            position: absolute;
-            right: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #6c757d;
-            pointer-events: none;
-        }
-
-    .form-hint {
-        font-size: 12px;
-        color: #6c757d;
-        margin-top: 5px;
-        font-style: italic;
-    }
-
-    .camera-controls {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-
-    .face-preview-container {
-        position: relative;
-        width: 100%;
-        max-width: 500px;
-        margin: 0 auto 15px;
-        border-radius: 12px;
-        overflow: hidden;
-        background: #000;
-    }
-
-    #addEmployeeVideo {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .face-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-    }
-
-    .face-frame {
-        width: 60%;
-        padding-bottom: 80%;
-        border: 3px solid rgba(102, 126, 234, 0.8);
-        border-radius: 50%;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-        animation: pulse-border 2s infinite;
-    }
-
-    keyframes pulse-border {
-        0%, 100% {
-            border-color: rgba(102, 126, 234, 0.8);
-            transform: scale(1);
-        }
-
-        50% {
-            border-color: rgba(102, 126, 234, 1);
-            transform: scale(1.05);
-        }
-    }
-
-    .captured-face {
-        text-align: center;
-        padding: 15px;
-        background: white;
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-
-        .captured-face h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .captured-face img {
-            max-width: 300px;
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-    .face-status {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 15px;
-        background: #e7f3ff;
-        border: 1px solid #bee5eb;
-        border-radius: 8px;
-        font-size: 14px;
-        color: #0c5460;
-    }
-
-    .status-icon {
-        font-size: 20px;
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .btn {
-        flex: 1;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.3s;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-    }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-    .btn-success {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        color: white;
-    }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
-        }
-
-    .btn-danger {
-        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-        color: white;
-    }
-
-    .btn-sm {
-        padding: 8px 15px;
+    .info-subtitle {
         font-size: 13px;
+        color: #6c757d;
     }
 
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .btn-icon {
-        font-size: 16px;
-    }
-
-    media (max-width: 768px) {
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-
-        .camera-controls {
-            flex-direction: column;
-        }
-
-        .form-actions {
-            flex-direction: column;
-        }
+    .btn-lg {
+        padding: 14px 24px;
+        font-size: 15px;
     }
 </style>
 
