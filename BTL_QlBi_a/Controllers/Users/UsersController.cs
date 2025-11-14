@@ -16,6 +16,7 @@ namespace BTL_QlBi_a.Controllers.Users
         {
             var dsBan = await _context.BanBia
                 .Include(b => b.LoaiBan)
+                .Include(b => b.KhuVuc)
                 .OrderBy(b => b.TenBan)
                 .ToListAsync();
 

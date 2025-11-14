@@ -13,28 +13,118 @@
 </div>
 
 <div class="container mb-5" id="tables">
-    <h2 class="text-center mb-4 text-white" style="border-bottom: 2px solid #2a2a4e; padding-bottom: 10px; display: inline-block;">TRẠNG THÁI BÀN (LIVE)</h2>
-    <div class="row g-4">
-        @foreach (var ban in Model)
-        {
-            bool isTrong = ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong;
-            string color = isTrong ? "#28a745" : "#dc3545"; // Xanh hoặc Đỏ
-            string status = isTrong ? "Đang trống" : "Đang chơi";
-            string glow = isTrong ? "0 0 15px rgba(40, 167, 69, 0.5)" : "none";
+    <div class="text-center mb-4">
+        <h2 class="text-white section-heading">TRẢI NGHIỆM ĐẲNG CẤP</h2>
+        <p class="text-muted">Chọn loại bàn yêu thích của bạn</p>
+    </div>
 
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="card h-100" style="background-color: #16213e; border: 1px solid @color; box-shadow: @glow; transition: transform 0.3s;">
-                        <div class="card-body text-center">
-                            <div style="font-size: 3rem; margin-bottom: 10px;">🎱</div>
-                            <h5 class="card-title text-white">@ban.TenBan</h5>
-                            <p class="text-muted small">@ban.LoaiBan?.TenLoai</p>
-                            <span class="badge rounded-pill" style="background-color: @color; font-size: 0.9rem;">@status</span>
-                        </div>
+    @{
+        // Lấy danh sách các loại bàn duy nhất có trong DB
+        var listLoaiBan = Model.Select(b => b.LoaiBan).Where(l => l != null).DistinctBy(l => l.MaLoai).ToList();
+    }
+
+    <ul class="nav nav-pills justify-content-center mb-5" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill px-4" id="pills-all-tab" data-bs-toggle="pill" data-bs-target="#pills-all" type="button" role="tab">
+                Tất cả
+            </button>
+        </li>
+
+        @foreach (var loai in listLoaiBan)
+        {
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4" id="pills-@loai.MaLoai-tab" data-bs-toggle="pill" data-bs-target="#pills-@loai.MaLoai" type="button" role="tab">
+                    @loai.TenLoai
+                </button>
+            </li>
+        }
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+
+        <div class="tab-pane fade show active" id="pills-all" role="tabpanel">
+            <div class="row g-4">
+                @foreach (var ban in Model)
+                {
+                    RenderTableCard(ban);
+                 }
+            </div>
+        </div>
+
+        @foreach (var loai in listLoaiBan)
+        {
+                <div class="tab-pane fade" id="pills-@loai.MaLoai" role="tabpanel">
+                    <div class="row g-4">
+                    @foreach (var ban in Model.Where(b => b.MaLoai == loai.MaLoai))
+                    {
+                        RenderTableCard(ban);                  
+                    }
                     </div>
                 </div>
         }
     </div>
 </div>
+
+@{
+    void RenderTableCard(BTL_QlBi_a.Models.Entities.BanBia ban)
+    {
+        bool isTrong = ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong;
+        string statusColor = isTrong ? "#28a745" : "#dc3545";
+        string statusText = isTrong ? "Sẵn sàng" : "Đang chơi";
+        string glowClass = isTrong ? "glow-border" : "";
+
+        // Ảnh mặc định nếu chưa có ảnh
+        string imgSrc = string.IsNullOrEmpty(ban.HinhAnh)
+            ? "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=600&q=80" // Ảnh bi-a mẫu
+            : ban.HinhAnh; 
+
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="card h-100 table-card @glowClass">
+                        <div class="card-img-wrapper">
+                            <img src="@imgSrc" class="card-img-top" alt="@ban.TenBan">
+                            <div class="price-badge">
+                        @(ban.LoaiBan?.GiaGio.ToString("N0"))đ/h
+                            </div>
+                            <div class="status-badge" style="background-color: @statusColor">
+                        @if (isTrong)
+                        {
+                            <i class="fa-solid fa-check me-1"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-user-clock me-1"></i>
+                        }
+                        @statusText
+                            </div>
+                        </div>
+
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-white fw-bold">@ban.TenBan</h5>
+                            <p class="card-text text-muted small">
+                                <i class="fa-solid fa-layer-group me-1"></i> @(ban.LoaiBan?.TenLoai ?? "Bàn tiêu chuẩn") <br/>
+                                <i class="fa-solid fa-location-dot me-1"></i> @(ban.KhuVuc?.TenKhuVuc ?? "Sảnh chính")
+                            </p>
+
+                    @if (isTrong)
+                    {
+                        if (Context.Session.GetInt32("MaKH") != null)
+                        {
+                                            <button class="btn btn-info w-100 fw-bold" onclick="bookTable(@ban.MaBan)">ĐẶT BÀN NGAY</button>
+                        }
+                        else
+                        {
+                                            <a href="/Account/Login" class="btn btn-outline-light w-100 btn-sm">Đăng nhập để đặt</a>
+                        }
+                    }
+                    else
+                    {
+                                    <button class="btn btn-secondary w-100" disabled>Vui lòng chờ</button>
+                    }
+                        </div>
+                    </div>
+                </div>
+    }
+}
 
 <div class="container py-5" id="member">
     <div class="row justify-content-center">
