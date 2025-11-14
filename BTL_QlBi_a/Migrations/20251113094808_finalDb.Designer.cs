@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BTL_QlBi_a.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-<<<<<<<< HEAD:BTL_QlBi_a/Migrations/20251111141802_updateDB.Designer.cs
-    [Migration("20251111141802_updateDB")]
-    partial class updateDB
-========
-    [Migration("20251112020329_Init_Dabase")]
-    partial class Init_Dabase
->>>>>>>> master:BTL_QlBi_a/Migrations/20251112020329_Init_Dabase.Designer.cs
+    [Migration("20251113094808_finalDb")]
+    partial class finalDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -641,6 +636,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnName("ma_kh");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaKH"));
+
+                    b.Property<string>("Avatar")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("avatar");
 
                     b.Property<int>("DiemTichLuy")
                         .ValueGeneratedOnAdd()

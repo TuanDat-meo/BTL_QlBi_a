@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BTL_QlBi_a.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:BTL_QlBi_a/Migrations/20251111141802_updateDB.cs
-    public partial class updateDB : Migration
-========
-    public partial class Init_Dabase : Migration
->>>>>>>> master:BTL_QlBi_a/Migrations/20251112020329_Init_Dabase.cs
+    public partial class finalDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -44,7 +40,8 @@ namespace BTL_QlBi_a.Migrations
                     tong_chi_tieu = table.Column<decimal>(type: "decimal(12,0)", nullable: false, defaultValue: 0m),
                     ngay_dang_ky = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     lan_den_cuoi = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    hoat_dong = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    hoat_dong = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    avatar = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {

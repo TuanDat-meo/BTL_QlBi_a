@@ -1,204 +1,245 @@
-﻿<form id="formThemNhanVien" enctype="multipart/form-data">
-    <div class="form-row">
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Họ tên <span style="color: red;">*</span></label>
-            <input type="text"
-                   name="TenNV"
-                   class="form-control"
-                   placeholder="Nhập họ tên nhân viên"
-                   required>
-        </div>
+﻿<div class="add-employee-container">
+    <!-- Employee Basic Info -->
+    <div class="form-section">
+        <h3 class="section-title">📋 Thông tin cơ bản</h3>
 
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Số điện thoại <span style="color: red;">*</span></label>
-            <input type="tel"
-                   name="SDT"
-                   class="form-control"
-                   placeholder="0123456789"
-                   pattern="[0-9]{10,11}"
-                   required>
-        </div>
-    </div>
-
-    <div class="form-row">
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Email</label>
-            <input type="email"
-                   name="Email"
-                   class="form-control"
-                   placeholder="email@example.com">
-        </div>
-
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Nhóm quyền <span style="color: red;">*</span></label>
-            <select name="MaNhom" class="form-control" required>
-                <option value="">-- Chọn nhóm quyền --</option>
-                @foreach (var nhom in ViewBag.NhomQuyen)
-                {
-                    <option value="@nhom.MaNhom">@nhom.TenNhom</option>
-                }
-            </select>
-        </div>
-    </div>
-
-    <div class="form-row">
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Lương cơ bản (VNĐ) <span style="color: red;">*</span></label>
-            <input type="number"
-                   name="LuongCoBan"
-                   class="form-control"
-                   placeholder="5000000"
-                   min="0"
-                   step="100000"
-                   value="5000000"
-                   required>
-        </div>
-
-        <div class="form-group" style="flex: 1;">
-            <label class="form-label">Phụ cấp (VNĐ)</label>
-            <input type="number"
-                   name="PhuCap"
-                   class="form-control"
-                   placeholder="500000"
-                   min="0"
-                   step="100000"
-                   value="0">
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="form-label">Ca làm việc mặc định <span style="color: red;">*</span></label>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="radio" name="CaMacDinh" value="0" checked>
-                <span>🌅 Sáng (6h-14h)</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="radio" name="CaMacDinh" value="1">
-                <span>☀️ Chiều (14h-22h)</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="radio" name="CaMacDinh" value="2">
-                <span>🌙 Tối (18h-2h)</span>
-            </label>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="form-label">Mật khẩu <span style="color: red;">*</span></label>
-        <div style="position: relative;">
-            <input type="password"
-                   name="MatKhau"
-                   id="matKhauInput"
-                   class="form-control"
-                   placeholder="Nhập mật khẩu"
-                   minlength="6"
-                   required>
-            <button type="button"
-                    onclick="togglePassword('matKhauInput')"
-                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px;">
-                👁️
-            </button>
-        </div>
-        <small style="color: #6c757d; font-size: 11px;">Tối thiểu 6 ký tự</small>
-    </div>
-
-    <!-- Face ID Upload Section - UPDATED -->
-    <div class="form-group">
-        <label class="form-label">
-            📸 Ảnh Face ID
-            <span style="color: #667eea; font-size: 11px;">(Khuyến nghị)</span>
-        </label>
-
-        <div class="faceid-upload-container">
-            <!-- Upload Methods -->
-            <div class="upload-methods">
-                <button type="button" class="upload-method-btn active" onclick="switchUploadMethod('file')" data-method="file">
-                    📁 Chọn file
-                </button>
-                <button type="button" class="upload-method-btn" onclick="switchUploadMethod('camera')" data-method="camera">
-                    📷 Chụp ảnh
-                </button>
-            </div>
-
-            <!-- File Upload Method -->
-            <div id="fileUploadSection" class="upload-section active">
-                <input type="file"
-                       name="FaceIDAnh"
-                       id="faceIdFileInput"
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addTenNV">Họ và tên <span class="required">*</span></label>
+                <input type="text"
+                       id="addTenNV"
                        class="form-control"
-                       accept="image/jpeg,image/jpg,image/png"
-                       onchange="handleFileSelect(this)">
-                <div class="upload-hint">
-                    <span>📌 Chấp nhận: JPG, JPEG, PNG</span>
-                    <span>📏 Kích thước tối đa: 5MB</span>
-                    <span>👤 Nên chụp rõ khuôn mặt, ánh sáng đủ</span>
-                </div>
+                       placeholder="Nhập họ và tên nhân viên"
+                       required>
             </div>
 
-            <!-- Camera Upload Method -->
-            <div id="cameraUploadSection" class="upload-section">
-                <div class="camera-container">
-                    <video id="addFaceVideo" autoplay playsinline></video>
-                    <canvas id="addFaceCanvas" style="display: none;"></canvas>
-                    <div class="camera-overlay">
-                        <div class="face-guide"></div>
-                    </div>
-                </div>
-                <div class="camera-controls">
-                    <button type="button" class="btn btn-camera" onclick="startCamera()">
-                        📷 Bật camera
-                    </button>
-                    <button type="button" class="btn btn-capture" onclick="capturePhoto()" style="display: none;">
-                        📸 Chụp ảnh
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="stopCamera()" style="display: none;">
-                        ❌ Tắt camera
-                    </button>
-                </div>
+            <div class="form-group">
+                <label for="addSDT">Số điện thoại <span class="required">*</span></label>
+                <input type="tel"
+                       id="addSDT"
+                       class="form-control"
+                       placeholder="Nhập số điện thoại"
+                       pattern="[0-9]{10,11}"
+                       required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addEmail">Email</label>
+                <input type="email"
+                       id="addEmail"
+                       class="form-control"
+                       placeholder="Nhập email (tùy chọn)">
             </div>
 
-            <!-- Preview Section -->
-            <div id="faceIdPreview" class="preview-container"></div>
+            <div class="form-group">
+                <label for="addMaNhom">Nhóm quyền <span class="required">*</span></label>
+                <select id="addMaNhom" class="form-control" required>
+                    <option value="">-- Chọn nhóm quyền --</option>
+                    <option value="1">Admin</option>
+                    <option value="2">Quản lý</option>
+                    <option value="3">Thu ngân</option>
+                    <option value="4">Phục vụ</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <div class="form-actions" style="display: flex; gap: 10px; margin-top: 20px;">
-        <button type="button" class="btn btn-secondary" onclick="closeModal()" style="flex: 1;">
-            ❌ Hủy
+    <!-- Salary Info -->
+    <div class="form-section">
+        <h3 class="section-title">💰 Thông tin lương</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addLuongCoBan">Lương cơ bản <span class="required">*</span></label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="addLuongCoBan"
+                           class="form-control currency-input"
+                           placeholder="Nhập lương cơ bản"
+                           value="0"
+                           required>
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">Ví dụ: 5000000 → 5.000.000 VNĐ</small>
+            </div>
+
+            <div class="form-group">
+                <label for="addPhuCap">Phụ cấp</label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="addPhuCap"
+                           class="form-control currency-input"
+                           placeholder="Nhập phụ cấp"
+                           value="0">
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">Ví dụ: 500000 → 500.000 VNĐ</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-section">
+        <h3 class="section-title">🔐 Mật khẩu</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="addMatKhau">Mật khẩu <span class="required">*</span></label>
+                <input type="password"
+                       id="addMatKhau"
+                       class="form-control"
+                       placeholder="Nhập mật khẩu"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="addMatKhauConfirm">Xác nhận mật khẩu <span class="required">*</span></label>
+                <input type="password"
+                       id="addMatKhauConfirm"
+                       class="form-control"
+                       placeholder="Nhập lại mật khẩu"
+                       required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Face ID -->
+    <div class="form-section">
+        <h3 class="section-title">📸 Face ID (Tùy chọn)</h3>
+
+        <div class="face-capture-section">
+            <div class="camera-controls">
+                <button type="button"
+                        class="btn btn-primary"
+                        id="btnStartCamera"
+                        onclick="startAddEmployeeCamera()">
+                    <span class="btn-icon">📸</span>
+                    <span>Bật Camera</span>
+                </button>
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        id="btnStopCamera"
+                        onclick="stopAddEmployeeCamera()"
+                        style="display: none;">
+                    <span class="btn-icon">🛑</span>
+                    <span>Tắt Camera</span>
+                </button>
+
+                <button type="button"
+                        class="btn btn-success"
+                        id="btnCaptureFace"
+                        onclick="captureAddEmployeeFace()"
+                        style="display: none;">
+                    <span class="btn-icon">📷</span>
+                    <span>Chụp ảnh</span>
+                </button>
+            </div>
+
+            <div class="face-preview-container" id="facePreviewContainer" style="display: none;">
+                <video id="addEmployeeVideo" autoplay playsinline></video>
+                <canvas id="addEmployeeCanvas" style="display: none;"></canvas>
+
+                <div class="face-overlay">
+                    <div class="face-frame"></div>
+                </div>
+            </div>
+
+            <div class="captured-face" id="capturedFaceContainer" style="display: none;">
+                <h4>Ảnh đã chụp:</h4>
+                <img id="capturedFaceImage" alt="Captured face">
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="deleteCapturedFace()">
+                    <span>🗑️ Xóa ảnh</span>
+                </button>
+            </div>
+
+            <div class="face-status" id="faceStatus">
+                <span class="status-icon">ℹ️</span>
+                <span>Nhấn "Bật Camera" để chụp ảnh Face ID</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+        <button type="button"
+                class="btn btn-primary btn-lg"
+                id="btnSubmitAddEmployee"
+                onclick="submitAddEmployee()">
+            <span class="btn-icon">✅</span>
+            <span>Thêm nhân viên</span>
         </button>
-        <button type="submit" class="btn btn-primary" style="flex: 2;">
-            ✅ Thêm nhân viên
+
+        <button type="button"
+                class="btn btn-secondary btn-lg"
+                onclick="closeModal()">
+            <span class="btn-icon">❌</span>
+            <span>Hủy</span>
         </button>
     </div>
-</form>
+</div>
 
 <style>
-    /* Existing styles... */
-    .form-row {
+    .add-employee-container {
+        padding: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 15px;
         display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 15px;
         margin-bottom: 15px;
     }
 
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
     .form-group {
-        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
     }
 
-    .form-label {
-        display: block;
-        font-weight: 600;
-        font-size: 13px;
-        color: #495057;
-        margin-bottom: 6px;
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+    .required {
+        color: #dc3545;
     }
 
     .form-control {
         width: 100%;
-        padding: 8px 12px;
+        padding: 10px 12px;
         border: 2px solid #dee2e6;
         border-radius: 8px;
-        font-size: 13px;
+        font-size: 14px;
         transition: all 0.3s;
     }
 
@@ -208,86 +249,56 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-    input[type="radio"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
+    .input-with-unit {
+        position: relative;
+        display: flex;
+        align-items: center;
     }
 
-    /* Face ID Upload Styles */
-    .faceid-upload-container {
-        border: 2px dashed #dee2e6;
-        border-radius: 12px;
-        padding: 20px;
-        background: #f8f9fa;
+        .input-with-unit input {
+            flex: 1;
+            padding-right: 60px;
+        }
+
+        .input-with-unit .unit {
+            position: absolute;
+            right: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            pointer-events: none;
+        }
+
+    .form-hint {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+        font-style: italic;
     }
 
-    .upload-methods {
+    .camera-controls {
         display: flex;
         gap: 10px;
         margin-bottom: 15px;
     }
 
-    .upload-method-btn {
-        flex: 1;
-        padding: 10px;
-        border: 2px solid #dee2e6;
-        background: white;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-
-        .upload-method-btn:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-
-        .upload-method-btn.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-    .upload-section {
-        display: none;
-    }
-
-        .upload-section.active {
-            display: block;
-        }
-
-    .upload-hint {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        margin-top: 10px;
-        padding: 10px;
-        background: white;
-        border-radius: 8px;
-        font-size: 11px;
-        color: #6c757d;
-    }
-
-    .camera-container {
+    .face-preview-container {
         position: relative;
         width: 100%;
-        max-width: 400px;
+        max-width: 500px;
         margin: 0 auto 15px;
         border-radius: 12px;
         overflow: hidden;
         background: #000;
     }
 
-    #addFaceVideo {
+    #addEmployeeVideo {
         width: 100%;
         height: auto;
         display: block;
     }
 
-    .camera-overlay {
+    .face-overlay {
         position: absolute;
         top: 0;
         left: 0;
@@ -299,384 +310,152 @@
         pointer-events: none;
     }
 
-    .face-guide {
+    .face-frame {
         width: 60%;
         padding-bottom: 80%;
         border: 3px solid rgba(102, 126, 234, 0.8);
         border-radius: 50%;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        animation: pulse-border 2s infinite;
     }
 
-    .camera-controls {
+    keyframes pulse-border {
+        0%, 100% {
+            border-color: rgba(102, 126, 234, 0.8);
+            transform: scale(1);
+        }
+
+        50% {
+            border-color: rgba(102, 126, 234, 1);
+            transform: scale(1.05);
+        }
+    }
+
+    .captured-face {
+        text-align: center;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+        .captured-face h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .captured-face img {
+            max-width: 300px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+    .face-status {
         display: flex;
+        align-items: center;
         gap: 10px;
-        justify-content: center;
+        padding: 12px 15px;
+        background: #e7f3ff;
+        border: 1px solid #bee5eb;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0c5460;
     }
 
-    .btn-camera, .btn-capture {
-        padding: 10px 20px;
+    .status-icon {
+        font-size: 20px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px 20px;
         border: none;
         border-radius: 8px;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         transition: all 0.3s;
     }
 
-    .btn-camera {
+    .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
 
-    .btn-capture {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+    .btn-secondary {
+        background: #6c757d;
         color: white;
     }
 
-    .preview-container {
-        margin-top: 15px;
-        text-align: center;
-    }
-
-        .preview-container img {
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 12px;
-            border: 3px solid #667eea;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .btn-secondary:hover {
+            background: #5a6268;
         }
 
-    .preview-actions {
-        margin-top: 10px;
-        display: flex;
-        gap: 10px;
-        justify-content: center;
+    .btn-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
+        }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-icon {
+        font-size: 16px;
     }
 
     media (max-width: 768px) {
         .form-row {
-            flex-direction: column;
-            gap: 0;
+            grid-template-columns: 1fr;
         }
 
-        .camera-container {
-            max-width: 100%;
+        .camera-controls {
+            flex-direction: column;
+        }
+
+        .form-actions {
+            flex-direction: column;
         }
     }
 </style>
 
+<script src="~/asset/js/qlNhanVien/addEmployee.js"></script>
 <script>
-    let cameraStream = null;
-    let capturedImageBlob = null;
-
-    function togglePassword(inputId) {
-        const input = document.getElementById(inputId);
-        input.type = input.type === 'password' ? 'text' : 'password';
-    }
-
-        function switchUploadMethod(method, event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        // Update button states
-        document.querySelectorAll('#formThemNhanVien .upload-method-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        const clickedBtn = event ? event.currentTarget : document.querySelector(`[data-method="${method}"]`);
-        if (clickedBtn) clickedBtn.classList.add('active');
-
-        // Show/hide sections
-        const fileSection = document.getElementById('fileUploadSection');
-        const cameraSection = document.getElementById('cameraUploadSection');
-
-        if (method === 'file') {
-            fileSection?.classList.add('active');
-            cameraSection?.classList.remove('active');
-            stopCamera();
-        } else {
-            fileSection?.classList.remove('active');
-            cameraSection?.classList.add('active');
-        }
-    }
-        function handleFileSelect(input) {
-        const preview = document.getElementById('faceIdPreview');
-
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-
-            // Validate
-            if (!file.type.match('image/(jpeg|jpg|png)')) {
-                alert('❌ Chỉ chấp nhận file JPG, JPEG, PNG');
-                input.value = '';
-                return;
-            }
-
-            if (file.size > 5 * 1024 * 1024) {
-                alert('❌ Kích thước file không được vượt quá 5MB');
-                input.value = '';
-                return;
-            }
-
-            console.log('📁 File selected:', file.name, file.size, 'bytes');
-
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = `
-                    <div style="margin-top: 15px;">
-                        <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Ảnh đã chọn:</div>
-                        <img src="${e.target.result}" alt="Face ID Preview" style="max-width: 300px; max-height: 300px; border-radius: 12px; border: 3px solid #667eea; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                            <button type="button" class="btn btn-secondary" onclick="clearPreview()">
-                                🗑️ Xóa ảnh
-                            </button>
-                        </div>
-                    </div>
-                `;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-        async function startCamera() {
-        const video = document.getElementById('addFaceVideo');
-        const btnStart = document.querySelector('#cameraUploadSection .btn-camera');
-        const btnCapture = document.querySelector('#cameraUploadSection .btn-capture');
-        const btnStop = document.querySelector('#cameraUploadSection .btn-secondary');
-
-        if (!video) {
-            console.error('Video element not found');
-            return;
-        }
-
-        try {
-            console.log('📷 Starting camera...');
-
-            addCameraStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'user',
-                    width: { ideal: 640 },
-                    height: { ideal: 480 }
-                },
-                audio: false
-            });
-
-            video.srcObject = addCameraStream;
-
-            // Wait for video to be ready
-            await video.play();
-
-            console.log('✅ Camera started successfully');
-
-            // Update button visibility
-            if (btnStart) btnStart.style.display = 'none';
-            if (btnCapture) btnCapture.style.display = 'inline-block';
-            if (btnStop) btnStop.style.display = 'inline-block';
-
-        } catch (error) {
-            console.error('❌ Camera error:', error);
-            let errorMsg = 'Không thể truy cập camera';
-
-            if (error.name === 'NotAllowedError') {
-                errorMsg = 'Vui lòng cấp quyền truy cập camera';
-            } else if (error.name === 'NotFoundError') {
-                errorMsg = 'Không tìm thấy camera';
-            }
-
-            alert('❌ ' + errorMsg + '\n\n' + error.message);
-        }
-    }
-
-    function stopCamera() {
-        console.log('🛑 Stopping camera...');
-
-        if (addCameraStream) {
-            addCameraStream.getTracks().forEach(track => {
-                track.stop();
-                console.log('✓ Stopped track:', track.label);
-            });
-            addCameraStream = null;
-        }
-
-        const video = document.getElementById('addFaceVideo');
-        if (video) {
-            video.srcObject = null;
-        }
-
-        // Reset buttons
-        const btnStart = document.querySelector('#cameraUploadSection .btn-camera');
-        const btnCapture = document.querySelector('#cameraUploadSection .btn-capture');
-        const btnStop = document.querySelector('#cameraUploadSection .btn-secondary');
-
-        if (btnStart) btnStart.style.display = 'inline-block';
-        if (btnCapture) btnCapture.style.display = 'none';
-        if (btnStop) btnStop.style.display = 'none';
-    }
-
-
-        function capturePhoto() {
-        const video = document.getElementById('addFaceVideo');
-        const canvas = document.getElementById('addFaceCanvas');
-        const preview = document.getElementById('faceIdPreview');
-
-        if (!video || !canvas) {
-            console.error('Video or canvas not found');
-            return;
-        }
-
-        // Check if video is playing
-        if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-            alert('⚠️ Video chưa sẵn sàng. Vui lòng đợi một chút.');
-            return;
-        }
-
-        console.log('📸 Capturing photo...');
-
-        // Set canvas size to match video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        // Draw current frame
-        const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert to blob
-        canvas.toBlob(function(blob) {
-            if (!blob) {
-                alert('❌ Không thể chụp ảnh. Vui lòng thử lại.');
-                return;
-            }
-
-            addCapturedBlob = blob;
-            console.log('✅ Photo captured:', blob.size, 'bytes');
-
-            // Show preview
-            const url = URL.createObjectURL(blob);
-            preview.innerHTML = `
-                <div style="margin-top: 15px;">
-                    <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Ảnh vừa chụp:</div>
-                    <img src="${url}" alt="Captured Photo" style="max-width: 300px; max-height: 300px; border-radius: 12px; border: 3px solid #667eea; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                        <button type="button" class="btn btn-secondary" onclick="retakePhoto()">
-                            🔄 Chụp lại
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="confirmPhoto()">
-                            ✅ Sử dụng ảnh này
-                        </button>
-                    </div>
-                </div>
-            `;
-
-        }, 'image/jpeg', 0.95);
-    }
-
-
-    function retakePhoto() {
-        const preview = document.getElementById('faceIdPreview');
-        if (preview) preview.innerHTML = '';
-        addCapturedBlob = null;
-    }
-
-    function confirmPhoto() {
-        if (!addCapturedBlob) {
-            alert('❌ Không có ảnh để xác nhận');
-            return;
-        }
-
-        console.log('✅ Confirming photo...');
-
-        // Create File from Blob
-        const file = new File([addCapturedBlob], 'face-capture.jpg', { type: 'image/jpeg' });
-
-        // Create DataTransfer to set file input
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-
-        const fileInput = document.getElementById('faceIdFileInput');
-        if (fileInput) {
-            fileInput.files = dataTransfer.files;
-            console.log('✅ File set to input:', fileInput.files[0].name);
-        }
-
-        // Stop camera
-        stopCamera();
-
-        // Switch to file method to show preview
-        switchUploadMethod('file');
-
-        // Show preview in file section
-        const preview = document.getElementById('faceIdPreview');
-        const url = URL.createObjectURL(addCapturedBlob);
-        preview.innerHTML = `
-            <div style="margin-top: 15px;">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Ảnh đã chọn:</div>
-                <img src="${url}" alt="Selected Photo" style="max-width: 300px; max-height: 300px; border-radius: 12px; border: 3px solid #28a745; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                    <button type="button" class="btn btn-secondary" onclick="clearPreview()">
-                        🗑️ Xóa ảnh
-                    </button>
-                </div>
-            </div>
-        `;
-
-        alert('✅ Đã chọn ảnh thành công!');
-    }
-    function clearPreview() {
-        const preview = document.getElementById('faceIdPreview');
-        const fileInput = document.getElementById('faceIdFileInput');
-
-        if (preview) preview.innerHTML = '';
-        if (fileInput) fileInput.value = '';
-        addCapturedBlob = null;
-    }
-
-    // Form submission
-    document.getElementById('formThemNhanVien').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        // If using captured photo, ensure it's in the form data
-        if (capturedImageBlob && !formData.get('FaceIDAnh')) {
-            formData.append('FaceIDAnh', capturedImageBlob, 'face-capture.jpg');
-        }
-
-        try {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Đang xử lý...';
-
-            const response = await fetch('/NhanVien/ThemNhanVien', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('✅ ' + result.message);
-                stopCamera();
-                closeModal();
-                location.reload();
-            } else {
-                alert('❌ ' + result.message);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '✅ Thêm nhân viên';
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('❌ Có lỗi xảy ra: ' + error.message);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '✅ Thêm nhân viên';
-        }
-    });
-
-    // Cleanup when modal closes
-    window.addEventListener('beforeunload', function() {
-        stopCamera();
+    // Initialize currency inputs when modal loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCurrencyInputs();
     });
 </script>

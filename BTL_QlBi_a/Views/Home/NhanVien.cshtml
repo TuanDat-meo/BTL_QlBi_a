@@ -27,7 +27,7 @@
             @if (isAdmin || isQuanLy)
             {
                 <button class="btn btn-primary" onclick="NhanVienManager.openAddModal()">
-                    Thêm nhân viên
+                    ➕ Thêm nhân viên
                 </button>
                 <button class="btn btn-primary" onclick="openAttendanceModal()">
                     Chấm công
@@ -85,27 +85,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="filter-row">
-            <div class="filter-group">
-                <span class="filter-label">Ca làm việc:</span>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="NhanVienManager.filterByShift('all', event)">
-                        Tất cả
-                    </button>
-                    <button class="filter-btn" onclick="NhanVienManager.filterByShift('Sáng', event)">
-                        Sáng
-                    </button>
-                    <button class="filter-btn" onclick="NhanVienManager.filterByShift('Chiều', event)">
-                        Chiều
-                    </button>
-                    <button class="filter-btn" onclick="NhanVienManager.filterByShift('Tối', event)">
-                        Tối
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div class="filter-row">
             <input type="text"
                    class="search-input"
@@ -146,7 +125,7 @@
 @section Scripts {
     <script src="~/asset/js/qlNhanVien/nhanVienManager.js"></script>
     <script src="~/asset/js/qlNhanVien/attendance.js"></script>
-    <script src="~/asset/js/qlNhanVien/faceId.js"></script>
+    <script src="~/asset/js/qlNhanVien/addEmployee.js"></script>
     <script src="~/asset/js/qlNhanVien/schedule.js"></script>
     <script>
         // Store current user info globally

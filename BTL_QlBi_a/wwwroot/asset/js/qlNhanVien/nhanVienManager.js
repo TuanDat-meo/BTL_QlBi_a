@@ -133,16 +133,12 @@
         this.applyFilters();
     },
 
-    openAddModal: async function () {
-        try {
-            const response = await fetch('/NhanVien/FormThemNhanVien');
-            if (!response.ok) throw new Error('Failed to load form');
-
-            const html = await response.text();
-            openModal('➕ Thêm nhân viên mới', html);
-        } catch (error) {
-            console.error('Error:', error);
-            this.showNotification('❌ Có lỗi khi tải form: ' + error.message, 'error');
+    openAddModal: function () {
+        if (typeof openAddEmployeePanel === 'function') {
+            openAddEmployeePanel();
+        } else {
+            console.error('❌ openAddEmployeePanel not found');
+            alert('⚠️ Chức năng thêm nhân viên chưa được tải. Vui lòng thử lại.');
         }
     },
 

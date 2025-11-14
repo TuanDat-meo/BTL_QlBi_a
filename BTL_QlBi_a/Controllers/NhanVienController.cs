@@ -179,15 +179,16 @@ namespace BTL_QlBi_a.Controllers
         [HttpGet]
         public async Task<IActionResult> FormThemNhanVien()
         {
-            if (!KiemTraQuyen(new[] { "Admin", "Quản lý" }))
+            try
             {
-                return Forbid();
+                // Return partial view cho modal chấm công
+                return PartialView("~/Views/Home/Partials/NhanVien/_AddNhanVien.cshtml");
             }
-
-            var nhomQuyen = await _context.NhomQuyen.ToListAsync();
-            ViewBag.NhomQuyen = nhomQuyen;
-
-            return PartialView("~/Views/Home/Partials/NhanVien/_AddNhanVien.cshtml");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetAttendanceModal: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
 
         [HttpPost]
@@ -200,6 +201,7 @@ namespace BTL_QlBi_a.Controllers
                     return Json(new { success = false, message = "Không có quyền thực hiện" });
                 }
 
+                // Validate required fields
                 if (string.IsNullOrWhiteSpace(request.TenNV))
                     return Json(new { success = false, message = "Vui lòng nhập tên nhân viên" });
 
@@ -209,6 +211,7 @@ namespace BTL_QlBi_a.Controllers
                 if (string.IsNullOrWhiteSpace(request.MatKhau))
                     return Json(new { success = false, message = "Vui lòng nhập mật khẩu" });
 
+                // Check duplicate phone number
                 var sdtTonTai = await _context.NhanVien.AnyAsync(nv => nv.SDT == request.SDT);
                 if (sdtTonTai)
                     return Json(new { success = false, message = "Số điện thoại đã được sử dụng" });
@@ -216,13 +219,25 @@ namespace BTL_QlBi_a.Controllers
                 string faceIdPath = null;
                 string faceIdHash = null;
 
-                // Xử lý Face ID nếu có upload
+                // Process Face ID if uploaded
                 if (request.FaceIDAnh != null && request.FaceIDAnh.Length > 0)
                 {
+                    Console.WriteLine($"📸 Processing Face ID image: {request.FaceIDAnh.FileName}");
+
                     faceIdPath = await SaveImageAsync(request.FaceIDAnh);
-                    faceIdHash = await GenerateFaceHashFromFile(request.FaceIDAnh);
+                    if (!string.IsNullOrEmpty(faceIdPath))
+                    {
+                        faceIdHash = await GenerateFaceHashFromFile(request.FaceIDAnh);
+                        Console.WriteLine($"✅ Face ID saved: {faceIdPath}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ Failed to save Face ID image");
+                    }
                 }
 
+                // Create new employee
+                // NOTE: CaMacDinh defaults to 0 (or you can set a default value)
                 var nhanVienMoi = new NhanVien
                 {
                     TenNV = request.TenNV,
@@ -231,7 +246,7 @@ namespace BTL_QlBi_a.Controllers
                     MaNhom = request.MaNhom,
                     LuongCoBan = request.LuongCoBan,
                     PhuCap = request.PhuCap,
-                    CaMacDinh = request.CaMacDinh,
+                    CaMacDinh = CaLamViec.Sang, // Default shift - can be changed later
                     TrangThai = TrangThaiNhanVien.DangLam,
                     MatKhau = HashPassword(request.MatKhau),
                     FaceIDAnh = faceIdPath,
@@ -241,7 +256,9 @@ namespace BTL_QlBi_a.Controllers
                 _context.NhanVien.Add(nhanVienMoi);
                 await _context.SaveChangesAsync();
 
-                // Ghi log
+                Console.WriteLine($"✅ Employee added: #{nhanVienMoi.MaNV} - {nhanVienMoi.TenNV}");
+
+                // Log activity
                 int? maNV = HttpContext.Session.GetInt32("MaNV");
                 if (maNV.HasValue)
                 {
@@ -250,21 +267,27 @@ namespace BTL_QlBi_a.Controllers
                         MaNV = maNV.Value,
                         ThoiGian = DateTime.Now,
                         HanhDong = "Thêm nhân viên",
-                        ChiTiet = $"Thêm nhân viên {request.TenNV} (ID: {nhanVienMoi.MaNV})"
+                        ChiTiet = $"Thêm nhân viên {request.TenNV} (ID: {nhanVienMoi.MaNV})" +
+                                 (faceIdPath != null ? " - Có Face ID" : "")
                     };
                     _context.LichSuHoatDong.Add(lichSu);
                     await _context.SaveChangesAsync();
                 }
 
-                return Json(new { success = true, message = "Thêm nhân viên thành công" });
+                return Json(new
+                {
+                    success = true,
+                    message = "Thêm nhân viên thành công" + (faceIdPath != null ? " (Đã lưu Face ID)" : ""),
+                    employeeId = nhanVienMoi.MaNV
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in ThemNhanVien: {ex.Message}");
+                Console.WriteLine($"❌ Error in ThemNhanVien: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> CalculateSalary([FromBody] CalculateSalaryRequest request)
         {
@@ -2555,7 +2578,6 @@ namespace BTL_QlBi_a.Controllers
         public int MaNhom { get; set; }
         public decimal LuongCoBan { get; set; }
         public decimal PhuCap { get; set; }
-        public CaLamViec CaMacDinh { get; set; }
         public string MatKhau { get; set; } = "";
         public IFormFile? FaceIDAnh { get; set; }
     }
