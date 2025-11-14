@@ -1,0 +1,106 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.BanBia>
+@{
+    Layout = "~/Views/Shared/_LayoutUser.cshtml"; // Trỏ vào layout mới tạo
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1571216821602-74eb236332d3?q=80&w=1920'); background-size: cover; padding: 100px 0; border-bottom: 4px solid #00f2fe; margin-bottom: 40px;">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold text-white mb-3">ĐẲNG CẤP BI-A CHUYÊN NGHIỆP</h1>
+        <p class="lead text-light mb-4">Không gian sang trọng - Bàn chuẩn thi đấu</p>
+        <a href="#member" class="btn btn-lg btn-info fw-bold" style="background: #00f2fe; border: none; color: #000;">TRA CỨU HẠNG NGAY</a>
+    </div>
+</div>
+
+<div class="container mb-5" id="tables">
+    <h2 class="text-center mb-4 text-white" style="border-bottom: 2px solid #2a2a4e; padding-bottom: 10px; display: inline-block;">TRẠNG THÁI BÀN (LIVE)</h2>
+    <div class="row g-4">
+        @foreach (var ban in Model)
+        {
+            bool isTrong = ban.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong;
+            string color = isTrong ? "#28a745" : "#dc3545"; // Xanh hoặc Đỏ
+            string status = isTrong ? "Đang trống" : "Đang chơi";
+            string glow = isTrong ? "0 0 15px rgba(40, 167, 69, 0.5)" : "none";
+
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card h-100" style="background-color: #16213e; border: 1px solid @color; box-shadow: @glow; transition: transform 0.3s;">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🎱</div>
+                            <h5 class="card-title text-white">@ban.TenBan</h5>
+                            <p class="text-muted small">@ban.LoaiBan?.TenLoai</p>
+                            <span class="badge rounded-pill" style="background-color: @color; font-size: 0.9rem;">@status</span>
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+</div>
+
+<div class="container py-5" id="member">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="p-4" style="background: #16213e; border-radius: 15px; border: 1px solid #2a2a4e; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <h3 class="text-center mb-4 text-white">👑 KIỂM TRA HẠNG THÀNH VIÊN</h3>
+
+                <div class="input-group mb-3">
+                    <input type="text" id="sdtInput" class="form-control form-control-lg" placeholder="Nhập số điện thoại...">
+                    <button class="btn btn-info" onclick="lookupMember()" style="background: #00f2fe; color: #000; font-weight: bold;">Kiểm tra</button>
+                </div>
+
+                <div id="memberResult" class="text-center mt-4" style="display: none;">
+                    <div style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #00f2fe; overflow: hidden; margin: 0 auto 15px auto;">
+                        <img id="resAvatar" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h4 id="resName" class="text-white fw-bold"></h4>
+                    <div id="resRank" class="mb-3"></div>
+
+                    <div class="row text-white border-top border-secondary pt-3">
+                        <div class="col-6 border-end border-secondary">
+                            <small class="d-block text-muted">Điểm tích lũy</small>
+                            <span class="fw-bold fs-4 text-warning" id="resPoint"></span>
+                        </div>
+                        <div class="col-6">
+                            <small class="d-block text-muted">Tổng chi tiêu</small>
+                            <span class="fw-bold fs-4 text-info" id="resSpend"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            async function lookupMember() {
+                const sdt = document.getElementById('sdtInput').value;
+                if (!sdt) { alert('Vui lòng nhập SĐT!'); return; }
+
+                // URL gọi về Controller Users, Action TraCuuThanhVien
+                const url = '/Users/TraCuuThanhVien?sdt=' + sdt;
+
+                try {
+                    const response = await fetch(url);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const data = result.data;
+                        document.getElementById('resName').innerText = data.ten;
+                        document.getElementById('resRank').innerHTML = `<span class="badge bg-warning text-dark">${data.hang}</span>`;
+                        document.getElementById('resPoint').innerText = data.diem;
+                        document.getElementById('resSpend').innerText = data.chiTieu;
+                        document.getElementById('resAvatar').src = data.avatar;
+
+                        // Hiệu ứng hiện ra
+                        document.getElementById('memberResult').style.display = 'block';
+                    } else {
+                        alert(result.message);
+                        document.getElementById('memberResult').style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Lỗi kết nối!');
+                }
+            }
+        </script>
+}

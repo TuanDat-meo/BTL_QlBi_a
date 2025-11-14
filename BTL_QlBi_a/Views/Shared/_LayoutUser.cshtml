@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CLB Bi-a Pro</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <style>
+        /* CSS Inline tạm thời cho giao diện tối màu (Dark Theme) */
+        :root {
+            --primary-color: #00f2fe;
+            --secondary-color: #4facfe;
+            --bg-dark: #1a1a2e;
+            --card-bg: #16213e;
+        }
+        body { background-color: var(--bg-dark); color: white; font-family: sans-serif; }
+        .navbar { background: rgba(26, 26, 46, 0.95); border-bottom: 1px solid #2a2a4e; }
+        .navbar-brand {
+            font-weight: 800;
+            background: -webkit-linear-gradient(var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-link { color: #fff !important; }
+        .nav-link:hover { color: var(--primary-color) !important; }
+        footer { background-color: #0f3460; padding: 20px 0; margin-top: 50px; text-align: center; color: #ccc; }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/Users">🎱 BI-A PRO CLUB</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/Users">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tables">Bàn chơi</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-outline-info px-3" href="#member" style="border: 1px solid var(--primary-color);">Tra cứu hội viên</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div style="margin-top: 70px; min-height: 80vh;">
+        @RenderBody()
+    </div>
+
+    <footer>
+        <div class="container">
+            &copy; 2025 - CLB Bi-a Pro - Design by You
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
