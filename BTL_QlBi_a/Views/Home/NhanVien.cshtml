@@ -1,5 +1,150 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.NhanVien>
 @{
+    // Lấy thông tin user từ session
+    var tenNhom = Context.Session.GetString("TenNhom") ?? "Phục vụ";
+    var chucVu = Context.Session.GetString("ChucVu") ?? tenNhom;
+    var tenNV = Context.Session.GetString("TenNV") ?? "User";
+    var maNV = Context.Session.GetInt32("MaNV");
+
+    // Kiểm tra quyền - QUAN TRỌNG: So sánh chính xác
+    bool isAdmin = tenNhom == "Admin" || chucVu == "Admin";
+    bool isQuanLy = tenNhom == "Quản lý" || chucVu == "Quản lý" || isAdmin;
+
+    // Set ViewBag để truyền cho partial view
+    ViewBag.TenNhom = tenNhom;
+    ViewBag.ChucVu = chucVu;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/qlNhanVien/nhanvien.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/asset/css/qlNhanVien/schedule.css" asp-append-version="true">
+}
+
+<section class="page-section active" id="page-nhanvien">
+    <div class="section-header">
+        <h2 class="section-title">👔 Quản lý nhân viên</h2>
+        <div class="action-buttons">
+            @if (isAdmin || isQuanLy)
+            {
+                <button class="btn btn-primary" onclick="NhanVienManager.openAddModal()">
+                    Thêm nhân viên
+                </button>
+                <button class="btn btn-primary" onclick="openAttendanceModal()">
+                    Chấm công
+                </button>
+                <button class="btn btn-primary" onclick="openScheduleModal()">
+                    Ca làm
+                </button>
+            }
+            else
+            {
+                @* Nhân viên thường cũng có thể chấm công bằng Face ID *@
+                <button class="btn btn-primary" onclick="openAttendanceModal()">
+                    Chấm công
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">Trạng thái:</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="NhanVienManager.filterByStatus('all', event)">
+                        Tất cả
+                    </button>
+                    <button class="filter-btn" onclick="NhanVienManager.filterByStatus('DangLam', event)">
+                        Đang làm
+                    </button>
+                    <button class="filter-btn" onclick="NhanVienManager.filterByStatus('Nghi', event)">
+                        Nghỉ việc
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">Nhóm quyền:</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="NhanVienManager.filterByRole('all', event)">
+                        Tất cả
+                    </button>
+                    <button class="filter-btn" onclick="NhanVienManager.filterByRole('Admin', event)">
+                        Admin
+                    </button>
+                    <button class="filter-btn" onclick="NhanVienManager.filterByRole('Quản lý', event)">
+                        Quản lý
+                    </button>
+                    <button class="filter-btn" onclick="NhanVienManager.filterByRole('Thu ngân', event)">
+                        Thu ngân
+                    </button>
+                    <button class="filter-btn" onclick="NhanVienManager.filterByRole('Phục vụ', event)">
+                        Phục vụ
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="filter-row">
+            <input type="text"
+                   class="search-input"
+                   placeholder="Tìm kiếm theo tên, số điện thoại..."
+                   id="searchNhanVien"
+                   onkeyup="NhanVienManager.search()">
+        </div>
+    </div>
+
+    <!-- Scrollable Container -->
+    <div class="employees-container">
+        @if (Model != null && Model.Any())
+        {
+            <div class="employees-grid" id="employeesGrid">
+                @foreach (var nv in Model)
+                {
+                    @await Html.PartialAsync("~/Views/Home/Partials/NhanVien/_EmployeeCard.cshtml", nv)
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <h3>Không có nhân viên nào</h3>
+                <p class="empty-text">Chưa có nhân viên trong hệ thống</p>
+                @if (isAdmin || isQuanLy)
+                {
+                    <button class="btn btn-primary" onclick="NhanVienManager.openAddModal()" style="margin-top: 20px;">
+                        ➕ Thêm nhân viên đầu tiên
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/asset/js/qlNhanVien/nhanVienManager.js"></script>
+    <script src="~/asset/js/qlNhanVien/attendance.js"></script>
+    <script src="~/asset/js/qlNhanVien/addEmployee.js"></script>
+    <script src="~/asset/js/qlNhanVien/schedule.js"></script>
+    <script>
+        // Store current user info globally
+        window.currentUserInfo = {
+            maNV: @(maNV ?? 0),
+            tenNV: '@tenNV',
+            tenNhom: '@tenNhom',
+            chucVu: '@chucVu',
+            isAdmin: @isAdmin.ToString().ToLower(),
+            isQuanLy: @isQuanLy.ToString().ToLower()
+        };
+
+        // Debug log
+        console.log('✅ User Session Info:', window.currentUserInfo);
+        console.log('📸 Face Recognition Attendance System Ready');
+
+        // Helper function for schedule management (placeholder)
+        function openScheduleManagement() {
+            alert('⚠️ Chức năng quản lý ca làm việc đang được phát triển');
+        }
+    </script>
 }

@@ -1,0 +1,631 @@
+﻿<div class="attendance-modal-container">
+    <!-- Employee Info (Hidden initially, shown after recognition) -->
+    <div id="recognizedEmployeeInfo" class="employee-info-section" style="display: none;">
+        <!-- Will be populated after face recognition -->
+    </div>
+
+    <!-- Attendance Status -->
+    <div id="attendanceStatus" class="attendance-status-section">
+        <div class="status-info info">
+            <span class="status-icon">👤</span>
+            <div class="status-content">
+                <div class="status-title">Hệ thống chấm công</div>
+                <div class="status-subtitle">Chọn phương thức chấm công</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Method Selection -->
+    <div class="method-selection">
+        <div class="method-buttons">
+            <button class="method-btn active" data-method="faceid" onclick="selectAttendanceMethod('faceid')">
+                <span class="method-text">Face ID</span>
+            </button>
+            <button class="method-btn" data-method="manual" onclick="openManualAttendanceModal()">
+                <span class="method-text">Thủ công</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Face ID Section -->
+    <div id="faceidSection" class="method-section active">
+        <div class="face-capture-area">
+            <div class="face-video-container">
+                <video id="attendanceFaceVideo" autoplay playsinline></video>
+                <canvas id="attendanceFaceCanvas" style="display: none;"></canvas>
+                <div class="face-overlay">
+                    <div class="face-frame"></div>
+                </div>
+            </div>
+            <div id="faceidStatus" class="biometric-status info">
+                <span class="status-icon">📸</span>
+                <span>Đang khởi động camera...</span>
+            </div>
+        </div>
+
+        <div class="instruction-card">
+            <h4>📌 Hướng dẫn:</h4>
+            <ul>
+                <li>✅ Đặt khuôn mặt vào khung hình</li>
+                <li>✅ Giữ khuôn mặt thẳng, ánh sáng đủ</li>
+                <li>❌ Không đeo khẩu trang, kính đen</li>
+                <li>🔄 Hệ thống sẽ tự động nhận diện</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Manual Section -->
+    <div id="manualSection" class="method-section">
+        <div class="manual-form">
+            <div class="form-group">
+                <label for="manualMaNV">Mã nhân viên: <span style="color: red;">*</span></label>
+                <input type="number"
+                       id="manualMaNV"
+                       class="form-control"
+                       placeholder="Nhập mã nhân viên"
+                       onchange="loadEmployeeInfo(this.value)">
+            </div>
+
+            <div id="manualEmployeeInfo" style="display: none; margin-top: 15px;">
+                <!-- Employee info will be loaded here -->
+            </div>
+
+            <div class="instruction-card" style="margin-top: 15px;">
+                <h4>📌 Hướng dẫn:</h4>
+                <ul>
+                    <li>✏️ Nhập mã nhân viên của bạn</li>
+                    <li>✅ Hệ thống sẽ tự động kiểm tra trạng thái</li>
+                    <li>⏰ Nhấn nút Check-in hoặc Check-out tương ứng</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Input (Optional) -->
+    <div class="note-section">
+        <label for="ghiChu">📝 Ghi chú (tùy chọn):</label>
+        <textarea id="ghiChu"
+                  rows="2"
+                  placeholder="Nhập ghi chú nếu cần..."></textarea>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button id="submitAttendanceBtn"
+                class="btn btn-primary btn-checkin"
+                onclick="submitAttendance()"
+                disabled>
+            <span class="btn-icon">⏰</span>
+            <span>Vui lòng nhận diện</span>
+        </button>
+        <button class="btn btn-secondary" onclick="closeAttendanceModal()">
+            <span class="btn-icon">❌</span>
+            <span>Đóng</span>
+        </button>
+    </div>
+</div>
+
+<style>
+    .attendance-modal-container {
+        padding: 0;
+    }
+
+    .employee-info-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        color: white;
+    }
+
+    .employee-recognized {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .employee-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+        .employee-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+    }
+
+    .employee-details {
+        flex: 1;
+    }
+
+    .employee-name {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .employee-role {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .attendance-status-section {
+        margin-bottom: 20px;
+    }
+
+    .status-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        border-radius: 10px;
+        background: #f8f9fa;
+    }
+
+        .status-info.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #28a745;
+        }
+
+        .status-info.pending {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffc107;
+        }
+
+        .status-info.complete {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border: 1px solid #17a2b8;
+        }
+
+        .status-info.info {
+            background: linear-gradient(135deg, #e7f3ff 0%, #d0e9ff 100%);
+            border: 1px solid #667eea;
+        }
+
+    .status-icon {
+        font-size: 32px;
+    }
+
+    .status-content {
+        flex: 1;
+    }
+
+    .status-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 5px;
+    }
+
+    .status-subtitle {
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    .status-time {
+        font-size: 24px;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .status-detail {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #495057;
+        margin-top: 5px;
+    }
+
+    .divider {
+        color: #dee2e6;
+    }
+
+    .total-hours {
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .method-selection {
+        margin-bottom: 20px;
+    }
+
+    .method-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .method-btn {
+        padding: 10px 20px;
+        border: 2px solid #e9ecef;
+        background: white;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .method-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .method-btn.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+    .method-icon {
+        font-size: 32px;
+    }
+
+    .method-text {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .method-section {
+        display: none;
+    }
+
+        .method-section.active {
+            display: block;
+        }
+
+    .face-capture-area {
+        margin-bottom: 20px;
+    }
+
+    .face-video-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto 15px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+    }
+
+    #attendanceFaceVideo {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .face-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .face-frame {
+        width: 60%;
+        padding-bottom: 80%;
+        border: 3px solid rgba(102, 126, 234, 0.8);
+        border-radius: 50%;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        animation: pulse-border 2s infinite;
+    }
+
+    keyframes pulse-border {
+        0%, 100% {
+            border-color: rgba(102, 126, 234, 0.8);
+            transform: scale(1);
+        }
+
+        50% {
+            border-color: rgba(102, 126, 234, 1);
+            transform: scale(1.05);
+        }
+    }
+
+    .biometric-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+        .biometric-status.info {
+            background: #e7f3ff;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .biometric-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .biometric-status.processing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .biometric-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+    .status-spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .instruction-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+
+        .instruction-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+
+        .instruction-card ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.8;
+        }
+
+    .manual-form .form-group {
+        margin-bottom: 15px;
+    }
+
+        .manual-form .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+    #manualEmployeeInfo {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 15px;
+        border-radius: 10px;
+        color: white;
+    }
+
+        #manualEmployeeInfo .employee-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        #manualEmployeeInfo .employee-role {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+    .note-section {
+        margin-bottom: 20px;
+    }
+
+        .note-section label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .note-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 13px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+            .note-section textarea:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary.ready {
+            animation: pulse-ready 1.5s infinite;
+        }
+
+    keyframes pulse-ready {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .btn-checkin {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .btn-checkout {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn.disabled {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .btn-icon {
+        font-size: 16px;
+    }
+
+    .btn-spinner {
+        animation: spin 1s linear infinite;
+    }
+</style>
+
+<script>
+    // Show employee info section when recognized
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new MutationObserver(function(mutations) {
+            const employeeInfo = document.getElementById('recognizedEmployeeInfo');
+            if (employeeInfo && employeeInfo.innerHTML.trim() !== '') {
+                employeeInfo.style.display = 'block';
+            }
+        });
+
+        const employeeInfoEl = document.getElementById('recognizedEmployeeInfo');
+        if (employeeInfoEl) {
+            observer.observe(employeeInfoEl, {
+                childList: true,
+                subtree: true
+            });
+        }
+    });
+
+    // Load employee info for manual check-in
+    async function loadEmployeeInfo(maNV) {
+        if (!maNV) return;
+
+        const infoDiv = document.getElementById('manualEmployeeInfo');
+        const submitBtn = document.getElementById('submitAttendanceBtn');
+
+        try {
+            // Fetch employee data
+            const response = await fetch(`/NhanVien/ChiTietNhanVien?maNV=${maNV}`);
+            if (!response.ok) {
+                throw new Error('Không tìm thấy nhân viên');
+            }
+
+            // Get today's attendance
+            const todayResponse = await fetch(`/NhanVien/GetTodayAttendance?maNV=${maNV}`);
+            const todayAttendance = await todayResponse.json();
+
+            // Show employee info
+            infoDiv.style.display = 'block';
+            infoDiv.innerHTML = `
+                <div class="employee-name">Nhân viên: #${maNV}</div>
+                <div class="employee-role">Đã xác thực</div>
+            `;
+
+            // Set recognized employee
+            window.recognizedEmployee = { maNV: parseInt(maNV) };
+            window.todayAttendanceRecord = todayAttendance;
+
+            // Update UI
+            updateAttendanceUIForEmployee({ maNV: parseInt(maNV) }, todayAttendance);
+
+        } catch (error) {
+            console.error('Error loading employee:', error);
+            infoDiv.style.display = 'none';
+            showNotification('❌ ' + error.message, 'error');
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="btn-icon">⏰</span><span>Vui lòng nhập mã NV</span>';
+            }
+        }
+    }
+</script>

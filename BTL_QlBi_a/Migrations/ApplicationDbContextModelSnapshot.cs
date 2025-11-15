@@ -370,6 +370,10 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(15)")
                         .HasColumnName("sdt");
 
+                    b.Property<int>("SoGio")
+                        .HasColumnType("int")
+                        .HasColumnName("so_gio");
+
                     b.Property<int?>("SoNguoi")
                         .HasColumnType("int")
                         .HasColumnName("so_nguoi");
@@ -947,6 +951,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasDefaultValue("Sáng")
                         .HasColumnName("ca_mac_dinh");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("email");
 
                     b.Property<string>("FaceIDAnh")
                         .HasMaxLength(255)

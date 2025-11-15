@@ -1,0 +1,137 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.LichSuHoatDong>
+
+<div style="max-height: 500px; overflow-y: auto;">
+    @if (Model != null && Model.Any())
+    {
+        <div class="timeline">
+            @foreach (var item in Model)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        @switch (item.HanhDong)
+                        {
+                            case "Đăng nhập":
+                                <span style="font-size: 20px;">🔓</span>
+                                break;
+                            case "Đăng xuất":
+                                <span style="font-size: 20px;">🔒</span>
+                                break;
+                            case "Thêm nhân viên":
+                                <span style="font-size: 20px;">➕</span>
+                                break;
+                            case "Cập nhật nhân viên":
+                                <span style="font-size: 20px;">✏️</span>
+                                break;
+                            case "Xóa nhân viên":
+                                <span style="font-size: 20px;">🗑️</span>
+                                break;
+                            case "Bắt đầu chơi":
+                                <span style="font-size: 20px;">▶️</span>
+                                break;
+                            case "Thanh toán":
+                                <span style="font-size: 20px;">💳</span>
+                                break;
+                            default:
+                                <span style="font-size: 20px;">📝</span>
+                                break;
+                        }
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <strong style="color: #1a1a2e; font-size: 14px;">@item.HanhDong</strong>
+                            <span style="color: #6c757d; font-size: 11px;">
+                                @item.ThoiGian.ToString("dd/MM/yyyy HH:mm:ss")
+                            </span>
+                        </div>
+                        <div class="timeline-body">
+                            <p style="color: #495057; font-size: 13px; margin: 5px 0 0 0;">
+                                @item.ChiTiet
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p class="empty-text">Chưa có lịch sử hoạt động</p>
+        </div>
+    }
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 70px;
+        margin-bottom: 25px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 15px;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        background: white;
+        border: 3px solid #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px 15px;
+        border-left: 3px solid #667eea;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+
+    .timeline-body {
+        font-size: 13px;
+        color: #495057;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    .empty-text {
+        font-size: 14px;
+    }
+</style>

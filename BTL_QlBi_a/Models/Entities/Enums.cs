@@ -49,7 +49,10 @@ namespace BTL_QlBi_a.Models.Entities
 
         [Display(Name = "Bảo trì")]
         [EnumMember(Value = "Bảo trì")]
-        BaoTri
+        BaoTri,
+        [Display(Name = "Ngưng hoạt động")]
+        [EnumMember(Value = "Ngưng hoạt động")]
+        NgungHoatDong
     }
 
     public enum TrangThaiDatBan

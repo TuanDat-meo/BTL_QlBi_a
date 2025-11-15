@@ -1,0 +1,430 @@
+﻿<div class="manual-attendance-modal">
+    <h3 style="margin-bottom: 20px;">✍️ Chấm công thủ công</h3>
+
+    <div class="form-group">
+        <label>Số điện thoại: <span style="color: red;">*</span></label>
+        <input type="tel"
+               id="manualSDT"
+               class="form-control"
+               placeholder="Nhập số điện thoại (10-11 số)"
+               pattern="[0-9]{10,11}"
+               maxlength="11"
+               autofocus>
+        <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">
+            Ví dụ: 0123456789
+        </small>
+    </div>
+
+    <div id="manualEmployeeInfo" class="employee-info-box" style="display: none;">
+        <!-- Employee info will load here -->
+    </div>
+
+    <div id="manualAttendanceStatus" class="attendance-status-box" style="display: none;">
+        <!-- Status will load here -->
+    </div>
+
+    <div class="form-group">
+        <label>Ghi chú (tùy chọn):</label>
+        <textarea id="manualGhiChu"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Nhập ghi chú..."></textarea>
+    </div>
+
+    <div class="action-buttons">
+        <button id="btnCheckIn"
+                class="btn btn-primary btn-checkin"
+                onclick="submitManualAttendance(true)"
+                disabled>
+            ⏰ Check-in
+        </button>
+        <button id="btnCheckOut"
+                class="btn btn-primary btn-checkout"
+                onclick="submitManualAttendance(false)"
+                disabled>
+            🚪 Check-out
+        </button>
+        <button class="btn btn-secondary" onclick="closeModal()">
+            ❌ Đóng
+        </button>
+    </div>
+</div>
+
+<style>
+    .manual-attendance-modal {
+        max-width: 500px;
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+    .employee-info-box {
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+        .employee-info-box .emp-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .employee-info-box .emp-role {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+    .attendance-status-box {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+        .attendance-status-box.status-pending {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        .attendance-status-box.status-active {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .attendance-status-box.status-complete {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+    .btn-checkin {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .btn-checkout {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
+
+<script>
+    let currentManualEmployee = null;
+    let currentManualAttendance = null;
+
+    // Khi nhập số điện thoại
+    document.getElementById('manualSDT')?.addEventListener('input', debounce(async function(e) {
+        const sdt = e.target.value.trim();
+
+        // Validate phone number format
+        if (!sdt || sdt.length < 10) {
+            hideManualEmployeeInfo();
+            return;
+        }
+
+        // Check if valid phone number
+        if (!/^[0-9]{10,11}$/.test(sdt)) {
+            hideManualEmployeeInfo();
+            return;
+        }
+
+        await loadManualEmployeeInfoByPhone(sdt);
+    }, 500));
+
+    // Debounce helper
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    async function loadManualEmployeeInfoByPhone(sdt) {
+        const infoBox = document.getElementById('manualEmployeeInfo');
+        const statusBox = document.getElementById('manualAttendanceStatus');
+        const btnCheckIn = document.getElementById('btnCheckIn');
+        const btnCheckOut = document.getElementById('btnCheckOut');
+
+        try {
+            // Show loading
+            infoBox.style.display = 'block';
+            infoBox.innerHTML = '<div style="text-align: center;">⏳ Đang tìm nhân viên...</div>';
+
+            // Search employee by phone number
+            const searchResponse = await fetch(`/NhanVien/SearchEmployeeByPhone?sdt=${encodeURIComponent(sdt)}`);
+
+            if (!searchResponse.ok) {
+                throw new Error('Không tìm thấy nhân viên với số điện thoại này');
+            }
+
+            const employeeData = await searchResponse.json();
+
+            if (!employeeData.success || !employeeData.employee) {
+                throw new Error('Không tìm thấy nhân viên với số điện thoại này');
+            }
+
+            const employee = employeeData.employee;
+
+            // Check if employee is active
+            if (employee.trangThai !== 'DangLam') {
+                throw new Error('Nhân viên này đã nghỉ việc');
+            }
+
+            // Get today's attendance
+            const todayResponse = await fetch(`/NhanVien/GetTodayAttendance?maNV=${employee.maNV}`);
+            const todayData = await todayResponse.json();
+
+            // Store data
+            currentManualEmployee = {
+                maNV: employee.maNV,
+                tenNV: employee.tenNV,
+                sdt: employee.sdt,
+                tenNhom: employee.tenNhom,
+                caMacDinh: employee.caMacDinh
+            };
+            currentManualAttendance = todayData.success ? todayData : null;
+
+            // Show employee info with full details
+            infoBox.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="emp-avatar-circle">
+                        ${getInitials(employee.tenNV)}
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="emp-name">${employee.tenNV}</div>
+                        <div class="emp-role">${employee.tenNhom} • Ca ${employee.caMacDinh}</div>
+                        <div class="emp-phone">📱 ${employee.sdt}</div>
+                    </div>
+                    <div class="emp-badge">✅</div>
+                </div>
+            `;
+
+            // Show attendance status (rest of the code remains the same)
+            statusBox.style.display = 'block';
+
+            if (!currentManualAttendance || !currentManualAttendance.gioVao) {
+                statusBox.className = 'attendance-status-box status-pending';
+                statusBox.innerHTML = `
+                    <div style="font-weight: 700; margin-bottom: 5px;">⏰ Chưa chấm công hôm nay</div>
+                    <div style="font-size: 13px;">Sẵn sàng check-in</div>
+                `;
+                btnCheckIn.disabled = false;
+                btnCheckOut.disabled = true;
+            } else if (currentManualAttendance.gioVao && !currentManualAttendance.gioRa) {
+                const gioVao = new Date(currentManualAttendance.gioVao);
+                const now = new Date();
+                const workingHours = ((now - gioVao) / (1000 * 60 * 60)).toFixed(1);
+
+                statusBox.className = 'attendance-status-box status-active';
+                statusBox.innerHTML = `
+                    <div style="font-weight: 700; margin-bottom: 8px;">✅ Đã check-in</div>
+                    <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 15px; font-size: 13px;">
+                        <span style="color: rgba(255,255,255,0.7);">Giờ vào:</span>
+                        <span style="font-weight: 600;">${gioVao.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}</span>
+                        <span style="color: rgba(255,255,255,0.7);">Đang làm:</span>
+                        <span style="font-weight: 600;">${workingHours}h</span>
+                    </div>
+                `;
+                btnCheckIn.disabled = true;
+                btnCheckOut.disabled = false;
+            } else {
+                const gioVao = new Date(currentManualAttendance.gioVao);
+                const gioRa = new Date(currentManualAttendance.gioRa);
+                statusBox.className = 'attendance-status-box status-complete';
+                statusBox.innerHTML = `
+                    <div style="font-weight: 700; margin-bottom: 8px;">✅ Đã hoàn thành ca làm việc</div>
+                    <div style="font-size: 13px;">
+                        Vào: ${gioVao.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})} •
+                        Ra: ${gioRa.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})} •
+                        ${currentManualAttendance.soGioLam?.toFixed(1)}h
+                    </div>
+                `;
+                btnCheckIn.disabled = true;
+                btnCheckOut.disabled = true;
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            infoBox.style.display = 'block';
+            infoBox.innerHTML = `
+                <div style="text-align: center; padding: 15px;">
+                    <div style="font-size: 32px; margin-bottom: 10px;">❌</div>
+                    <div style="color: #dc3545; font-weight: 600;">${error.message}</div>
+                    <div style="color: #6c757d; font-size: 12px; margin-top: 8px;">
+                        Vui lòng kiểm tra lại số điện thoại
+                    </div>
+                </div>
+            `;
+            hideManualAttendanceStatus();
+            btnCheckIn.disabled = true;
+            btnCheckOut.disabled = true;
+        }
+    }
+
+    // Helper functions
+    function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    function hideManualEmployeeInfo() {
+        const infoBox = document.getElementById('manualEmployeeInfo');
+        const statusBox = document.getElementById('manualAttendanceStatus');
+        const btnCheckIn = document.getElementById('btnCheckIn');
+        const btnCheckOut = document.getElementById('btnCheckOut');
+
+        if (infoBox) infoBox.style.display = 'none';
+        if (statusBox) statusBox.style.display = 'none';
+        if (btnCheckIn) btnCheckIn.disabled = true;
+        if (btnCheckOut) btnCheckOut.disabled = true;
+
+        currentManualEmployee = null;
+        currentManualAttendance = null;
+    }
+
+    function hideManualAttendanceStatus() {
+        const statusBox = document.getElementById('manualAttendanceStatus');
+        if (statusBox) statusBox.style.display = 'none';
+    }
+
+    async function submitManualAttendance(isCheckIn) {
+        if (!currentManualEmployee) {
+            alert('❌ Vui lòng nhập mã nhân viên');
+            return;
+        }
+
+        const ghiChu = document.getElementById('manualGhiChu')?.value || '';
+        const btnCheckIn = document.getElementById('btnCheckIn');
+        const btnCheckOut = document.getElementById('btnCheckOut');
+
+        // Disable buttons
+        if (btnCheckIn) btnCheckIn.disabled = true;
+        if (btnCheckOut) btnCheckOut.disabled = true;
+
+        try {
+            const response = await fetch('/NhanVien/ManualCheckAttendance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    MaNV: currentManualEmployee.maNV,
+                    IsCheckIn: isCheckIn,
+                    XacThucBang: 0, // ThuCong
+                    GhiChu: ghiChu
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const actionType = isCheckIn ? 'Check-in' : 'Check-out';
+                const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                alert(`✅ ${actionType} thành công lúc ${now}!`);
+
+                // Close modal
+                closeModal();
+
+                // Reload if needed
+                if (window.currentEmployeeId === currentManualEmployee.maNV) {
+                    const attendanceTab = document.getElementById('tab-attendance');
+                    if (attendanceTab && attendanceTab.classList.contains('active')) {
+                        loadAttendanceHistory(currentManualEmployee.maNV);
+                    }
+                }
+            } else {
+                alert('❌ ' + (result.message || 'Không thể chấm công'));
+
+                // Re-enable appropriate button
+                if (isCheckIn && btnCheckIn) btnCheckIn.disabled = false;
+                if (!isCheckIn && btnCheckOut) btnCheckOut.disabled = false;
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Không thể chấm công. Vui lòng thử lại.');
+
+            // Re-enable appropriate button
+            if (isCheckIn && btnCheckIn) btnCheckIn.disabled = false;
+            if (!isCheckIn && btnCheckOut) btnCheckOut.disabled = false;
+        }
+    }
+</script>

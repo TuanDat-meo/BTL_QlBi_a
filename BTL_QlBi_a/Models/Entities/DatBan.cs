@@ -27,6 +27,8 @@ namespace BTL_QlBi_a.Models.Entities
 
         public int? SoNguoi { get; set; }
 
+        public int SoGio { get; set; } = 1; 
+
         public string? GhiChu { get; set; }
 
         public TrangThaiDatBan TrangThai { get; set; } = TrangThaiDatBan.DangCho;
