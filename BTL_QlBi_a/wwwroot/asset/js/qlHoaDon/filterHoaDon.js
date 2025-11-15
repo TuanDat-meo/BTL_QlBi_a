@@ -1,76 +1,48 @@
-﻿let searchTimeout;
-
-function triggerFilter() {
-    // Gọi hàm từ file Loading.js
-    if (typeof showLoading === 'function') {
-        showLoading();
-    }
-
-    clearTimeout(searchTimeout);
-
-    searchTimeout = setTimeout(() => {
-        runFilterLogic(); // Chạy logic lọc thật sự
-
-        // Tắt Loading
-        if (typeof hideLoading === 'function') {
-            hideLoading();
-        }
-    }, 400); // Độ trễ 0.4s để kịp thấy hiệu ứng
-}
-function runFilterLogic() {
+﻿function filterInvoices(status) {
     const rows = document.querySelectorAll('#invoiceTableBody tr');
-
-    // --- Lấy giá trị hiện tại của các ô input ---
-    const activeBtn = document.querySelector('.filter-btn[data-status].active');
-    const currentStatus = activeBtn ? activeBtn.dataset.status : 'all';
-
-    const dateFrom = document.getElementById('dateFrom').value;
-    const dateTo = document.getElementById('dateTo').value;
-    const searchValue = document.getElementById('searchInvoices').value.toLowerCase();
-
-    // --- Duyệt qua từng dòng ---
-    rows.forEach(row => {
-        const rowStatus = row.dataset.status;
-        const rowDate = row.dataset.date;
-        const rowText = row.textContent.toLowerCase();
-
-        // 1. Kiểm tra Trạng thái
-        const matchStatus = (currentStatus === 'all' || rowStatus === currentStatus);
-
-        // 2. Kiểm tra Ngày
-        let matchDate = true;
-        if (dateFrom && rowDate < dateFrom) matchDate = false;
-        if (dateTo && rowDate > dateTo) matchDate = false;
-
-        // 3. Kiểm tra Tìm kiếm
-        const matchSearch = (searchValue === '' || rowText.includes(searchValue));
-
-        // KẾT QUẢ: Phải thỏa mãn CẢ 3 điều kiện
-        if (matchStatus && matchDate && matchSearch) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    updateSummaryCard();
-}
-function filterInvoices(status) {
-    // Cập nhật nút active
     const buttons = document.querySelectorAll('.filter-btn[data-status]');
+
     buttons.forEach(btn => btn.classList.remove('active'));
     document.querySelector('.filter-btn[data-status="' + status + '"]')?.classList.add('active');
 
-    // Gọi bộ lọc
-    triggerFilter();
+    rows.forEach(row => {
+        const rowStatus = row.dataset.status;
+        row.style.display = (status === 'all' || rowStatus === status) ? '' : 'none';
+    });
+    updateSummaryCard();
 }
 
 function filterByDate() {
-    triggerFilter();
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+    const rows = document.querySelectorAll('#invoiceTableBody tr');
+
+    if (!dateFrom && !dateTo) return;
+
+    rows.forEach(row => {
+        const rowDate = row.dataset.date;
+        let show = true;
+
+        if (dateFrom && rowDate < dateFrom) show = false;
+        if (dateTo && rowDate > dateTo) show = false;
+
+        row.style.display = show ? '' : 'none';
+    });
+
+    updateSummaryCard();
+
 }
 
 function searchInvoices() {
-    triggerFilter();
+    const searchValue = document.getElementById('searchInvoices').value.toLowerCase();
+    const rows = document.querySelectorAll('#invoiceTableBody tr');
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchValue) ? '' : 'none';
+    });
+    updateSummaryCard();
+
 }
 
 function updateSummaryCard() {

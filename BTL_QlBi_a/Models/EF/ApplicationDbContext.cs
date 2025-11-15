@@ -155,7 +155,6 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.SDT).HasColumnName("sdt").HasMaxLength(15).IsRequired();
                 entity.Property(e => e.ThoiGianDat).HasColumnName("thoi_gian_dat").IsRequired();
                 entity.Property(e => e.SoNguoi).HasColumnName("so_nguoi");
-                entity.Property(e => e.SoGio).HasColumnName("so_gio");
                 entity.Property(e => e.GhiChu).HasColumnName("ghi_chu");
                 entity.Property(e => e.TrangThai)
                     .HasColumnName("trang_thai")

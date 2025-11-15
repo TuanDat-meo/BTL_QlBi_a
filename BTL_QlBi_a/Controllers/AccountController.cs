@@ -51,60 +51,44 @@ namespace BTL_QlBi_a.Controllers
                     .Include(nv => nv.NhomQuyen)
                     .FirstOrDefaultAsync(nv => nv.SDT == sdt && nv.MatKhau == matkhau);
 
-                if (nhanVien != null)
+                if (nhanVien == null)
                 {
-                    // So sánh với enum
-                    if (nhanVien.TrangThai != TrangThaiNhanVien.DangLam)
-                    {
-                        ViewBag.Error = "Tài khoản của bạn đã bị khóa";
-                        return View();
-                    }
-
-                    // Lưu thông tin vào Session
-                    HttpContext.Session.SetInt32("MaNV", nhanVien.MaNV);
-                    HttpContext.Session.SetString("TenNV", nhanVien.TenNV);
-                    HttpContext.Session.SetInt32("MaNhom", nhanVien.MaNhom);
-                    HttpContext.Session.SetString("TenNhom", nhanVien.NhomQuyen?.TenNhom ?? "Nhân viên");
-
-                    // Ghi log hoạt động
-                    var logHoatDong = new LichSuHoatDong
-                    {
-                        MaNV = nhanVien.MaNV,
-                        HanhDong = "Đăng nhập",
-                        ChiTiet = $"Nhân viên {nhanVien.TenNV} đăng nhập vào hệ thống",
-                        ThoiGian = DateTime.Now
-                    };
-                    _context.LichSuHoatDong.Add(logHoatDong);
-                    await _context.SaveChangesAsync();
-
-                    return RedirectToAction("BanBia", "Home");
+                    ViewBag.Error = "Số điện thoại hoặc mật khẩu không đúng";
+                    return View();
                 }
 
-                // KHach Hang
-
-                var khachHang = await _context.KhachHang
-                            .FirstOrDefaultAsync(kh => kh.SDT == sdt && 
-                                                (kh.MatKhau == hashedPassword || kh.MatKhau == matkhau));
-
-                if(khachHang != null)
+                // So sánh với enum
+                if (nhanVien.TrangThai != TrangThaiNhanVien.DangLam)
                 {
-                    if (khachHang.HoatDong == false)
-                    {
-                        ViewBag.Error = "Tài khoản của bạn đã bị khóa.";
-                        return View();
-                    }
-                    HttpContext.Session.SetInt32("MaKH", khachHang.MaKH); // Lưu MaKH
-                    HttpContext.Session.SetString("TenKH", khachHang.TenKH);
-                    HttpContext.Session.SetString("Role", "KhachHang"); // Đánh dấu vai trò
-
-                    // Xóa session của nhân viên
-                    HttpContext.Session.Remove("MaNV");
-
-                    // Chuyển hướng về trang người dùng (Client)
-                    return RedirectToAction("Index", "Users");
+                    ViewBag.Error = "Tài khoản của bạn đã bị khóa";
+                    return View();
                 }
-                ViewBag.Error = "Số điện thoại hoặc mật khẩu không đúng";
-                return View();
+
+                // Lưu thông tin vào Session
+                HttpContext.Session.SetInt32("MaNV", nhanVien.MaNV);
+                HttpContext.Session.SetString("TenNV", nhanVien.TenNV);
+                HttpContext.Session.SetInt32("MaNhom", nhanVien.MaNhom);
+
+                // Lưu role name - QUAN TRỌNG: Dùng TenNhom từ database
+                string roleName = nhanVien.NhomQuyen?.TenNhom ?? "Phục vụ";
+                HttpContext.Session.SetString("TenNhom", roleName);
+                HttpContext.Session.SetString("ChucVu", roleName);
+
+                // Debug log
+                Console.WriteLine($"Login: {nhanVien.TenNV}, Role: {roleName}, MaNhom: {nhanVien.MaNhom}");
+
+                // Ghi log hoạt động
+                var logHoatDong = new LichSuHoatDong
+                {
+                    MaNV = nhanVien.MaNV,
+                    HanhDong = "Đăng nhập",
+                    ChiTiet = $"Nhân viên {nhanVien.TenNV} ({roleName}) đăng nhập vào hệ thống",
+                    ThoiGian = DateTime.Now
+                };
+                _context.LichSuHoatDong.Add(logHoatDong);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("BanBia", "Home");
             }
             catch (Exception ex)
             {
