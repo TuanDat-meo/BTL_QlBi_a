@@ -25,7 +25,8 @@ CREATE TABLE khach_hang (
     tong_chi_tieu DECIMAL(12,0) DEFAULT 0,
     ngay_dang_ky DATETIME DEFAULT GETDATE(),
     lan_den_cuoi DATETIME,
-    hoat_dong BIT DEFAULT 0
+    hoat_dong BIT DEFAULT 0,
+    avatar NVARCHAR(255)
 );
 GO
 

@@ -370,6 +370,10 @@ namespace BTL_QlBi_a.Migrations
                         .HasColumnType("nvarchar(15)")
                         .HasColumnName("sdt");
 
+                    b.Property<int>("SoGio")
+                        .HasColumnType("int")
+                        .HasColumnName("so_gio");
+
                     b.Property<int?>("SoNguoi")
                         .HasColumnType("int")
                         .HasColumnName("so_nguoi");

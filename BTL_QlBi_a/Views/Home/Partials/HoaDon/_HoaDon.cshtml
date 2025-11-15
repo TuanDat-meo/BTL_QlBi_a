@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.HoaDon>
 
 <link href="~/asset/css/qlHoaDon/hoa-don.css" rel="stylesheet" />
+<link href="~/asset/css/qlHoaDon/Loading.css" rel="stylesheet" />
 
 <div class="section-header">
     <h2 class="section-title">Quản lý hóa đơn</h2>
@@ -32,6 +33,7 @@
 
 @if (Model != null && Model.Any())
 {
+        <div class="loading-container">
             <div class="data-table">
                 <table>
                     <thead>
@@ -71,7 +73,7 @@
                     </tbody>
                 </table>
             </div>
-
+         </div>
             <div class="info-card" style="margin-top: 20px;">
                 <div class="info-row">
                     <span class="info-label">Tổng hóa đơn:</span>
