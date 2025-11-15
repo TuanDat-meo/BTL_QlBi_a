@@ -247,6 +247,7 @@ namespace BTL_QlBi_a.Models.EF
                 entity.Property(e => e.FaceIDAnh).HasColumnName("faceid_anh").HasMaxLength(255);
                 entity.Property(e => e.MaNhom).HasColumnName("ma_nhom").IsRequired();
                 entity.Property(e => e.SDT).HasColumnName("sdt").HasMaxLength(15);
+                entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(100);
                 entity.Property(e => e.LuongCoBan).HasColumnName("luong_co_ban").HasColumnType("decimal(12,0)").HasDefaultValue(0);
                 entity.Property(e => e.PhuCap).HasColumnName("phu_cap").HasColumnType("decimal(12,0)").HasDefaultValue(0);
                 entity.Property(e => e.CaMacDinh)

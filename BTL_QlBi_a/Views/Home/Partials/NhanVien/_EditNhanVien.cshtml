@@ -1,0 +1,305 @@
+﻿@model BTL_QlBi_a.Models.Entities.NhanVien
+
+<link rel="stylesheet" href="~/asset/css/qlNhanVien/editNhanVien.css" asp-append-version="true">
+
+<div class="edit-employee-container">
+    <!-- Employee Basic Info -->
+    <div class="form-section">
+        <h3 class="section-title">👤 Thông tin cơ bản</h3>
+
+        <input type="hidden" id="editMaNV" value="@Model.MaNV">
+
+        <div class="form-row full-width">
+            <div class="form-group">
+                <label for="editTenNV">Họ và tên <span class="required">*</span></label>
+                <input type="text"
+                       id="editTenNV"
+                       class="form-control"
+                       placeholder="Nhập họ và tên nhân viên"
+                       value="@Model.TenNV"
+                       required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editSDT">Số điện thoại <span class="required">*</span></label>
+                <input type="tel"
+                       id="editSDT"
+                       class="form-control"
+                       placeholder="Nhập số điện thoại"
+                       value="@Model.SDT"
+                       pattern="[0-9]{10,11}"
+                       required>
+                <small class="form-hint">VD: 0987654321</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editEmail">Email</label>
+                <input type="email"
+                       id="editEmail"
+                       class="form-control"
+                       placeholder="Nhập email (tùy chọn)"
+                       value="@Model.Email">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editMaNhom">Nhóm quyền <span class="required">*</span></label>
+                <select id="editMaNhom" class="form-control" required>
+                    <option value="">-- Chọn nhóm quyền --</option>
+                    @if (ViewBag.NhomQuyen != null)
+                    {
+                        foreach (var nhom in ViewBag.NhomQuyen)
+                        {
+                            if (nhom.MaNhom == Model.MaNhom)
+                            {
+                                <option value="@nhom.MaNhom" selected>@nhom.TenNhom</option>
+                            }
+                            else
+                            {
+                                <option value="@nhom.MaNhom">@nhom.TenNhom</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="editCaMacDinh">Ca làm việc <span class="required">*</span></label>
+                <select id="editCaMacDinh" class="form-control" required>
+                    @if (Model.CaMacDinh.ToString() == "Sang")
+                    {
+                        <option value="Sang" selected>Ca sáng</option>
+                    }
+                    else
+                    {
+                        <option value="Sang">Ca sáng</option>
+                    }
+                    @if (Model.CaMacDinh.ToString() == "Chieu")
+                    {
+                        <option value="Chieu" selected>Ca chiều</option>
+                    }
+                    else
+                    {
+                        <option value="Chieu">Ca chiều</option>
+                    }
+                    @if (Model.CaMacDinh.ToString() == "Toi")
+                    {
+                        <option value="Toi" selected>Ca tối</option>
+                    }
+                    else
+                    {
+                        <option value="Toi">Ca tối</option>
+                    }
+                    @if (Model.CaMacDinh.ToString() == "FullTime")
+                    {
+                        <option value="FullTime" selected>Full time</option>
+                    }
+                    else
+                    {
+                        <option value="FullTime">Full time</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row full-width">
+            <div class="form-group">
+                <label for="editTrangThai">Trạng thái <span class="required">*</span></label>
+                <select id="editTrangThai" class="form-control" required>
+                    @if (Model.TrangThai.ToString() == "DangLam")
+                    {
+                        <option value="DangLam" selected>Đang làm</option>
+                    }
+                    else
+                    {
+                        <option value="DangLam">Đang làm</option>
+                    }
+                    @if (Model.TrangThai.ToString() == "Nghi")
+                    {
+                        <option value="Nghi" selected>Nghỉ việc</option>
+                    }
+                    else
+                    {
+                        <option value="Nghi">Nghỉ việc</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Info -->
+    <div class="form-section">
+        <h3 class="section-title">💰 Thông tin lương</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editLuongCoBan">Lương cơ bản <span class="required">*</span></label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="editLuongCoBan"
+                           class="form-control currency-input"
+                           placeholder="Nhập lương cơ bản"
+                           value="@Model.LuongCoBan.ToString("N0")"
+                           required>
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">VD: 5000000 → 5.000.000 VNĐ</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editPhuCap">Phụ cấp</label>
+                <div class="input-with-unit">
+                    <input type="text"
+                           id="editPhuCap"
+                           class="form-control currency-input"
+                           placeholder="Nhập phụ cấp"
+                           value="@Model.PhuCap.ToString("N0")">
+                    <span class="unit">VNĐ</span>
+                </div>
+                <small class="form-hint">VD: 500000 → 500.000 VNĐ</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Update (Optional) -->
+    <div class="form-section">
+        <h3 class="section-title">🔐 Đổi mật khẩu (Tùy chọn)</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editMatKhauMoi">Mật khẩu mới</label>
+                <input type="password"
+                       id="editMatKhauMoi"
+                       class="form-control"
+                       placeholder="Để trống nếu không đổi">
+                <small class="form-hint">Tối thiểu 6 ký tự</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editMatKhauConfirm">Xác nhận mật khẩu mới</label>
+                <input type="password"
+                       id="editMatKhauConfirm"
+                       class="form-control"
+                       placeholder="Nhập lại mật khẩu mới">
+            </div>
+        </div>
+    </div>
+
+    <!-- Face ID Section -->
+    <div class="form-section">
+        <h3 class="section-title">📸 Face ID</h3>
+
+        @if (!string.IsNullOrEmpty(Model.FaceIDAnh))
+        {
+            <div class="current-face-id">
+                <h4>✅ Face ID hiện tại:</h4>
+                <div class="face-id-preview">
+                    <img src="~/asset/img/@Model.FaceIDAnh" alt="Face ID" id="currentFaceImage">
+                </div>
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="confirmDeleteFaceID()">
+                    <span>🗑️ Xóa Face ID</span>
+                </button>
+                <input type="hidden" id="deleteFaceIDFlag" value="false">
+            </div>
+        }
+        else
+        {
+            <div class="no-face-id">
+                <p>❌ Chưa có Face ID</p>
+            </div>
+        }
+
+        <div class="camera-controls">
+            <button type="button"
+                    class="btn btn-primary"
+                    id="btnEditStartCamera"
+                    onclick="startEditEmployeeCamera()">
+                <span class="btn-icon">📸</span>
+                <span>Bật Camera</span>
+            </button>
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    id="btnEditStopCamera"
+                    onclick="stopEditEmployeeCamera()"
+                    style="display: none;">
+                <span class="btn-icon">🛑</span>
+                <span>Tắt Camera</span>
+            </button>
+
+            <button type="button"
+                    class="btn btn-success"
+                    id="btnEditCaptureFace"
+                    onclick="captureEditEmployeeFace()"
+                    style="display: none;">
+                <span class="btn-icon">📷</span>
+                <span>Chụp ảnh</span>
+            </button>
+        </div>
+
+        <div class="face-preview-container" id="editFacePreviewContainer" style="display: none;">
+            <video id="editEmployeeVideo" autoplay playsinline></video>
+            <canvas id="editEmployeeCanvas" style="display: none;"></canvas>
+
+            <div class="face-overlay">
+                <div class="face-frame"></div>
+            </div>
+        </div>
+
+        <div class="captured-face" id="editCapturedFaceContainer" style="display: none;">
+            <h4>✅ Ảnh mới đã chụp:</h4>
+            <img id="editCapturedFaceImage" alt="New captured face">
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="deleteEditCapturedFace()">
+                <span>🗑️ Xóa và chụp lại</span>
+            </button>
+        </div>
+
+        <div class="face-status info" id="editFaceStatus">
+            <span class="status-icon">ℹ️</span>
+            <span>Nhấn "Bật Camera" để chụp ảnh Face ID mới</span>
+        </div>
+
+        <div class="instruction-card">
+            <h4>📌 Hướng dẫn chụp Face ID:</h4>
+            <ul>
+                <li>✅ Đặt khuôn mặt vào khung hình tròn</li>
+                <li>✅ Giữ khuôn mặt thẳng, ánh sáng đủ</li>
+                <li>❌ Không đeo khẩu trang, kính đen</li>
+                <li>📷 Nhấn "Chụp ảnh" khi sẵn sàng</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+        <button type="button"
+                class="btn btn-primary btn-lg"
+                id="btnSubmitEditEmployee"
+                onclick="submitEditEmployee()">
+            <span class="btn-icon">💾</span>
+            <span>Cập nhật</span>
+        </button>
+
+        <button type="button"
+                class="btn btn-secondary btn-lg"
+                onclick="closeEditEmployeePanel()">
+            <span class="btn-icon">❌</span>
+            <span>Hủy</span>
+        </button>
+    </div>
+</div>
+
+<script src="~/asset/js/qlNhanVien/editEmployee.js"></script>
+<script>
+    // Initialize currency inputs when modal loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeEditCurrencyInputs();
+    });
+</script>

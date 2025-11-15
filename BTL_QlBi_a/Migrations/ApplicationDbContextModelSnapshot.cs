@@ -952,6 +952,11 @@ namespace BTL_QlBi_a.Migrations
                         .HasDefaultValue("Sáng")
                         .HasColumnName("ca_mac_dinh");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("email");
+
                     b.Property<string>("FaceIDAnh")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")

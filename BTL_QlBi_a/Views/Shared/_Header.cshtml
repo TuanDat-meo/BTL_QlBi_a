@@ -1,4 +1,21 @@
-﻿<header class="header">
+﻿@functions {
+    string GetRoleInitials(dynamic role)
+    {
+        string roleStr = role?.ToString() ?? "Nhân viên";
+
+        // Map specific role names to initials
+        return roleStr switch
+        {
+            "Admin" => "AD",
+            "Quản lý" => "QL",
+            "Thu ngân" => "TN",
+            "Phục vụ" => "PV",
+            _ => "NV"
+        };
+    }
+}
+
+<header class="header">
     <div class="header-top">
         <div class="header-title">
             <h1>🎱 Quản Lý Quán Bi-a Pro</h1>
@@ -8,7 +25,7 @@
                 <div class="user-name">@(ViewBag.TenNV ?? "Nhân viên")</div>
                 <div class="user-role">@(ViewBag.ChucVu ?? "Nhân viên")</div>
             </div>
-            <div class="user-avatar">@(ViewBag.ChucVu?.Substring(0, 1) ?? "NV")</div>
+            <div class="user-avatar">@GetRoleInitials(ViewBag.ChucVu)</div>
             <button class="logout-btn" onclick="logout()">Đăng xuất</button>
         </div>
     </div>
