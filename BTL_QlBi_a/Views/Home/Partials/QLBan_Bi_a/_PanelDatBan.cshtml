@@ -3,78 +3,16 @@
 
 <div class="modal-content reservation-modal">
     <div class="modal-header">
-        <h3 class="modal-title">Đặt bàn trước</h3>
+        <h3 class="modal-title">📅 Đặt bàn trước</h3>
         <button class="close-modal-btn" onclick="TableManager.closeModal()">✕</button>
     </div>
 
     <div class="modal-body">
         <form id="reservationForm" onsubmit="event.preventDefault(); TableManager.confirmReservationBooking();">
-
-            <!-- Bước 1: Chọn bàn từ sơ đồ -->
+            <!-- Bước 1: Chọn thời gian -->
             <div class="reservation-step">
                 <h4 class="step-title">
                     <span class="step-number">1</span>
-                    Chọn bàn <span class="required">*</span>
-                </h4>
-
-                <input type="hidden" id="reservationTable" required>
-
-                <!-- Filter và Search trong 1 hàng -->
-                <div class="table-controls">
-                    <div class="area-filter-compact">
-                        <button type="button" class="area-btn-sm active" onclick="ReservationManager.filterTablesByArea('all', event)">Tất cả</button>
-                        <button type="button" class="area-btn-sm" onclick="ReservationManager.filterTablesByArea('Tầng 1', event)">T1</button>
-                        <button type="button" class="area-btn-sm" onclick="ReservationManager.filterTablesByArea('Tầng 2', event)">T2</button>
-                        <button type="button" class="area-btn-sm" onclick="ReservationManager.filterTablesByArea('VIP', event)">VIP</button>
-                    </div>
-                    <input type="text"
-                           class="table-search"
-                           id="tableSearch"
-                           placeholder="Tìm bàn..."
-                           onkeyup="ReservationManager.searchTables()">
-                </div>
-
-                <!-- Sơ đồ bàn dạng compact -->
-                <div class="table-diagram-compact" id="tableDiagram">
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var ban in Model.Where(b => b.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong))
-                        {
-                            <div class="diagram-table-compact"
-                                 data-table-id="@ban.MaBan"
-                                 data-area="@ban.KhuVuc?.TenKhuVuc"
-                                 data-name="@ban.TenBan"
-                                 data-price="@ban.LoaiBan?.GiaGio"
-                                 data-type="@ban.LoaiBan?.TenLoai"
-                                 onclick="ReservationManager.selectTable(@ban.MaBan)"
-                                 title="@ban.TenBan - @ban.LoaiBan?.TenLoai - @ban.LoaiBan?.GiaGio.ToString("N0")đ/h">
-                                <div class="table-name-sm">@ban.TenBan</div>
-                                <div class="table-price-sm">@ban.LoaiBan?.GiaGio.ToString("N0")đ</div>
-                                @if (ban.KhuVuc?.TenKhuVuc == "VIP")
-                                {
-                                    <span class="vip-badge-sm">⭐</span>
-                                }
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="no-tables-available">
-                            <p>Không có bàn trống</p>
-                        </div>
-                    }
-                </div>
-
-                <div class="selected-table-info-compact" id="selectedTableInfo" style="display: none;">
-                    <span class="check-icon">✓</span>
-                    <span id="selectedTableName"></span>
-                </div>
-            </div>
-
-            <!-- Bước 2: Chọn thời gian -->
-            <div class="reservation-step">
-                <h4 class="step-title">
-                    <span class="step-number">2</span>
                     Chọn thời gian <span class="required">*</span>
                 </h4>
 
@@ -112,12 +50,83 @@
                 </div>
 
                 <div class="duration-display" id="durationDisplay" style="display: none;">
-                    <div class="duration-text">
-                        Thời gian đặt: <strong id="durationText">0 giờ</strong>
+                    <div class="duration-icon">⏱️</div>
+                    <div style="flex: 1;">
+                        <div class="duration-text">
+                            Thời gian: <strong id="durationText">0 giờ</strong>
+                        </div>
+                        <div class="estimated-cost">
+                            Ước tính: <strong id="estimatedCost">0đ</strong>
+                        </div>
                     </div>
-                    <div class="estimated-cost">
-                        Ước tính: <strong id="estimatedCost">0đ</strong>
+                </div>
+            </div>
+
+            <!-- Bước 2: Chọn bàn từ sơ đồ (sẽ được load động) -->
+            <div class="reservation-step">
+                <h4 class="step-title">
+                    <span class="step-number">2</span>
+                    Chọn bàn trống <span class="required">*</span>
+                </h4>
+
+                <input type="hidden" id="reservationTable" required>
+
+                <!-- Filter và Search -->
+                <div class="table-controls">
+                    <div class="area-filter-compact">
+                        <button type="button" class="area-btn-sm active" onclick="ReservationManager.filterTablesByArea('all', event)">Tất cả</button>
+                        <button type="button" class="area-btn-sm" onclick="ReservationManager.filterTablesByArea('Tầng 1', event)">T1</button>
+                        <button type="button" class="area-btn-sm" onclick="ReservationManager.filterTablesByArea('Tầng 2', event)">T2</button>
+                        <button type="button" class="area-btn-sm" onclick="ReservationManager.filterTablesByArea('VIP', event)">VIP</button>
                     </div>
+                    <input type="text"
+                           class="table-search"
+                           id="tableSearch"
+                           placeholder="Tìm bàn..."
+                           onkeyup="ReservationManager.searchTables()">
+                </div>
+
+                <!-- Sơ đồ bàn - Load ban đầu -->
+                <div class="table-diagram-compact" id="tableDiagram">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var ban in Model.Where(b => b.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiBan.Trong))
+                        {
+                            <div class="diagram-table-compact"
+                                 data-table-id="@ban.MaBan"
+                                 data-area="@ban.KhuVuc?.TenKhuVuc"
+                                 data-name="@ban.TenBan"
+                                 data-price="@ban.LoaiBan?.GiaGio"
+                                 data-type="@ban.LoaiBan?.TenLoai"
+                                 onclick="ReservationManager.selectTable(@ban.MaBan)"
+                                 title="@ban.TenBan - @ban.LoaiBan?.TenLoai - @ban.LoaiBan?.GiaGio.ToString("N0")đ/h">
+                                <div class="table-name-sm">@ban.TenBan</div>
+                                <div class="table-price-sm">@ban.LoaiBan?.GiaGio.ToString("N0")đ</div>
+                                @if (ban.KhuVuc?.TenKhuVuc == "VIP")
+                                {
+                                    <span class="vip-badge-sm">⭐</span>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-tables-available" style="grid-column: 1 / -1;">
+                            <p>Không có bàn trống</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Thông báo bàn đã chọn -->
+                <div class="selected-table-info-compact" id="selectedTableInfo" style="display: none;">
+                    <span class="check-icon">✓</span>
+                    <span id="selectedTableName"></span>
+                </div>
+
+                <!-- Thêm thông báo hướng dẫn -->
+                <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 6px; font-size: 12px; color: #1976d2;">
+                    💡 <strong>Lưu ý:</strong> Danh sách bàn sẽ tự động cập nhật khi bạn thay đổi thời gian.
+                    Chỉ hiển thị các bàn trống trong khung giờ bạn chọn.
                 </div>
             </div>
 
@@ -184,22 +193,22 @@
                     Hủy
                 </button>
                 <button type="submit" class="btn btn-success">
-                    Xác nhận đặt bàn
+                    ✅ Xác nhận đặt bàn
                 </button>
             </div>
         </form>
     </div>
 </div>
+
 <script>
-    // Initialize ReservationManager when modal is loaded
     (function() {
         if (typeof ReservationManager !== 'undefined') {
-            console.log('Initializing ReservationManager for modal');
+            console.log('✅ Initializing ReservationManager for modal');
             setTimeout(() => {
                 ReservationManager.init();
             }, 100);
         } else {
-            console.error('ReservationManager is not loaded!');
+            console.error('❌ ReservationManager is not loaded!');
         }
     })();
 </script>
