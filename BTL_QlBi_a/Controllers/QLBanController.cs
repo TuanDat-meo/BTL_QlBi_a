@@ -191,6 +191,7 @@ namespace BTL_QlBi_a.Controllers
 
         #endregion
 
+
         #region Chi tiết bàn & API
 
         // GET: Chi tiết bàn (Right Panel)
@@ -451,7 +452,97 @@ namespace BTL_QlBi_a.Controllers
         }
 
         #endregion
+        #region Danh sách bàn đặt
 
+        /// <summary>
+        /// Hiển thị trang danh sách bàn đặt
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> DanhSachBanDat()
+        {
+            try
+            {
+                var tenNhom = HttpContext.Session.GetString("TenNhom") ?? "Nhân viên";
+                ViewBag.TenNhom = tenNhom;
+
+                await LoadHeaderStats();
+
+                // Lấy danh sách đặt bàn đang chờ và đã xác nhận
+                var now = DateTime.Now;
+                var danhSachDatBan = await _context.DatBan
+                    .Include(d => d.BanBia)
+                        .ThenInclude(b => b.LoaiBan)
+                    .Include(d => d.BanBia)
+                        .ThenInclude(b => b.KhuVuc)
+                    .Include(d => d.KhachHang)
+                    .Where(d => (d.TrangThai == TrangThaiDatBan.DangCho ||
+                                d.TrangThai == TrangThaiDatBan.DaXacNhan) &&
+                               d.ThoiGianDat >= now.AddHours(-2)) // Chỉ hiển thị đặt bàn trong 2h tới
+                    .OrderBy(d => d.ThoiGianDat)
+                    .ToListAsync();
+
+                // Thống kê
+                ViewBag.TongDatBan = danhSachDatBan.Count;
+                ViewBag.DangCho = danhSachDatBan.Count(d => d.TrangThai == TrangThaiDatBan.DangCho);
+                ViewBag.DaXacNhan = danhSachDatBan.Count(d => d.TrangThai == TrangThaiDatBan.DaXacNhan);
+
+                return View("~/Views/Home/Partials/QLBan_Bi_a/_DanhSachBanDat.cshtml", danhSachDatBan);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error in DanhSachBanDat: {ex.Message}");
+                return StatusCode(500, "Lỗi tải trang");
+            }
+        }
+
+        /// <summary>
+        /// API: Lấy danh sách đặt bàn (cho auto-refresh)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> LayDanhSachDatBan()
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var danhSachDatBan = await _context.DatBan
+                    .Include(d => d.BanBia)
+                        .ThenInclude(b => b.LoaiBan)
+                    .Include(d => d.BanBia)
+                        .ThenInclude(b => b.KhuVuc)
+                    .Include(d => d.KhachHang)
+                    .Where(d => (d.TrangThai == TrangThaiDatBan.DangCho ||
+                                d.TrangThai == TrangThaiDatBan.DaXacNhan) &&
+                               d.ThoiGianDat >= now.AddHours(-2))
+                    .OrderBy(d => d.ThoiGianDat)
+                    .Select(d => new
+                    {
+                        maDat = d.MaDat,
+                        maBan = d.MaBan,
+                        tenBan = d.BanBia.TenBan,
+                        khuVuc = d.BanBia.KhuVuc.TenKhuVuc,
+                        loaiBan = d.BanBia.LoaiBan.TenLoai,
+                        tenKhach = d.TenKhach,
+                        sdt = d.SDT,
+                        thoiGianDat = d.ThoiGianDat,
+                        soGio = d.SoGio,
+                        soNguoi = d.SoNguoi,
+                        ghiChu = d.GhiChu,
+                        trangThai = d.TrangThai.ToString(),
+                        tenKH = d.KhachHang != null ? d.KhachHang.TenKH : null,
+                        hangTV = d.KhachHang != null ? d.KhachHang.HangTV.ToString() : null
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, data = danhSachDatBan });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error in LayDanhSachDatBan: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        #endregion
         #region Quản lý trạng thái bàn
 
         // POST: Bắt đầu chơi
@@ -720,57 +811,286 @@ namespace BTL_QlBi_a.Controllers
 
             return PartialView("~/Views/Home/Partials/QLBan_Bi_a/_PanelDatBan.cshtml", danhSachBan);
         }
+        [HttpGet]
+        public async Task<IActionResult> LayBanTrongTheoGio(string ngayDat, string gioBatDau, string gioKetThuc)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ngayDat) || string.IsNullOrWhiteSpace(gioBatDau) || string.IsNullOrWhiteSpace(gioKetThuc))
+                {
+                    return Json(new { success = false, message = "Thông tin không hợp lệ" });
+                }
 
-        // POST: Tạo đặt bàn
+                // Parse thời gian
+                DateTime startTime = DateTime.Parse($"{ngayDat}T{gioBatDau}:00");
+                DateTime endTime = DateTime.Parse($"{ngayDat}T{gioKetThuc}:00");
+
+                // Xử lý trường hợp qua đêm
+                var startHour = TimeSpan.Parse(gioBatDau).Hours;
+                var endHour = TimeSpan.Parse(gioKetThuc).Hours;
+
+                if (endHour < startHour)
+                {
+                    endTime = endTime.AddDays(1);
+                    Console.WriteLine($"⚠️ Đặt bàn qua đêm: {startTime:yyyy-MM-dd HH:mm} -> {endTime:yyyy-MM-dd HH:mm}");
+                }
+
+                Console.WriteLine($"🔍 Checking availability: {startTime:yyyy-MM-dd HH:mm} -> {endTime:yyyy-MM-dd HH:mm}");
+
+                // ✅ FIX: Lấy TẤT CẢ bàn (trừ bàn ngưng hoạt động)
+                var allBan = await _context.BanBia
+                    .Include(b => b.LoaiBan)
+                    .Include(b => b.KhuVuc)
+                    .Where(b => b.TrangThai != TrangThaiBan.NgungHoatDong) // Chỉ loại bỏ bàn ngưng hoạt động
+                    .ToListAsync();
+
+                // Lấy các đặt bàn trong khoảng thời gian cần kiểm tra
+                var datePart = startTime.Date;
+                var searchStartDate = datePart.AddDays(-1); // Lùi 1 ngày để bắt trường hợp qua đêm
+                var searchEndDate = endTime.Date.AddDays(1); // Thêm 1 ngày để bắt trường hợp qua đêm
+
+                var datBanCanKiemTra = await _context.DatBan
+                    .Where(d => (d.TrangThai == TrangThaiDatBan.DangCho || d.TrangThai == TrangThaiDatBan.DaXacNhan) &&
+                               d.ThoiGianDat.Date >= searchStartDate &&
+                               d.ThoiGianDat.Date <= searchEndDate)
+                    .ToListAsync();
+
+                // ✅ FIX: Lấy các bàn ĐANG CHƠI (để loại bỏ khỏi danh sách)
+                var banDangChoi = await _context.HoaDon
+                    .Where(h => h.TrangThai == TrangThaiHoaDon.DangChoi)
+                    .Select(h => h.MaBan)
+                    .ToListAsync();
+
+                Console.WriteLine($"📊 Tổng số bàn: {allBan.Count}, Đặt bàn cần kiểm tra: {datBanCanKiemTra.Count}, Bàn đang chơi: {banDangChoi.Count}");
+
+                var banTrong = new List<object>();
+
+                foreach (var ban in allBan)
+                {
+                    // ✅ FIX: Bỏ qua bàn đang chơi (có hóa đơn đang mở)
+                    if (banDangChoi.Contains(ban.MaBan))
+                    {
+                        Console.WriteLine($"⏭️ Bỏ qua bàn {ban.TenBan} - Đang chơi (có hóa đơn)");
+                        continue;
+                    }
+
+                    bool isTrong = true;
+
+                    // Kiểm tra các đặt bàn của bàn này
+                    var datBanCuaBan = datBanCanKiemTra.Where(d => d.MaBan == ban.MaBan).ToList();
+
+                    if (datBanCuaBan.Any())
+                    {
+                        Console.WriteLine($"🔍 Kiểm tra bàn {ban.TenBan} có {datBanCuaBan.Count} lượt đặt:");
+                    }
+
+                    foreach (var dat in datBanCuaBan)
+                    {
+                        DateTime datStart = dat.ThoiGianDat;
+                        DateTime datEnd = dat.ThoiGianDat.AddHours(dat.SoGio);
+
+                        // ✅ CÔNG THỨC KIỂM TRA TRÙNG CHÍNH XÁC:
+                        // Hai khoảng thời gian [A1, A2] và [B1, B2] TRÙNG khi:
+                        // A1 < B2 AND B1 < A2
+                        bool isTrung = startTime < datEnd && datStart < endTime;
+
+                        Console.WriteLine($"   📅 Đặt bàn: {datStart:dd/MM HH:mm} → {datEnd:dd/MM HH:mm} ({dat.SoGio}h)");
+                        Console.WriteLine($"   🔍 Kiểm tra: {startTime:dd/MM HH:mm} → {endTime:dd/MM HH:mm}");
+                        Console.WriteLine($"   ➡️ Logic: ({startTime:HH:mm} < {datEnd:HH:mm}) = {startTime < datEnd}");
+                        Console.WriteLine($"             ({datStart:HH:mm} < {endTime:HH:mm}) = {datStart < endTime}");
+                        Console.WriteLine($"   ✅ Kết quả: {(isTrung ? "❌ TRÙNG" : "✅ KHÔNG TRÙNG")}");
+
+                        if (isTrung)
+                        {
+                            isTrong = false;
+                            break;
+                        }
+                    }
+
+                    if (isTrong)
+                    {
+                        Console.WriteLine($"✅ Bàn {ban.TenBan} TRỐNG");
+                        banTrong.Add(new
+                        {
+                            maBan = ban.MaBan,
+                            tenBan = ban.TenBan,
+                            khuVuc = ban.KhuVuc?.TenKhuVuc ?? "",
+                            loaiBan = ban.LoaiBan?.TenLoai ?? "",
+                            giaGio = ban.LoaiBan?.GiaGio ?? 0,
+                            trangThai = ban.TrangThai.ToString()
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"❌ Bàn {ban.TenBan} ĐÃ ĐƯỢC ĐẶT");
+                    }
+                }
+
+                Console.WriteLine($"✅ Tìm thấy {banTrong.Count} bàn trống trong khung giờ {gioBatDau} - {gioKetThuc}");
+
+                return Json(new
+                {
+                    success = true,
+                    data = banTrong,
+                    soLuong = banTrong.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error in LayBanTrongTheoGio: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
         [HttpPost]
         public async Task<IActionResult> TaoDatBan([FromBody] TaoDatBanRequest request)
         {
             try
             {
-                var ban = await _context.BanBia.FindAsync(request.MaBan);
+                var ban = await _context.BanBia
+                    .Include(b => b.LoaiBan)
+                    .FirstOrDefaultAsync(b => b.MaBan == request.MaBan);
+
                 if (ban == null)
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
 
-                if (ban.TrangThai != TrangThaiBan.Trong)
-                    return Json(new { success = false, message = "Bàn đã được đặt hoặc đang sử dụng" });
+                // ✅ FIX: Kiểm tra nếu bàn ĐANG CHƠI (có hóa đơn đang mở) thì không cho đặt
+                var banDangChoi = await _context.HoaDon
+                    .AnyAsync(h => h.MaBan == request.MaBan && h.TrangThai == TrangThaiHoaDon.DangChoi);
 
+                if (banDangChoi)
+                {
+                    return Json(new { success = false, message = "Bàn đang được sử dụng, không thể đặt" });
+                }
+
+                DateTime startTime = DateTime.Parse(request.ThoiGianDat);
+                DateTime endTime = DateTime.Parse(request.GioKetThuc);
+
+                Console.WriteLine($"🔍 Đặt bàn: {startTime:yyyy-MM-dd HH:mm} -> {endTime:yyyy-MM-dd HH:mm}");
+
+                double totalHours = (endTime - startTime).TotalHours;
+                int soGio = (int)Math.Ceiling(totalHours);
+
+                Console.WriteLine($"📋 Thời gian: {totalHours:F2}h (Làm tròn: {soGio}h)");
+
+                // ✅ FIX: Kiểm tra trùng lịch CHÍNH XÁC
+                var datePart = startTime.Date;
+                var searchStartDate = datePart.AddDays(-1);
+                var searchEndDate = endTime.Date.AddDays(1);
+
+                var datBanTrung = await _context.DatBan
+                    .Where(d => d.MaBan == request.MaBan &&
+                               (d.TrangThai == TrangThaiDatBan.DangCho || d.TrangThai == TrangThaiDatBan.DaXacNhan) &&
+                               d.ThoiGianDat.Date >= searchStartDate &&
+                               d.ThoiGianDat.Date <= searchEndDate)
+                    .ToListAsync();
+
+                foreach (var dat in datBanTrung)
+                {
+                    DateTime datStart = dat.ThoiGianDat;
+                    DateTime datEnd = dat.ThoiGianDat.AddHours(dat.SoGio);
+
+                    // ✅ CÔNG THỨC KIỂM TRA TRÙNG
+                    bool isTrung = startTime < datEnd && datStart < endTime;
+
+                    if (isTrung)
+                    {
+                        Console.WriteLine($"❌ Trùng lịch: Đặt bàn hiện tại {datStart:HH:mm dd/MM} - {datEnd:HH:mm dd/MM}");
+                        Console.WriteLine($"   Đặt bàn mới: {startTime:HH:mm dd/MM} - {endTime:HH:mm dd/MM}");
+
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"Bàn đã được đặt trong khung giờ {datStart:HH:mm dd/MM} - {datEnd:HH:mm dd/MM}"
+                        });
+                    }
+                }
+
+                // Tìm hoặc tạo khách hàng
                 var khachHang = await _context.KhachHang
                     .FirstOrDefaultAsync(k => k.SDT == request.Sdt);
 
+                // ✅ FIX: KHÔNG thay đổi TrangThai của bàn
+                // Bàn vẫn giữ nguyên trạng thái Trong hoặc DangChoi
+                // Chỉ cập nhật MaKH để tracking
                 if (khachHang != null)
                 {
-                    ban.MaKH = khachHang.MaKH;
+                    // Không gán ban.MaKH nữa, để tránh conflict khi có nhiều đặt bàn
                 }
 
-                ban.TrangThai = TrangThaiBan.DaDat;
-                ban.GhiChu = $"Đặt từ {DateTime.Parse(request.ThoiGianDat):HH:mm} đến {DateTime.Parse(request.GioKetThuc):HH:mm}";
+                // ✅ FIX: KHÔNG cập nhật GhiChu của bàn
+                // Vì một bàn có thể có nhiều đặt bàn, không nên ghi chú vào bàn
 
+                // Tạo đặt bàn
                 var datBan = new DatBan
                 {
                     MaBan = request.MaBan,
                     MaKH = khachHang?.MaKH,
                     TenKhach = request.TenKhach,
                     SDT = request.Sdt,
-                    ThoiGianDat = DateTime.Parse(request.ThoiGianDat),
+                    ThoiGianDat = startTime,
+                    SoGio = soGio,
                     SoNguoi = request.SoNguoi,
                     GhiChu = $"Email: {request.Email}. {request.GhiChu}",
-                    TrangThai = TrangThaiDatBan.DangCho,
+                    TrangThai = TrangThaiDatBan.DangCho, // ✅ FIX: Đặt bàn ở trạng thái Đang chờ
                     NgayTao = DateTime.Now
                 };
 
                 _context.DatBan.Add(datBan);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Đặt bàn thành công" });
+                // Ghi log
+                int? maNV = HttpContext.Session.GetInt32("MaNV");
+                if (maNV.HasValue)
+                {
+                    string ghiChuThoiGian;
+                    if (endTime.Date > startTime.Date)
+                    {
+                        ghiChuThoiGian = $"từ {startTime:HH:mm dd/MM} đến {endTime:HH:mm dd/MM} ({soGio}h)";
+                    }
+                    else
+                    {
+                        ghiChuThoiGian = $"từ {startTime:HH:mm} đến {endTime:HH:mm} ({soGio}h)";
+                    }
+
+                    var lichSu = new LichSuHoatDong
+                    {
+                        MaNV = maNV.Value,
+                        ThoiGian = DateTime.Now,
+                        HanhDong = "Đặt bàn",
+                        ChiTiet = $"Đặt bàn {ban.TenBan} {ghiChuThoiGian} - KH: {request.TenKhach}"
+                    };
+                    _context.LichSuHoatDong.Add(lichSu);
+                    await _context.SaveChangesAsync();
+                }
+
+                Console.WriteLine($"✅ Đặt bàn thành công: {ban.TenBan} - {startTime:HH:mm} đến {endTime:HH:mm}");
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Đặt bàn thành công!",
+                    thongTin = new
+                    {
+                        tenBan = ban.TenBan,
+                        ngayDat = startTime.ToString("dd/MM/yyyy"),
+                        gioBatDau = startTime.ToString("HH:mm"),
+                        gioKetThuc = endTime.ToString("HH:mm"),
+                        ngayKetThuc = endTime.Date > startTime.Date ? endTime.ToString("dd/MM/yyyy") : null,
+                        soGio = soGio,
+                        tenKhach = request.TenKhach,
+                        sdt = request.Sdt
+                    }
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in TaoDatBan: {ex.Message}");
+                Console.WriteLine($"❌ Error in TaoDatBan: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
 
-        // POST: Xác nhận đặt bàn
         [HttpPost]
         public async Task<IActionResult> XacNhanDatBan([FromBody] XacNhanDatBanRequest request)
         {
@@ -780,20 +1100,53 @@ namespace BTL_QlBi_a.Controllers
                 if (ban == null)
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
 
-                if (ban.TrangThai != TrangThaiBan.DaDat)
-                    return Json(new { success = false, message = "Bàn không ở trạng thái đã đặt" });
+                // ✅ FIX: Kiểm tra bàn đang chơi
+                var banDangChoi = await _context.HoaDon
+                    .AnyAsync(h => h.MaBan == request.MaBan && h.TrangThai == TrangThaiHoaDon.DangChoi);
+
+                if (banDangChoi)
+                {
+                    return Json(new { success = false, message = "Bàn đang được sử dụng" });
+                }
+
+                // ✅ FIX: Lấy TẤT CẢ đặt bàn phù hợp về client rồi xử lý
+                var now = DateTime.Now;
+                var allDatBan = await _context.DatBan
+                    .Where(d => d.MaBan == request.MaBan &&
+                               d.TrangThai == TrangThaiDatBan.DangCho &&
+                               d.ThoiGianDat <= now.AddMinutes(30) &&
+                               d.ThoiGianDat >= now.AddMinutes(-60))
+                    .ToListAsync(); // ← Lấy về client trước
+
+                if (!allDatBan.Any())
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đặt bàn phù hợp hoặc đã quá giờ" });
+                }
+
+                // ✅ Xử lý trên client-side (không dùng Math.Abs trong LINQ)
+                var datBan = allDatBan
+                    .OrderBy(d => Math.Abs((d.ThoiGianDat - now).TotalMinutes))
+                    .FirstOrDefault();
+
+                if (datBan == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đặt bàn phù hợp" });
+                }
 
                 int? maNV = HttpContext.Session.GetInt32("MaNV");
                 if (!maNV.HasValue)
                     return Json(new { success = false, message = "Vui lòng đăng nhập" });
 
+                // Cập nhật trạng thái bàn
                 ban.TrangThai = TrangThaiBan.DangChoi;
                 ban.GioBatDau = DateTime.Now;
+                ban.MaKH = datBan.MaKH;
 
+                // Tạo hóa đơn
                 var hoaDon = new HoaDon
                 {
                     MaBan = request.MaBan,
-                    MaKH = ban.MaKH,
+                    MaKH = datBan.MaKH,
                     MaNV = maNV.Value,
                     ThoiGianBatDau = DateTime.Now,
                     TrangThai = TrangThaiHoaDon.DangChoi
@@ -801,26 +1154,34 @@ namespace BTL_QlBi_a.Controllers
 
                 _context.HoaDon.Add(hoaDon);
 
-                var datBan = await _context.DatBan
-                    .FirstOrDefaultAsync(d => d.MaBan == request.MaBan &&
-                                            d.TrangThai == TrangThaiDatBan.DangCho);
-                if (datBan != null)
-                {
-                    datBan.TrangThai = TrangThaiDatBan.DaXacNhan;
-                }
+                // Cập nhật trạng thái đặt bàn
+                datBan.TrangThai = TrangThaiDatBan.DaXacNhan;
 
+                await _context.SaveChangesAsync();
+
+                // Ghi log
+                var lichSu = new LichSuHoatDong
+                {
+                    MaNV = maNV.Value,
+                    ThoiGian = DateTime.Now,
+                    HanhDong = "Xác nhận đặt bàn",
+                    ChiTiet = $"Bàn {ban.TenBan} - KH: {datBan.TenKhach} (Đặt lúc {datBan.ThoiGianDat:HH:mm dd/MM})"
+                };
+                _context.LichSuHoatDong.Add(lichSu);
                 await _context.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Xác nhận đặt bàn thành công" });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in XacNhanDatBan: {ex.Message}");
+                Console.WriteLine($"❌ Error in XacNhanDatBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
-
-        // POST: Hủy đặt bàn
+        // <summary>
+        /// Hủy đặt bàn
+        /// ✅ FIX: Chỉ hủy đặt bàn trong bảng DatBan, không thay đổi TrangThai của bàn
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> HuyDatBan([FromBody] HuyDatBanRequest request)
         {
@@ -830,28 +1191,47 @@ namespace BTL_QlBi_a.Controllers
                 if (ban == null)
                     return Json(new { success = false, message = "Không tìm thấy bàn" });
 
-                if (ban.TrangThai != TrangThaiBan.DaDat)
-                    return Json(new { success = false, message = "Bàn không ở trạng thái đã đặt" });
-
-                ban.TrangThai = TrangThaiBan.Trong;
-                ban.MaKH = null;
-                ban.GhiChu = null;
-
+                // ✅ FIX: Tìm đặt bàn cần hủy (có thể truyền thêm MaDat trong request)
+                // Tạm thời lấy đặt bàn gần nhất chưa bị hủy
                 var datBan = await _context.DatBan
-                    .FirstOrDefaultAsync(d => d.MaBan == request.MaBan &&
-                                            d.TrangThai == TrangThaiDatBan.DangCho);
-                if (datBan != null)
+                    .Where(d => d.MaBan == request.MaBan &&
+                               (d.TrangThai == TrangThaiDatBan.DangCho || d.TrangThai == TrangThaiDatBan.DaXacNhan))
+                    .OrderBy(d => d.ThoiGianDat)
+                    .FirstOrDefaultAsync();
+
+                if (datBan == null)
                 {
-                    datBan.TrangThai = TrangThaiDatBan.DaHuy;
+                    return Json(new { success = false, message = "Không tìm thấy đặt bàn cần hủy" });
                 }
 
+                // ✅ FIX: Chỉ cập nhật trạng thái đặt bàn
+                datBan.TrangThai = TrangThaiDatBan.DaHuy;
+
+                // ✅ FIX: KHÔNG thay đổi TrangThai của bàn
+                // Vì bàn có thể còn đặt bàn khác
+
                 await _context.SaveChangesAsync();
+
+                // Ghi log
+                int? maNV = HttpContext.Session.GetInt32("MaNV");
+                if (maNV.HasValue)
+                {
+                    var lichSu = new LichSuHoatDong
+                    {
+                        MaNV = maNV.Value,
+                        ThoiGian = DateTime.Now,
+                        HanhDong = "Hủy đặt bàn",
+                        ChiTiet = $"Bàn {ban.TenBan} - KH: {datBan.TenKhach} (Đặt lúc {datBan.ThoiGianDat:HH:mm dd/MM})"
+                    };
+                    _context.LichSuHoatDong.Add(lichSu);
+                    await _context.SaveChangesAsync();
+                }
 
                 return Json(new { success = true, message = "Hủy đặt bàn thành công" });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in HuyDatBan: {ex.Message}");
+                Console.WriteLine($"❌ Error in HuyDatBan: {ex.Message}");
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
@@ -1337,7 +1717,7 @@ namespace BTL_QlBi_a.Controllers
     public class XacNhanThanhToanRequest
     {
         public int MaHD { get; set; }
-        public string PhuongThucThanhToan { get; set; } = "TienMat"; 
+        public string PhuongThucThanhToan { get; set; } = "TienMat";
         public decimal TienKhachDua { get; set; }
         public string? MaGiaoDichQR { get; set; }
     }
