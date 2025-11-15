@@ -119,11 +119,82 @@ namespace BTL_QlBi_a.Controllers
             return View();
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> Signup(string? tenNV, string? sdt, string? matkhau, string? xacnhanMatkhau)
+        //{
+        //    if (string.IsNullOrEmpty(tenNV) || string.IsNullOrEmpty(sdt) ||
+        //        string.IsNullOrEmpty(matkhau) || string.IsNullOrEmpty(xacnhanMatkhau))
+        //    {
+        //        ViewBag.Error = "Vui lòng nhập đầy đủ thông tin";
+        //        return View();
+        //    }
+
+        //    if (matkhau != xacnhanMatkhau)
+        //    {
+        //        ViewBag.Error = "Mật khẩu xác nhận không khớp";
+        //        return View();
+        //    }
+
+        //    if (await _context.NhanVien.AnyAsync(nv => nv.SDT == sdt))
+        //    {
+        //        ViewBag.Error = "Số điện thoại đã được đăng ký";
+        //        return View();
+        //    }
+
+        //    try
+        //    {
+        //        // Tìm nhóm quyền mặc định (ví dụ: "Nhân viên")
+        //        var nhomMacDinh = await _context.NhomQuyen
+        //            .FirstOrDefaultAsync(n => n.TenNhom == "Nhân viên");
+
+        //        if (nhomMacDinh == null)
+        //        {
+        //            ViewBag.Error = "Không tìm thấy nhóm quyền mặc định";
+        //            return View();
+        //        }
+
+        //        // Tạo nhân viên mới
+        //        var newNhanVien = new NhanVien
+        //        {
+        //            TenNV = tenNV,
+        //            SDT = sdt,
+        //            MatKhau = HashPassword(matkhau),
+        //            MaNhom = nhomMacDinh.MaNhom,
+        //            TrangThai = TrangThaiNhanVien.DangLam,
+        //            CaMacDinh = CaLamViec.Sang,
+        //            LuongCoBan = 0,
+        //            PhuCap = 0
+        //        };
+
+        //        _context.NhanVien.Add(newNhanVien);
+        //        await _context.SaveChangesAsync();
+
+        //        // Ghi log hoạt động
+        //        var logHoatDong = new LichSuHoatDong
+        //        {
+        //            MaNV = newNhanVien.MaNV,
+        //            HanhDong = "Đăng ký",
+        //            ChiTiet = $"Nhân viên {tenNV} đăng ký tài khoản mới",
+        //            ThoiGian = DateTime.Now
+        //        };
+        //        _context.LichSuHoatDong.Add(logHoatDong);
+        //        await _context.SaveChangesAsync();
+
+        //        ViewBag.Success = "Đăng ký thành công! Vui lòng đăng nhập.";
+        //        return View("Login");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ViewBag.Error = "Đăng ký thất bại: " + ex.Message;
+        //        return View();
+        //    }
+        //}
         [HttpPost]
-        public async Task<IActionResult> Signup(string? tenNV, string? sdt, string? matkhau, string? xacnhanMatkhau)
+        public async Task<IActionResult> Signup(string? tenNV, string? sdt, string? email, string? matkhau, string? xacnhanMatkhau)
         {
             if (string.IsNullOrEmpty(tenNV) || string.IsNullOrEmpty(sdt) ||
-                string.IsNullOrEmpty(matkhau) || string.IsNullOrEmpty(xacnhanMatkhau))
+                string.IsNullOrEmpty(email) || string.IsNullOrEmpty(matkhau) ||
+                string.IsNullOrEmpty(xacnhanMatkhau))
             {
                 ViewBag.Error = "Vui lòng nhập đầy đủ thông tin";
                 return View();
@@ -135,49 +206,35 @@ namespace BTL_QlBi_a.Controllers
                 return View();
             }
 
-            if (await _context.NhanVien.AnyAsync(nv => nv.SDT == sdt))
+            // Kiểm tra SDT đã tồn tại trong cả 2 bảng
+            if (await _context.KhachHang.AnyAsync(kh => kh.SDT == sdt) ||
+                await _context.NhanVien.AnyAsync(nv => nv.SDT == sdt))
             {
                 ViewBag.Error = "Số điện thoại đã được đăng ký";
                 return View();
             }
 
+            // Kiểm tra Email đã tồn tại
+            if (await _context.KhachHang.AnyAsync(kh => kh.Email == email))
+            {
+                ViewBag.Error = "Email đã được đăng ký";
+                return View();
+            }
+
             try
             {
-                // Tìm nhóm quyền mặc định (ví dụ: "Nhân viên")
-                var nhomMacDinh = await _context.NhomQuyen
-                    .FirstOrDefaultAsync(n => n.TenNhom == "Nhân viên");
-
-                if (nhomMacDinh == null)
+                // Tạo Khách Hàng mới với vai trò "User"
+                var newKhachHang = new KhachHang
                 {
-                    ViewBag.Error = "Không tìm thấy nhóm quyền mặc định";
-                    return View();
-                }
-
-                // Tạo nhân viên mới
-                var newNhanVien = new NhanVien
-                {
-                    TenNV = tenNV,
+                    TenKH = tenNV,
                     SDT = sdt,
+                    Email = email,
                     MatKhau = HashPassword(matkhau),
-                    MaNhom = nhomMacDinh.MaNhom,
-                    TrangThai = TrangThaiNhanVien.DangLam,
-                    CaMacDinh = CaLamViec.Sang,
-                    LuongCoBan = 0,
-                    PhuCap = 0
+                    HoatDong = true, // Tài khoản hoạt động
+                    DiemTichLuy = 0  // Điểm khởi tạo = 0
                 };
 
-                _context.NhanVien.Add(newNhanVien);
-                await _context.SaveChangesAsync();
-
-                // Ghi log hoạt động
-                var logHoatDong = new LichSuHoatDong
-                {
-                    MaNV = newNhanVien.MaNV,
-                    HanhDong = "Đăng ký",
-                    ChiTiet = $"Nhân viên {tenNV} đăng ký tài khoản mới",
-                    ThoiGian = DateTime.Now
-                };
-                _context.LichSuHoatDong.Add(logHoatDong);
+                _context.KhachHang.Add(newKhachHang);
                 await _context.SaveChangesAsync();
 
                 ViewBag.Success = "Đăng ký thành công! Vui lòng đăng nhập.";
@@ -196,125 +253,186 @@ namespace BTL_QlBi_a.Controllers
             return View("Forgot");
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> ForgotPassword(string? email)
-        //{
-        //    // 1. Kiểm tra email đầu vào
-        //    if (string.IsNullOrEmpty(email))
-        //    {
-        //        ViewBag.Error = "Vui lòng nhập địa chỉ email";
-        //        // Vẫn trả về View("Forgot") để xử lý lỗi đã đề cập ở câu hỏi trước
-        //        return View("Forgot");
-        //    }
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(string? email)
+        {
+            // 1. Kiểm tra email đầu vào
+            if (string.IsNullOrEmpty(email))
+            {
+                ViewBag.Error = "Vui lòng nhập địa chỉ email";
+                return View("Forgot");
+            }
 
-        //    // 2. Tìm nhân viên theo Email
-        //    // Thay đổi: .FirstOrDefaultAsync(nv => nv.SDT == sdt) thành .FirstOrDefaultAsync(nv => nv.Email == email)
-        //    var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.mail == email);
+            // 2. Tìm trong bảng KhachHang trước
+            var khachHang = await _context.KhachHang.FirstOrDefaultAsync(kh => kh.Email == email);
 
-        //    if (nhanVien == null)
-        //    {
-        //        // Thông báo chung chung để tránh lộ thông tin tài khoản
-        //        ViewBag.Success = "Nếu địa chỉ email tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến bạn.";
-        //        return View("Forgot");
-        //    }
+            // 3. Nếu không tìm thấy trong KhachHang, tìm trong NhanVien
+            var nhanVien = khachHang == null
+                ? await _context.NhanVien.FirstOrDefaultAsync(nv => nv.Email == email)
+                : null;
 
-        //    try
-        //    {
-        //        string otp = GenerateOTP();
+            if (khachHang == null && nhanVien == null)
+            {
+                // Thông báo chung chung để tránh lộ thông tin tài khoản
+                ViewBag.Success = "Nếu địa chỉ email tồn tại trong hệ thống, mã xác nhận sẽ được gửi đến bạn.";
+                return View("Forgot");
+            }
 
-        //        // Gửi OTP qua Email
-        //        // Thay đổi: recipientEmail là email lấy từ input
-        //        await SendOtpEmail(email, otp);
+            try
+            {
+                string otp = GenerateOTP();
 
-        //        // 3. Lưu OTP và Email vào Session
-        //        // Thay đổi: "PasswordResetOTP_" + sdt thành "PasswordResetOTP_" + email
-        //        HttpContext.Session.SetString("PasswordResetOTP_" + email, otp);
-        //        // Thay đổi: "PasswordResetSDT" thành "PasswordResetEmail"
-        //        HttpContext.Session.SetString("PasswordResetEmail", email);
+                // Gửi OTP qua Email
+                await SendOtpEmail(email, otp);
 
-        //        // 4. Chuyển hướng sang trang ResetPassword
-        //        // Thay đổi: new { sdt } thành new { email }
-        //        return RedirectToAction("ResetPassword", new { email });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Ghi log lỗi để kiểm tra dịch vụ Email
-        //        Console.WriteLine($"Lỗi ForgotPassword: {ex.Message}");
-        //        ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng thử lại sau.";
-        //        return View("Forgot");
-        //    }
-        //}
+                // Lưu OTP và Email vào Session
+                HttpContext.Session.SetString("PasswordResetOTP_" + email, otp);
+                HttpContext.Session.SetString("PasswordResetEmail", email);
+                HttpContext.Session.SetString("OTPCreatedTime", DateTime.Now.ToString());
+
+                // Chuyển hướng sang trang ResetPassword
+                return RedirectToAction("ResetPassword", new { email });
+            }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi để kiểm tra dịch vụ Email
+                Console.WriteLine($"Lỗi ForgotPassword: {ex.Message}");
+                ViewBag.Error = "Lỗi trong quá trình gửi mã. Vui lòng thử lại sau.";
+                return View("Forgot");
+            }
+        }
 
         [HttpGet]
-        public IActionResult ResetPassword(string? sdt)
+        public IActionResult ResetPassword(string? email)
         {
-            if (HttpContext.Session.GetString("PasswordResetSDT") != sdt || string.IsNullOrEmpty(sdt))
+            if (HttpContext.Session.GetString("PasswordResetEmail") != email || string.IsNullOrEmpty(email))
             {
                 return RedirectToAction("ForgotPassword");
             }
-            ViewBag.SDT = sdt;
+
+            // Kiểm tra OTP có hết hạn không (10 phút)
+            var otpCreatedTimeStr = HttpContext.Session.GetString("OTPCreatedTime");
+            if (!string.IsNullOrEmpty(otpCreatedTimeStr))
+            {
+                var otpCreatedTime = DateTime.Parse(otpCreatedTimeStr);
+                if (DateTime.Now.Subtract(otpCreatedTime).TotalMinutes > 10)
+                {
+                    HttpContext.Session.Remove("PasswordResetOTP_" + email);
+                    HttpContext.Session.Remove("PasswordResetEmail");
+                    HttpContext.Session.Remove("OTPCreatedTime");
+
+                    ViewBag.Error = "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.";
+                    return View("Forgot");
+                }
+            }
+
+            ViewBag.Email = email;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> ResetPassword(string? sdt, string? otp, string? matkhauMoi, string? xacnhanMatkhau)
+        public async Task<IActionResult> ResetPassword(string? email, string? otp, string? matkhauMoi, string? xacnhanMatkhau)
         {
-            if (string.IsNullOrEmpty(sdt))
+            if (string.IsNullOrEmpty(email))
             {
-                ViewBag.Error = "Số điện thoại không hợp lệ.";
-                return View("ForgotPassword");
+                ViewBag.Error = "Email không hợp lệ.";
+                return View("Forgot");
             }
 
-            var storedOtp = HttpContext.Session.GetString("PasswordResetOTP_" + sdt);
+            var storedOtp = HttpContext.Session.GetString("PasswordResetOTP_" + email);
 
-            if (storedOtp == null || HttpContext.Session.GetString("PasswordResetSDT") != sdt)
+            if (storedOtp == null || HttpContext.Session.GetString("PasswordResetEmail") != email)
             {
                 ViewBag.Error = "Phiên đặt lại mật khẩu đã hết hạn hoặc không hợp lệ. Vui lòng thử lại.";
-                return View("ForgotPassword");
+                return View("Forgot");
+            }
+
+            // Kiểm tra OTP có hết hạn không
+            var otpCreatedTimeStr = HttpContext.Session.GetString("OTPCreatedTime");
+            if (!string.IsNullOrEmpty(otpCreatedTimeStr))
+            {
+                var otpCreatedTime = DateTime.Parse(otpCreatedTimeStr);
+                if (DateTime.Now.Subtract(otpCreatedTime).TotalMinutes > 10)
+                {
+                    HttpContext.Session.Remove("PasswordResetOTP_" + email);
+                    HttpContext.Session.Remove("PasswordResetEmail");
+                    HttpContext.Session.Remove("OTPCreatedTime");
+
+                    ViewBag.Error = "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.";
+                    return View("Forgot");
+                }
             }
 
             if (otp != storedOtp)
             {
                 ViewBag.Error = "Mã xác nhận (OTP) không đúng.";
-                ViewBag.SDT = sdt;
+                ViewBag.Email = email;
+                return View();
+            }
+
+            if (string.IsNullOrEmpty(matkhauMoi) || string.IsNullOrEmpty(xacnhanMatkhau))
+            {
+                ViewBag.Error = "Vui lòng nhập đầy đủ mật khẩu mới.";
+                ViewBag.Email = email;
                 return View();
             }
 
             if (matkhauMoi != xacnhanMatkhau)
             {
                 ViewBag.Error = "Mật khẩu mới và xác nhận mật khẩu không khớp.";
-                ViewBag.SDT = sdt;
+                ViewBag.Email = email;
                 return View();
             }
 
-            // Tìm nhân viên theo SDT
-            var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.SDT == sdt);
-
-            if (nhanVien == null)
+            if (matkhauMoi.Length < 6)
             {
-                ViewBag.Error = "Không tìm thấy tài khoản. Vui lòng thử lại.";
-                return View("ForgotPassword");
+                ViewBag.Error = "Mật khẩu phải có ít nhất 6 ký tự.";
+                ViewBag.Email = email;
+                return View();
             }
 
             try
             {
-                nhanVien.MatKhau = HashPassword(matkhauMoi!);
-                await _context.SaveChangesAsync();
+                // Tìm trong KhachHang trước
+                var khachHang = await _context.KhachHang.FirstOrDefaultAsync(kh => kh.Email == email);
 
-                HttpContext.Session.Remove("PasswordResetOTP_" + sdt);
-                HttpContext.Session.Remove("PasswordResetSDT");
+                if (khachHang != null)
+                {
+                    // Cập nhật mật khẩu cho Khách hàng
+                    khachHang.MatKhau = HashPassword(matkhauMoi);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    // Tìm trong NhanVien
+                    var nhanVien = await _context.NhanVien.FirstOrDefaultAsync(nv => nv.Email == email);
 
-                ViewBag.Success = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập.";
+                    if (nhanVien == null)
+                    {
+                        ViewBag.Error = "Không tìm thấy tài khoản. Vui lòng thử lại.";
+                        return View("Forgot");
+                    }
+
+                    // Cập nhật mật khẩu cho Nhân viên
+                    nhanVien.MatKhau = HashPassword(matkhauMoi);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Xóa session
+                HttpContext.Session.Remove("PasswordResetOTP_" + email);
+                HttpContext.Session.Remove("PasswordResetEmail");
+                HttpContext.Session.Remove("OTPCreatedTime");
+
+                ViewBag.Success = "Đặt lại mật khẩu thành công! Vui lòng đăng nhập.";
                 return View("Login");
             }
             catch (Exception ex)
             {
                 ViewBag.Error = "Lỗi trong quá trình đặt lại mật khẩu: " + ex.Message;
-                ViewBag.SDT = sdt;
+                ViewBag.Email = email;
                 return View();
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> Logout()
         {

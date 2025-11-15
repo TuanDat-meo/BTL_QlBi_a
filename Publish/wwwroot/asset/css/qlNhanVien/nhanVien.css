@@ -1,0 +1,861 @@
+﻿/* ========================================
+   NHÂN VIÊN - FIXED LAYOUT WITH SCROLL
+   ======================================== */
+
+/* Page Section - Fixed Container */
+.page-section {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Section Header - Fixed at top */
+.section-header {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    padding: 20px 20px 15px 20px;
+    border-bottom: 3px solid #e5e7eb;
+    background: white;
+    z-index: 10;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Filter Bar - Fixed below header */
+.filter-bar {
+    flex-shrink: 0;
+    background: white;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 9;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+    .filter-row:last-child {
+        margin-bottom: 0;
+    }
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #4b5563;
+    font-size: 14px;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 7px 16px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    user-select: none;
+}
+
+    .filter-btn:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        background: #eff6ff;
+        transform: translateY(-1px);
+    }
+
+    .filter-btn:active {
+        transform: translateY(0);
+    }
+
+    .filter-btn.active {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+.search-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    min-width: 250px;
+    background: white;
+}
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-input::placeholder {
+        color: #9ca3af;
+    }
+
+/* Scrollable Content Container */
+.employees-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    background: #f9fafb;
+    max-height:550px;
+}
+
+    /* Custom Scrollbar */
+    .employees-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .employees-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .employees-container::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+        .employees-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+/* Employee Cards Grid */
+.employees-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Employee Card - Modern Design */
+.employee-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+    .employee-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .employee-card:active {
+        transform: translateY(-2px);
+    }
+
+/* Employee Image/Avatar Section */
+.employee-image {
+    position: relative;
+    height: 180px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+}
+
+    .employee-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.employee-card:hover .employee-image img {
+    transform: scale(1.05);
+}
+
+.employee-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.avatar-initials {
+    font-size: 48px;
+    font-weight: 700;
+    color: white;
+}
+
+.employee-status-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+    .employee-status-badge.active {
+        background: rgba(40, 167, 69, 0.9);
+        color: white;
+    }
+
+    .employee-status-badge.inactive {
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+    }
+
+.employee-role-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.role-admin {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+.role-quanly {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    color: white;
+}
+
+.role-thungan {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+}
+
+.role-phucvu {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+.btn-edit-card {
+    background: rgba(255, 255, 255, 0.95);
+    color: #667eea;
+}
+
+    .btn-edit-card:hover {
+        background: #667eea;
+        color: white;
+        transform: scale(1.1);
+    }
+.btn-attendance-card {
+    background: rgba(255, 255, 255, 0.95);
+    color: #28a745;
+}
+
+    .btn-attendance-card:hover {
+        background: #28a745;
+        color: white;
+        transform: scale(1.1);
+    }
+/* Edit Button on Card */
+.btn-edit-employee {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+    .btn-edit-employee:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        transform: scale(1.1) rotate(15deg);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-edit-employee:active {
+        transform: scale(1.05) rotate(10deg);
+    }
+
+/* Employee Content */
+.employee-content {
+    padding: 16px;
+}
+
+/* Employee Header */
+.employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 10px;
+}
+
+.employee-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.employee-id {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Employee Info Items */
+.employee-info {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1.4;
+}
+
+    .employee-info strong {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+.employee-phone {
+    font-size: 14px;
+    color: #3b82f6;
+    font-weight: 600;
+    margin: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.employee-salary {
+    font-size: 16px;
+    color: #10b981;
+    font-weight: 700;
+    margin: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Shift Badge */
+.shift-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+/* Stats in Card */
+.employee-stats {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 2px solid #f3f4f6;
+}
+
+.stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    background: #f9fafb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+    .stat-item:hover {
+        background: #f3f4f6;
+        transform: translateY(-2px);
+    }
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #6b7280;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    min-width: 90px;
+}
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+
+.btn-info {
+    background: #3b82f6;
+    color: white;
+}
+
+    .btn-info:hover {
+        background: #2563eb;
+    }
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+    .btn-warning:hover {
+        background: #d97706;
+    }
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-text {
+    color: #6b7280;
+    margin: 8px 0;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.employee-card {
+    animation: fadeIn 0.4s ease backwards;
+}
+
+    .employee-card:nth-child(1) {
+        animation-delay: 0.05s;
+    }
+
+    .employee-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .employee-card:nth-child(3) {
+        animation-delay: 0.15s;
+    }
+
+    .employee-card:nth-child(4) {
+        animation-delay: 0.2s;
+    }
+
+    .employee-card:nth-child(5) {
+        animation-delay: 0.25s;
+    }
+
+    .employee-card:nth-child(6) {
+        animation-delay: 0.3s;
+    }
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .employees-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .employees-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .employee-image {
+        height: 140px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .section-title {
+        font-size: 24px;
+    }
+
+    .employees-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    .filter-bar {
+        padding: 16px;
+    }
+
+    .filter-row {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px;
+    }
+
+    .section-title {
+        font-size: 22px;
+    }
+
+    .employees-container {
+        padding: 15px;
+    }
+
+    .employees-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .employee-image {
+        height: 140px;
+    }
+
+    .employee-content {
+        padding: 16px;
+    }
+
+    .employee-name {
+        font-size: 18px;
+    }
+
+    .filter-bar {
+        padding: 14px;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .filter-group {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-buttons {
+        width: 100%;
+    }
+
+    .filter-btn {
+        flex: 1;
+        min-width: calc(50% - 4px);
+        text-align: center;
+    }
+
+    .search-input {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .action-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header {
+        padding: 12px;
+    }
+
+    .section-title {
+        font-size: 20px;
+    }
+
+    .employees-container {
+        padding: 12px;
+    }
+
+    .employees-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .employee-image {
+        height: 180px;
+    }
+
+    .avatar-initials {
+        font-size: 60px;
+    }
+
+    .employee-content {
+        padding: 14px;
+    }
+
+    .employee-name {
+        font-size: 17px;
+    }
+
+    .employee-phone {
+        font-size: 14px;
+    }
+
+    .employee-salary {
+        font-size: 16px;
+    }
+
+    .filter-bar {
+        padding: 12px;
+    }
+
+    .filter-label {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .filter-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .search-input {
+        font-size: 13px;
+        padding: 9px 14px;
+    }
+
+    .btn {
+        padding: 9px 14px;
+        font-size: 13px;
+    }
+
+    .employee-status-badge,
+    .employee-role-badge {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .btn-edit-employee {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .shift-badge {
+        font-size: 12px;
+        padding: 5px 12px;
+    }
+
+    .stat-value {
+        font-size: 16px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .empty-state {
+        padding: 60px 15px;
+    }
+
+    .empty-icon {
+        font-size: 60px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+    }
+
+    .empty-text {
+        font-size: 14px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .filter-bar,
+    .action-buttons,
+    .btn-edit-employee,
+    .section-header .action-buttons {
+        display: none !important;
+    }
+
+    .employees-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .employee-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+    }
+
+    .employee-image {
+        height: 150px;
+    }
+}
+
+/* Hover Effects */
+.employee-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.employee-card:hover::before {
+    opacity: 1;
+}

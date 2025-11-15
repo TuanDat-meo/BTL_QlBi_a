@@ -1,0 +1,423 @@
+﻿/* ==================== DIAGRAM MODAL STYLES ==================== */
+
+/* Modal Base */
+.diagram-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 1000px;
+    width: 95%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+/* Header */
+.diagram-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 2px solid #e9ecef;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+    .diagram-header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+.close-modal-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .close-modal-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg);
+    }
+
+/* Controls */
+.diagram-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.floor-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.floor-tab {
+    padding: 10px 20px;
+    border: 2px solid #e9ecef;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+    .floor-tab:hover {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .floor-tab.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+.edit-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Body */
+.diagram-body {
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    display: flex;
+    gap: 20px;
+}
+
+.diagram-canvas-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Canvas */
+.diagram-canvas {
+    position: relative;
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    min-height: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #6b7280;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Empty Floor */
+.empty-floor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Grid Overlay */
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Table Element */
+.diagram-table {
+    position: absolute;
+    width: 80px;
+    height: 60px;
+    background: white;
+    border: 3px solid #dee2e6;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+    .diagram-table:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        z-index: 3;
+    }
+
+    .diagram-table.dragging {
+        opacity: 0.7;
+        cursor: grabbing !important;
+        z-index: 999;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    /* Table Status Colors */
+    .diagram-table.available,
+    .diagram-table.trong {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    }
+
+    .diagram-table.occupied,
+    .diagram-table.dangchoi {
+        border-color: #ef4444;
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    }
+
+    .diagram-table.reserved,
+    .diagram-table.dadat {
+        border-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    }
+
+    .diagram-table.maintenance,
+    .diagram-table.baotri {
+        border-color: #6b7280;
+        background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+    }
+
+.table-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.table-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+}
+
+.vip-mark {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 16px;
+    background: #fbbf24;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}
+
+.drag-handle {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 12px;
+    color: #9ca3af;
+    cursor: move;
+}
+
+/* Legend */
+.diagram-legend {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid;
+}
+
+    .legend-color.available {
+        background: #10b981;
+        border-color: #059669;
+    }
+
+    .legend-color.occupied {
+        background: #ef4444;
+        border-color: #dc2626;
+    }
+
+    .legend-color.reserved {
+        background: #f59e0b;
+        border-color: #d97706;
+    }
+
+/* Instructions */
+.edit-instructions {
+    width: 250px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    height: fit-content;
+}
+
+    .edit-instructions h4 {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        color: #1f2937;
+    }
+
+    .edit-instructions ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .edit-instructions li {
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+    .btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+    }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .diagram-modal {
+        max-width: 95%;
+    }
+
+    .diagram-body {
+        flex-direction: column;
+    }
+
+    .edit-instructions {
+        width: 100%;
+    }
+
+    .diagram-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .floor-tabs {
+        justify-content: center;
+    }
+
+    .edit-controls {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .diagram-header h3 {
+        font-size: 20px;
+    }
+
+    .floor-tab {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .diagram-table {
+        width: 60px;
+        height: 45px;
+    }
+
+    .table-icon {
+        font-size: 18px;
+    }
+
+    .table-label {
+        font-size: 10px;
+    }
+
+    .diagram-legend {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .diagram-canvas {
+        min-height: 300px;
+    }
+}
