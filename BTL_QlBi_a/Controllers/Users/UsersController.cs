@@ -129,6 +129,9 @@ namespace BTL_QlBi_a.Controllers
             }
         }
 
+
+        #region Profile
+
         //============
         // Xem ho so
         //===========
@@ -176,6 +179,7 @@ namespace BTL_QlBi_a.Controllers
 
             kh.TenKH = model.TenKH;
             kh.Email = model.Email;
+            kh.NgaySinh = model.NgaySinh;
 
             // String Avatar
             if (fileAvatar != null)
@@ -219,5 +223,60 @@ namespace BTL_QlBi_a.Controllers
 
             return Json(new { success = true, message = "Đã hủy lịch đặt thành công." });
         }
+
+        //============
+        // Xem chi tiet hoa don
+        //===========
+        [HttpGet("ChiTietHoaDon")] 
+        public async Task<IActionResult> GetChiTietHoaDon(int maHD)
+        {
+            try
+            {
+                int? maKH = HttpContext.Session.GetInt32("MaKH");
+                if (maKH == null) return Json(new { success = false, message = "Vui lòng đăng nhập." });
+
+                // 1. Tìm hóa đơn (Phải khớp MaKH để bảo mật)
+                var hoaDon = await _context.HoaDon
+                    .Include(h => h.BanBia)
+                    .Include(h => h.BanBia.LoaiBan)
+                    .FirstOrDefaultAsync(h => h.MaHD == maHD && h.MaKH == maKH);
+
+                if (hoaDon == null) return Json(new { success = false, message = "Không tìm thấy hóa đơn." });
+
+                // 2. Lấy chi tiết dịch vụ
+                var chiTiet = await _context.ChiTietHoaDon
+                    .Where(ct => ct.MaHD == maHD)
+                    .Include(ct => ct.DichVu)
+                    .Select(ct => new {
+                        tenDV = ct.DichVu.TenDV,
+                        soLuong = ct.SoLuong,
+                        donGia = ct.DichVu.Gia,
+                        thanhTien = ct.ThanhTien
+                    })
+                    .ToListAsync();
+
+                // 3. Trả về JSON
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        maHD = hoaDon.MaHD,
+                        ngay = hoaDon.ThoiGianKetThuc?.ToString("dd/MM/yyyy HH:mm"),
+                        ban = hoaDon.BanBia.TenBan,
+                        tienGio = hoaDon.TienBan,
+                        tienDichVu = hoaDon.TienDichVu,
+                        giamGia = hoaDon.GiamGia,
+                        tongTien = hoaDon.TongTien,
+                        dichVus = chiTiet // Danh sách món
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+        #endregion
     }
 }

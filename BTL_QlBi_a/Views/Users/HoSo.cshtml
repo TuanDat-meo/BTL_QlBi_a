@@ -49,84 +49,127 @@
                 <div class="card-body text-white">
                     <div class="tab-content">
 
+                        @* INFO *@
                         <div class="tab-pane fade show active" id="info">
                             <form asp-action="UpdateProfile" asp-controller="Users" method="post" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <label class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control bg-dark text-white border-secondary" name="TenKH" value="@Model.KhachHang.TenKH" required>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Họ và tên</label>
+                                            <input type="text" class="form-control bg-dark text-white border-secondary" name="TenKH" value="@Model.KhachHang.TenKH" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Số điện thoại</label>
+                                            <input type="text" class="form-control bg-dark text-white border-secondary" value="@Model.KhachHang.SDT" readonly style="cursor: not-allowed; opacity: 0.7;">
+                                            <small class="text-muted">SĐT là định danh, không thể thay đổi.</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control bg-dark text-white border-secondary" name="Email" value="@Model.KhachHang.Email">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngày sinh</label>
+                                            <input type="date" class="form-control bg-dark text-white border-secondary" 
+                                                   name="NgaySinh" 
+                                                   value="@(Model.KhachHang.NgaySinh?.ToString("yyyy-MM-dd"))">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngày tham gia</label>
+                                            <input type="text" class="form-control bg-dark text-white border-secondary" 
+                                                   value="@(Model.KhachHang.NgayDangKy.ToString("dd/MM/yyyy") ?? "N/A")" 
+                                                   readonly style="cursor: default;">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Đổi Avatar</label>
+                                            <input type="file" class="form-control bg-dark text-white border-secondary" name="fileAvatar" accept="image/*">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control bg-dark text-white border-secondary" value="@Model.KhachHang.SDT" readonly style="cursor: not-allowed;">
-                                    <small class="text-muted">Không thể thay đổi SĐT</small>
+
+                                <div class="mt-3 text-end">
+                                    <button type="submit" class="btn btn-info fw-bold px-4">Lưu thay đổi</button>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" class="form-control bg-dark text-white border-secondary" name="Email" value="@Model.KhachHang.Email">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Đổi Avatar</label>
-                                    <input type="file" class="form-control bg-dark text-white border-secondary" name="fileAvatar" accept="image/*">
-                                </div>
-                                <button type="submit" class="btn btn-info fw-bold">Lưu thay đổi</button>
                             </form>
                         </div>
 
+                        @* LICH Đặt bàn *@
                         <div class="tab-pane fade" id="booking">
-                            @if (Model.LichSuDatBan.Any())
-                            {
+                                                    @if (Model.LichSuDatBan.Any())
+                                                    {
                                     <div class="table-responsive">
-                                        <table class="table table-dark table-hover">
-                                            <thead>
+                                        <table class="table table-dark table-hover align-middle"> <thead>
                                                 <tr>
                                                     <th>Ngày đặt</th>
                                                     <th>Bàn</th>
-                                                    <th>Trạng thái</th>
+                                                    <th class="text-center">Thời lượng</th> <th>Trạng thái</th>
                                                     <th>Hành động</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach (var item in Model.LichSuDatBan)
-                                            {
+                                                                    @foreach (var item in Model.LichSuDatBan)
+                                                                    {
                                                         <tr>
-                                                            <td>@item.ThoiGianDat.ToString("dd/MM/yyyy HH:mm")</td>
-                                                            <td>@(item.BanBia?.TenBan ?? "Bàn " + item.MaBan)</td>
                                                             <td>
-                                                        @if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
-                                                        {
-                                                                        <span class="badge bg-warning text-dark">Đang chờ</span>
-                                                        }
-                                                        else if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DaXacNhan)
-                                                        {
+                                                                <div class="fw-bold text-white">@item.ThoiGianDat.ToString("HH:mm - dd/MM/yyyy")</div>
+                                                                <small class="text-muted">
+                                                                    (Dự kiến xong lúc: @item.ThoiGianDat.AddHours(item.SoGio).ToString("HH:mm"))
+                                                                </small>
+                                                            </td>
+
+                                                            <td>@(item.BanBia?.TenBan ?? "Bàn " + item.MaBan)</td>
+
+                                                            <td class="text-center text-info fw-bold">
+                                                                                @item.SoGio giờ
+                                                            </td>
+
+                                                            <td>
+                                                                                @if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
+                                                                                {
+                                                                        <span class="badge bg-warning text-dark">Đang chờ duyệt</span>
+                                                                                }
+                                                                                else if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DaXacNhan)
+                                                                                {
                                                                         <span class="badge bg-success">Đã xác nhận</span>
-                                                        }
-                                                        else if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DaHuy)
-                                                        {
+                                                                                }
+                                                                                else if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DaHuy)
+                                                                                {
                                                                         <span class="badge bg-danger">Đã hủy</span>
-                                                        }
-                                                        else
-                                                        {
-                                                                        <span class="badge bg-info">Hoàn thành</span>
-                                                        }
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                        <span class="badge bg-secondary">Hoàn thành</span>
+                                                                                }
                                                             </td>
                                                             <td>
-                                                        @if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
-                                                        {
-                                                                        <button class="btn btn-sm btn-outline-danger" onclick="cancelBooking(@item.MaDat)">Hủy</button>
-                                                        }
+                                                                                @if (item.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
+                                                                                {
+                                                                        <button class="btn btn-sm btn-outline-danger" onclick="cancelBooking(@item.MaDat)">
+                                                                            <i class="fa-solid fa-xmark"></i> Hủy
+                                                                        </button>
+                                                                                }
                                                             </td>
                                                         </tr>
-                                            }
+                                                                    }
                                             </tbody>
                                         </table>
                                     </div>
-                            }
-                            else
-                            {
-                                    <p class="text-muted text-center mt-3">Bạn chưa đặt bàn nào.</p>
-                            }
+                                                    }
+                                                    else
+                                                    {
+                                    <div class="text-center py-5">
+                                        <div style="font-size: 3rem; margin-bottom: 10px;">📅</div>
+                                        <p class="text-muted">Bạn chưa đặt lịch nào.</p>
+                                        <a href="/Users#tables" class="btn btn-outline-info btn-sm">Đặt bàn ngay</a>
+                                    </div>
+                                                    }
                         </div>
-
+                        @* Lịch sử đặt bàn *@
                         <div class="tab-pane fade" id="history">
                             @if (Model.LichSuHoaDon.Any())
                             {
@@ -143,12 +186,17 @@
                                             <tbody>
                                             @foreach (var hd in Model.LichSuHoaDon)
                                             {
-                                                        <tr>
-                                                            <td>#@hd.MaHD</td>
-                                                            <td>@hd.ThoiGianKetThuc?.ToString("dd/MM/yyyy")</td>
-                                                            <td>@hd.BanBia?.TenBan</td>
-                                                            <td class="text-success fw-bold">@hd.TongTien.ToString("N0")đ</td>
-                                                        </tr>
+                                                <tr>
+                                                    <td>#@hd.MaHD</td>
+                                                    <td>@hd.ThoiGianKetThuc?.ToString("dd/MM/yyyy")</td>
+                                                    <td>@hd.BanBia?.TenBan</td>
+                                                    <td class="text-success fw-bold">@hd.TongTien.ToString("N0")đ</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-info" onclick="viewInvoiceDetail(@hd.MaHD)">
+                                                            <i class="fa-solid fa-eye"></i> Xem
+                                                        </button>
+                                                    </td>
+                                                </tr>
                                             }
                                             </tbody>
                                         </table>
@@ -162,6 +210,52 @@
 
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* Giao dien Chi tiet hoa don *@
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #16213e; border: 1px solid #4facfe; color: white;">
+            <div class="modal-header" style="border-bottom: 1px solid #2a2a4e;">
+                <h5 class="modal-title">📄 Chi tiết hóa đơn #<span id="modalMaHD"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between mb-3 text-muted small">
+                    <span id="modalNgay"></span>
+                    <span id="modalBan" class="text-info fw-bold"></span>
+                </div>
+
+                <table class="table table-sm table-dark table-borderless">
+                    <tbody id="modalTableBody">
+                        </tbody>
+                </table>
+
+                <hr style="border-color: #4facfe;">
+
+                <div class="d-flex justify-content-between">
+                    <span>Tiền giờ:</span>
+                    <span id="modalTienGio"></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Tiền dịch vụ:</span>
+                    <span id="modalTienDichVu"></span>
+                </div>
+                <div class="d-flex justify-content-between text-warning" id="rowGiamGia">
+                    <span>Giảm giá:</span>
+                    <span id="modalGiamGia"></span>
+                </div>
+                <div class="d-flex justify-content-between mt-2 fs-5 fw-bold text-info">
+                    <span>TỔNG CỘNG:</span>
+                    <span id="modalTongTien"></span>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #2a2a4e;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -196,5 +290,64 @@
                     }
                 })
             }
+
+         async function viewInvoiceDetail(maHD) {
+            try {
+                // Hiện loading nhẹ (tùy chọn)
+                document.body.style.cursor = 'wait';
+
+                const response = await fetch('/Users/ChiTietHoaDon?maHD=' + maHD);
+                const result = await response.json();
+
+                document.body.style.cursor = 'default';
+
+                if (result.success) {
+                    const data = result.data;
+
+                    // 1. Điền thông tin chung
+                    document.getElementById('modalMaHD').innerText = data.maHD;
+                    document.getElementById('modalNgay').innerText = data.ngay;
+                    document.getElementById('modalBan').innerText = data.ban;
+
+                    // 2. Điền danh sách dịch vụ
+                    const tbody = document.getElementById('modalTableBody');
+                    tbody.innerHTML = ''; // Xóa cũ
+
+                    if (data.dichVus.length > 0) {
+                        data.dichVus.forEach(item => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${item.tenDV} <small class="text-muted">x${item.soLuong}</small></td>
+                                    <td class="text-end">${item.thanhTien.toLocaleString()}đ</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted fst-italic">Không sử dụng dịch vụ</td></tr>';
+                    }
+
+                    // 3. Điền tổng tiền
+                    document.getElementById('modalTienGio').innerText = data.tienGio.toLocaleString() + 'đ';
+                    document.getElementById('modalTienDichVu').innerText = data.tienDichVu.toLocaleString() + 'đ';
+
+                    if(data.giamGia > 0){
+                        document.getElementById('rowGiamGia').style.display = 'flex';
+                        document.getElementById('modalGiamGia').innerText = '-' + data.giamGia.toLocaleString() + 'đ';
+                    } else {
+                        document.getElementById('rowGiamGia').style.display = 'none';
+                    }
+
+                    document.getElementById('modalTongTien').innerText = data.tongTien.toLocaleString() + 'đ';
+
+                    // 4. Hiện Modal
+                    new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+                } else {
+                    Swal.fire('Lỗi', result.message, 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Lỗi', 'Không thể tải chi tiết hóa đơn', 'error');
+            }
+        }
         </script>
 }
