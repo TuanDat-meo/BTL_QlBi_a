@@ -1,0 +1,211 @@
+﻿@model IEnumerable<BTL_QlBi_a.Models.Entities.DatBan>
+@{
+    ViewData["Title"] = "Danh sách bàn đặt";
+    var tenNhom = ViewBag.TenNhom as string ?? "Nhân viên";
+    bool isThuNgan = tenNhom == "Thu ngân" || tenNhom == "Quản lý" || tenNhom == "Admin";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/asset/css/qlBan/danhSachBanDat.css" />
+}
+
+<div class="page-section active" id="page-reservations">
+    <!-- Header với nút quay lại -->
+    <div class="section-header">
+        <div class="header-left">
+            <button class="btn btn-secondary" onclick="window.location.href='/QLBan/BanBia'" title="Quay lại quản lý bàn">
+                ← Quay lại
+            </button>
+            <h2 class="section-title">📅 Danh sách bàn đặt</h2>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-info" onclick="DanhSachBanDatManager.refresh()" title="Làm mới danh sách">
+                🔄 Làm mới
+            </button>
+            @if (isThuNgan)
+            {
+                <button class="btn btn-primary" onclick="window.location.href='/QLBan/BanBia'" title="Đặt bàn mới">
+                    ➕ Đặt bàn mới
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Thống kê -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <div class="stat-label">Tổng đặt bàn</div>
+                <div class="stat-value">@ViewBag.TongDatBan</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+                <div class="stat-label">Đang chờ</div>
+                <div class="stat-value">@ViewBag.DangCho</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <div class="stat-label">Đã xác nhận</div>
+                <div class="stat-value">@ViewBag.DaXacNhan</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">Trạng thái:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="DanhSachBanDatManager.filterByStatus('all', event)">Tất cả</button>
+                <button class="filter-btn" onclick="DanhSachBanDatManager.filterByStatus('DangCho', event)">Đang chờ</button>
+                <button class="filter-btn" onclick="DanhSachBanDatManager.filterByStatus('DaXacNhan', event)">Đã xác nhận</button>
+            </div>
+        </div>
+        <input type="text"
+               class="search-input"
+               placeholder="🔍 Tìm theo tên, SĐT, bàn..."
+               id="searchReservations"
+               onkeyup="DanhSachBanDatManager.search()">
+    </div>
+
+    <!-- Danh sách đặt bàn -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="reservations-grid" id="reservationsGrid">
+            @foreach (var dat in Model)
+            {
+                var trangThaiClass = dat.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho ? "waiting" : "confirmed";
+                var trangThaiText = dat.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho ? "Đang chờ" : "Đã xác nhận";
+                var gioKetThuc = dat.ThoiGianDat.AddHours(dat.SoGio);
+                var timeUntil = (dat.ThoiGianDat - DateTime.Now).TotalMinutes;
+                var isUrgent = timeUntil <= 15 && timeUntil >= 0;
+
+                <div class="reservation-card @(isUrgent ? "urgent" : "")"
+                     data-status="@dat.TrangThai.ToString()"
+                     data-ma-dat="@dat.MaDat"
+                     data-search="@dat.TenKhach @dat.SDT @dat.BanBia?.TenBan">
+
+                    <!-- Header -->
+                    <div class="card-header">
+                        <div class="reservation-info">
+                            <span class="reservation-id">#@dat.MaDat</span>
+                            <span class="status-badge @trangThaiClass">@trangThaiText</span>
+                            @if (isUrgent)
+                            {
+                                <span class="urgent-badge">🔥 Sắp đến giờ</span>
+                            }
+                        </div>
+                        <div class="table-name">🪑 @dat.BanBia?.TenBan</div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="label">Khu vực:</span>
+                            <span class="value">@dat.BanBia?.KhuVuc?.TenKhuVuc</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Loại bàn:</span>
+                            <span class="value">@dat.BanBia?.LoaiBan?.TenLoai</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">👤 Khách hàng:</span>
+                            <span class="value">
+                                <strong>@dat.TenKhach</strong>
+                                @if (dat.KhachHang != null)
+                                {
+                                    var hangBadge = dat.KhachHang.HangTV switch
+                                    {
+                                        BTL_QlBi_a.Models.Entities.HangThanhVien.Dong => "🥉 Đồng",
+                                        BTL_QlBi_a.Models.Entities.HangThanhVien.Bac => "🥈 Bạc",
+                                        BTL_QlBi_a.Models.Entities.HangThanhVien.Vang => "🥇 Vàng",
+                                        // BTL_QlBi_a.Models.Entities.HangThanhVien. => "💎 Kim Cương",
+                                        _ => ""
+                                    };
+                                    <span class="membership-badge">@hangBadge</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">📞 SĐT:</span>
+                            <span class="value">@dat.SDT</span>
+                        </div>
+                        <div class="info-row highlight">
+                            <span class="label">🕐 Thời gian:</span>
+                            <span class="value">
+                                @dat.ThoiGianDat.ToString("HH:mm dd/MM/yyyy")
+                                → @gioKetThuc.ToString("HH:mm")
+                                (@dat.SoGio giờ)
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">👥 Số người:</span>
+                            <span class="value">@(dat.SoNguoi ?? 1) người</span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(dat.GhiChu))
+                        {
+                            <div class="info-row note">
+                                <span class="label">📝 Ghi chú:</span>
+                                <span class="value">@dat.GhiChu</span>
+                            </div>
+                        }
+
+                        <!-- Countdown timer -->
+                        @if (timeUntil > 0)
+                        {
+                            <div class="countdown">
+                                <span class="countdown-icon">⏱️</span>
+                                <span class="countdown-text">
+                                    Còn @(timeUntil < 60 ? $"{(int)timeUntil} phút" : $"{(int)(timeUntil / 60)} giờ {(int)(timeUntil % 60)} phút")
+                                </span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    @if (isThuNgan)
+                    {
+                        <div class="card-actions">
+                            @if (dat.TrangThai == BTL_QlBi_a.Models.Entities.TrangThaiDatBan.DangCho)
+                            {
+                                <button class="btn btn-success btn-sm"
+                                        onclick="DanhSachBanDatManager.xacNhanDat(@dat.MaDat, @dat.MaBan)"
+                                        title="Xác nhận khách đã đến">
+                                    ✅ Xác nhận
+                                </button>
+                            }
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="DanhSachBanDatManager.huyDat(@dat.MaDat)"
+                                    title="Hủy đặt bàn">
+                                ❌ Hủy
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3>Không có đặt bàn nào</h3>
+            <p class="empty-text">Chưa có đặt bàn trong thời gian tới</p>
+            @if (isThuNgan)
+            {
+                <button class="btn btn-primary" onclick="window.location.href='/QLBan/BanBia'">
+                    ➕ Đặt bàn mới
+                </button>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/asset/js/qlban/danhSachBanDat.js"></script>
+}
